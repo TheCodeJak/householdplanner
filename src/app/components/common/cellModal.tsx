@@ -1,8 +1,8 @@
 "use client";
 
 import { AvatarDot } from "./avatarDot";
-import Modal from "../layout/modal";
-import { CloseButton } from "../icons/closeButton";
+import Modal from "./modal";
+import { CloseButton } from "../icons/close";
 import { Button } from "./button";
 
 const DAY_DE = [
@@ -95,7 +95,9 @@ export default function CellModal({
               <div className="flex items-center gap-3">
                 <AvatarDot
                   name={completedByName ?? cell!.assigneeName!}
-                  color={cell?.completedByColor ?? cell?.assigneeColor ?? "#22c55e"}
+                  color={
+                    cell?.completedByColor ?? cell?.assigneeColor ?? "#22c55e"
+                  }
                   completed={true}
                 />
                 <span className="text-sm font-medium text-slate-700">
@@ -134,18 +136,35 @@ export default function CellModal({
 
           <div className="flex flex-col gap-2">
             {!hasAssignee && (
-              <Button variant="primary" size="lg" onClick={onAssign} className="w-full">
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={onAssign}
+                className="w-full"
+              >
                 Ich mache das
               </Button>
             )}
 
             {hasAssignee && !isCompleted && (
               <>
-                <Button variant="primary" size="lg" onClick={onComplete} className="w-full">
-                  {isCurrentUser ? "Als erledigt markieren" : "Ich habe das erledigt"}
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={onComplete}
+                  className="w-full"
+                >
+                  {isCurrentUser
+                    ? "Als erledigt markieren"
+                    : "Ich habe das erledigt"}
                 </Button>
                 {isCurrentUser && (
-                  <Button variant="ghost" size="lg" onClick={onUnassign} className="w-full">
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    onClick={onUnassign}
+                    className="w-full"
+                  >
                     Nicht mehr ich
                   </Button>
                 )}
@@ -153,7 +172,12 @@ export default function CellModal({
             )}
 
             {isCompleted && isCompletedByCurrentUser && (
-              <Button variant="ghost" size="lg" onClick={onUncomplete} className="w-full">
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={onUncomplete}
+                className="w-full"
+              >
                 Doch nicht erledigt
               </Button>
             )}

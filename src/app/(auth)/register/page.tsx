@@ -3,8 +3,8 @@ import { db } from "@/db";
 import { user } from "@/db/schema";
 import { hashPassword } from "@/lib/auth";
 import { eq } from "drizzle-orm";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
+import { Button } from "@/app/components/common/button";
+import { Input } from "@/app/components/common/input";
 
 export default function RegisterPage() {
   async function action(formData: FormData) {
@@ -31,16 +31,40 @@ export default function RegisterPage() {
           Registrieren
         </h1>
         <form action={action} className="flex flex-col gap-4">
-          <Input label="Name" id="name" name="name" type="text" required autoComplete="name" />
-          <Input label="E-Mail" id="email" name="email" type="email" required autoComplete="email" />
-          <Input label="Passwort" id="password" name="password" type="password" required autoComplete="new-password" />
+          <Input
+            label="Name"
+            id="name"
+            name="name"
+            type="text"
+            required
+            autoComplete="name"
+          />
+          <Input
+            label="E-Mail"
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+          />
+          <Input
+            label="Passwort"
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="new-password"
+          />
           <Button type="submit" size="lg" className="mt-2 w-full">
             Konto erstellen
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-slate-500">
           Bereits ein Konto?{" "}
-          <a href="/login" className="font-semibold text-brand-600 hover:text-brand-700">
+          <a
+            href="/login"
+            className="font-semibold text-brand-600 hover:text-brand-700"
+          >
             Anmelden
           </a>
         </p>

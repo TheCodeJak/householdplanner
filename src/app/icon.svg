@@ -1,4 +1,144 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#6366f1"/>
-  <text x="16" y="22" text-anchor="middle" font-size="18" font-family="sans-serif" fill="white">H</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background gradient -->
+    <radialGradient id="bgGrad" cx="60%" cy="70%" r="70%">
+      <stop offset="0%" stop-color="#FFAB5E" stop-opacity="0.6"/>
+      <stop offset="60%" stop-color="#FFD4A8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFF5EC" stop-opacity="0.2"/>
+    </radialGradient>
+
+    <!-- Main background fill -->
+    <linearGradient id="mainBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE8CC"/>
+      <stop offset="100%" stop-color="#FFBA70"/>
+    </linearGradient>
+
+    <!-- Passive tile gradient -->
+    <linearGradient id="tilePassive" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFE8D0"/>
+    </linearGradient>
+
+    <!-- Active tile gradient (orange) -->
+    <linearGradient id="tileActive" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9A3C"/>
+      <stop offset="100%" stop-color="#FF6B00"/>
+    </linearGradient>
+
+    <!-- Wave / blob shape gradient -->
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFB36B" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FF8020" stop-opacity="0.30"/>
+    </linearGradient>
+
+    <!-- Outer glow filter -->
+    <filter id="outerGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="28" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0.5 0 0 0.2
+                0.4 0.3 0 0 0
+                0   0   0 0 0
+                0   0   0 0.55 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Tile shadow -->
+    <filter id="tileShadow" x="-8%" y="-8%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="#C45A00" flood-opacity="0.38"/>
+    </filter>
+
+    <!-- Clip to outer rounded rect -->
+    <clipPath id="outerClip">
+      <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Outer rounded square background ── -->
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#mainBg)"/>
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#bgGrad)"/>
+
+  <g clip-path="url(#outerClip)">
+
+    <!-- ── Decorative blob / wave ── -->
+    <path d="M -60 560
+             C 80 420, 200 700, 400 680
+             C 560 665, 620 800, 700 900
+             C 800 1020, 1000 980, 1080 900
+             L 1080 1080 L -60 1080 Z"
+          fill="url(#waveGrad)"/>
+
+    <!-- Second softer wave layer -->
+    <path d="M -40 640
+             C 120 500, 260 760, 460 730
+             C 600 710, 660 850, 760 940
+             C 860 1030, 1020 1010, 1080 960
+             L 1080 1080 L -40 1080 Z"
+          fill="#FFB36B" fill-opacity="0.22"/>
+
+    <!-- ── Dot grid (top-left area) ── -->
+    <g fill="#E8914A" fill-opacity="0.45">
+      <!-- row 1 -->
+      <circle cx="118" cy="118" r="7"/>
+      <circle cx="158" cy="118" r="7"/>
+      <circle cx="198" cy="118" r="7"/>
+      <circle cx="238" cy="118" r="7"/>
+      <!-- row 2 -->
+      <circle cx="118" cy="158" r="7"/>
+      <circle cx="158" cy="158" r="7"/>
+      <circle cx="198" cy="158" r="7"/>
+      <circle cx="238" cy="158" r="7"/>
+      <!-- row 3 -->
+      <circle cx="118" cy="198" r="6"/>
+      <circle cx="158" cy="198" r="6"/>
+      <circle cx="198" cy="198" r="6"/>
+      <!-- row 4 -->
+      <circle cx="118" cy="238" r="5"/>
+      <circle cx="158" cy="238" r="5"/>
+    </g>
+
+    <!-- ── Glassmorphism card behind tiles ── -->
+    <rect x="88" y="160" width="848" height="760" rx="80" ry="80"
+          fill="white" fill-opacity="0.22"
+          stroke="white" stroke-width="1.5" stroke-opacity="0.5"/>
+
+    <!-- ══════════════ TILES ══════════════ -->
+
+    <!-- Top-left tile -->
+    <rect x="136" y="208" width="340" height="310" rx="64" ry="64"
+          fill="url(#tilePassive)" filter="url(#tileShadow)"
+          stroke="#FFDBB8" stroke-width="3"/>
+
+    <!-- Top-right tile -->
+    <rect x="548" y="208" width="340" height="310" rx="64" ry="64"
+          fill="url(#tilePassive)" filter="url(#tileShadow)"
+          stroke="#FFDBB8" stroke-width="3"/>
+
+    <!-- Bottom-left tile -->
+    <rect x="136" y="554" width="340" height="310" rx="64" ry="64"
+          fill="url(#tilePassive)" filter="url(#tileShadow)"
+          stroke="#FFDBB8" stroke-width="3"/>
+
+    <!-- Bottom-right tile (ACTIVE / orange) -->
+    <rect x="548" y="554" width="340" height="310" rx="64" ry="64"
+          fill="url(#tileActive)" filter="url(#tileShadow)"/>
+    <!-- sheen highlight on orange tile -->
+    <rect x="548" y="554" width="340" height="120" rx="64" ry="64"
+          fill="white" fill-opacity="0.12"/>
+    <rect x="548" y="554" width="340" height="310" rx="64" ry="64"
+          fill="none" stroke="white" stroke-width="2" stroke-opacity="0.25"/>
+
+    <!-- ── Badge / record button (bottom-right of orange tile) ── -->
+    <!-- White ring -->
+    <circle cx="840" cy="820" r="54" fill="white"/>
+    <!-- Orange inner dot -->
+    <circle cx="840" cy="820" r="36" fill="url(#tileActive)"/>
+
+  </g>
+
+  <!-- Subtle vignette frame -->
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220"
+        fill="none" stroke="#E8722A" stroke-width="3" stroke-opacity="0.18"/>
 </svg>

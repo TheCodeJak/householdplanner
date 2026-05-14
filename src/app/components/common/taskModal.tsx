@@ -1,7 +1,7 @@
 "use client";
 
-import Modal from "../layout/modal";
-import { CloseButton } from "../icons/closeButton";
+import Modal from "./modal";
+import { CloseButton } from "../icons/close";
 import { Button } from "./button";
 import { Input } from "./input";
 import { useState } from "react";

@@ -1,7 +1,4 @@
-type IconProps = {
-  size?: number;
-  className?: string;
-};
+import { IconProps } from ".";
 
 export function NotificationIcon({ size = 24, className }: IconProps) {
   return (

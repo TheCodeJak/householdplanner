@@ -10,12 +10,14 @@ import {
   formatDate,
   getWeekNumber,
 } from "@/lib/dateUtils";
-import { HomeIcon, NotificationIcon } from "../components/icons";
-import { Button } from "../components/ui/button";
-import { AvatarDot, PlusDot } from "../components/ui";
-import NavButton from "../components/ui/navButton";
-import CellModal from "../components/ui/cellModal";
-import TaskModal from "../components/ui/taskModal";
+import { AddIcon, HomeIcon, NotificationIcon } from "../components/icons";
+import { Button } from "../components/common/button";
+import { AvatarDot, PlusDot } from "../components/common";
+import NavButton from "../components/layout/navButton";
+import CellModal from "../components/common/cellModal";
+import TaskModal from "../components/common/taskModal";
+import Image from "next/image";
+import { AddButton, UserAvatar } from "../components/common/new";
 
 // TODO: aus Session laden sobald familyId im JWT steht
 export const FAMILY_ID = "65183ae8-fc81-4228-97c5-dd3dd99c6322";
@@ -132,7 +134,8 @@ export default function DashboardPage() {
     <div className="shadow-md group border border-gray-100 rounded-2xl p-6">
       <div className="flex w-full items-center justify-between">
         <div className="flex gap-4 items-center">
-          <HomeIcon size={18} className="text-brand-600 drop-shadow-sm" />
+          {/* <HomeIcon size={18} className="text-brand-600 drop-shadow-sm" /> */}
+          <Image src="\icon.svg" width={32} height={32} alt="" priority />
           <h1 className="font-semibold text-xl text-gray-800">
             Household Planner
           </h1>
@@ -199,14 +202,7 @@ export default function DashboardPage() {
             onClick={() => setTaskModalOpen(true)}
             className="flex items-center gap-2 shadow-sm"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path
-                d="M7 1v12M1 7h12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
+            <AddIcon />
             Neue Aufgabe
           </Button>
         </div>
@@ -278,26 +274,26 @@ export default function DashboardPage() {
                           {cell?.assigneeName ? (
                             cell.completerDiffers ? (
                               <span className="flex items-center -space-x-2">
-                                <AvatarDot
-                                  name={cell.assigneeName}
+                                <UserAvatar
+                                  initial={cell.assigneeName[0]}
                                   color={cell.assigneeColor ?? "#94a3b8"}
                                   completed={false}
                                 />
-                                <AvatarDot
-                                  name={cell.completedByName!}
+                                <UserAvatar
+                                  initial={cell.completedByName![0]}
                                   color={cell.completedByColor ?? "#22c55e"}
                                   completed={true}
                                 />
                               </span>
                             ) : (
-                              <AvatarDot
-                                name={cell.assigneeName}
+                              <UserAvatar
+                                initial={cell.assigneeName[0]}
                                 color={cell.assigneeColor ?? "#94a3b8"}
                                 completed={cell.isCompleted}
                               />
                             )
                           ) : (
-                            <PlusDot />
+                            <AddButton />
                           )}
                         </button>
                       </td>
