@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { user } from "@/db/schema";
 import { hashPassword } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
 
 export default function RegisterPage() {
   async function action(formData: FormData) {
@@ -23,73 +25,22 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-900">
-      <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-sm dark:bg-zinc-800">
-        <h1 className="mb-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+    <div className="flex min-h-screen items-center justify-center bg-stone-50">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
+        <h1 className="mb-6 text-2xl font-semibold text-slate-900">
           Registrieren
         </h1>
         <form action={action} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="name"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              autoComplete="name"
-              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              E-Mail
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Passwort
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="new-password"
-              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
-            />
-          </div>
-          <button
-            type="submit"
-            className="mt-2 rounded-lg bg-zinc-900 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
+          <Input label="Name" id="name" name="name" type="text" required autoComplete="name" />
+          <Input label="E-Mail" id="email" name="email" type="email" required autoComplete="email" />
+          <Input label="Passwort" id="password" name="password" type="password" required autoComplete="new-password" />
+          <Button type="submit" size="lg" className="mt-2 w-full">
             Konto erstellen
-          </button>
+          </Button>
         </form>
-        <p className="mt-4 text-center text-sm text-zinc-500">
+        <p className="mt-4 text-center text-sm text-slate-500">
           Bereits ein Konto?{" "}
-          <a
-            href="/login"
-            className="font-medium text-zinc-900 underline dark:text-zinc-100"
-          >
+          <a href="/login" className="font-semibold text-brand-600 hover:text-brand-700">
             Anmelden
           </a>
         </p>

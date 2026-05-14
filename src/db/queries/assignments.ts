@@ -1,4 +1,4 @@
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "..";
 import { task, taskAssignment, taskSlot, user } from "../schema";
@@ -43,12 +43,15 @@ export async function getAssignmentsForWeek(mondayDate: string, familyId: string
       date: taskAssignment.date,
       assignedToId: taskAssignment.assignedToId,
       assigneeName: assignedUser.name,
+      completedById: taskAssignment.completedById,
+      completedByName: completedUser.name,
       completedAt: taskAssignment.completedAt,
       notes: taskAssignment.notes,
     })
     .from(taskAssignment)
     .innerJoin(task, eq(task.id, taskAssignment.taskId))
     .innerJoin(assignedUser, eq(assignedUser.id, taskAssignment.assignedToId))
+    .leftJoin(completedUser, eq(completedUser.id, taskAssignment.completedById))
     .where(
       and(
         gte(taskAssignment.date, mondayDate),
@@ -56,6 +59,33 @@ export async function getAssignmentsForWeek(mondayDate: string, familyId: string
         eq(task.familyId, familyId),
       ),
     );
+}
+
+export async function findAssignment(taskId: string, date: string) {
+  const [row] = await db
+    .select()
+    .from(taskAssignment)
+    .where(and(eq(taskAssignment.taskId, taskId), eq(taskAssignment.date, date)))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function completeAssignment(assignmentId: string, userId: string) {
+  const [row] = await db
+    .update(taskAssignment)
+    .set({ completedById: userId, completedAt: sql`now()` })
+    .where(eq(taskAssignment.id, assignmentId))
+    .returning();
+  return row;
+}
+
+export async function uncompleteAssignment(assignmentId: string) {
+  const [row] = await db
+    .update(taskAssignment)
+    .set({ completedById: null, completedAt: null })
+    .where(eq(taskAssignment.id, assignmentId))
+    .returning();
+  return row;
 }
 
 export async function createAssignment(data: {

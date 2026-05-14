@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand – Orange */
+  --color-brand-50:  #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+  --color-brand-800: #9a3412;
+  --color-brand-900: #7c2d12;
+
+  /* Semantic */
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-error-600:   #dc2626;
+  --color-error-700:   #b91c1c;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

@@ -8,7 +8,7 @@ export default function NavButton({
   return (
     <button
       onClick={onClick}
-      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-800"
+      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
     >
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
         {dir === "left" ? (

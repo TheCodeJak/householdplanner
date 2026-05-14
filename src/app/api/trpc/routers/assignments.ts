@@ -1,10 +1,14 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, protectedProcedure, router } from "../init";
 import {
   getAssignmentForDate,
   getAssignmentsForWeek,
   createAssignment,
   deleteAssignment,
+  findAssignment,
+  completeAssignment,
+  uncompleteAssignment,
 } from "@/db/queries/assignments";
 
 export const assignmentsRouter = router({
@@ -20,11 +24,28 @@ export const assignmentsRouter = router({
 
   assign: protectedProcedure
     .input(z.object({ taskId: z.uuid(), date: z.string() }))
-    .mutation(({ input, ctx }) =>
-      createAssignment({ ...input, assignedToId: ctx.userId }),
-    ),
+    .mutation(async ({ input, ctx }) => {
+      const existing = await findAssignment(input.taskId, input.date);
+      if (existing) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Aufgabe ist bereits jemandem zugewiesen.",
+        });
+      }
+      return createAssignment({ ...input, assignedToId: ctx.userId });
+    }),
 
   unassign: protectedProcedure
     .input(z.object({ assignmentId: z.uuid() }))
     .mutation(({ input }) => deleteAssignment(input.assignmentId)),
+
+  complete: protectedProcedure
+    .input(z.object({ assignmentId: z.uuid() }))
+    .mutation(({ input, ctx }) =>
+      completeAssignment(input.assignmentId, ctx.userId),
+    ),
+
+  uncomplete: protectedProcedure
+    .input(z.object({ assignmentId: z.uuid() }))
+    .mutation(({ input }) => uncompleteAssignment(input.assignmentId)),
 });
