@@ -10,9 +10,8 @@ import {
   formatDate,
   getWeekNumber,
 } from "@/lib/dateUtils";
-import { AddIcon, HomeIcon, NotificationIcon } from "../components/icons";
+import { AddIcon, NotificationIcon } from "../components/icons";
 import { Button } from "../components/common/button";
-import { AvatarDot, PlusDot } from "../components/common";
 import NavButton from "../components/layout/navButton";
 import CellModal from "../components/common/cellModal";
 import TaskModal from "../components/common/taskModal";
@@ -189,13 +188,22 @@ export default function DashboardPage() {
         </p>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <NavButton onClick={() => { setWeekOffset((o) => o - 1); setSelectedDayIdx(0); }} dir="left" />
+            <NavButton
+              onClick={() => {
+                setWeekOffset((o) => o - 1);
+                setSelectedDayIdx(0);
+              }}
+              dir="left"
+            />
             <span className="w-55 text-center text-xl font-semibold text-slate-800">
               {formatDate(weekDays[0])} – {formatDate(weekDays[6])}
               {weekDays[6].getFullYear()}
             </span>
             <NavButton
-              onClick={() => { setWeekOffset((o) => o + 1); setSelectedDayIdx(0); }}
+              onClick={() => {
+                setWeekOffset((o) => o + 1);
+                setSelectedDayIdx(0);
+              }}
               dir="right"
             />
           </div>
@@ -225,7 +233,9 @@ export default function DashboardPage() {
                     ${isSelected ? "" : "hover:bg-slate-50"}`}
                 >
                   <span>{day}</span>
-                  <span className={`text-[10px] mt-0.5 ${isSelected ? "text-brand-100" : "text-slate-400"}`}>
+                  <span
+                    className={`text-[10px] mt-0.5 ${isSelected ? "text-brand-100" : "text-slate-400"}`}
+                  >
                     {formatDate(weekDays[i])}
                   </span>
                 </button>
@@ -235,7 +245,9 @@ export default function DashboardPage() {
 
           <div className="flex flex-col gap-2">
             {rows.length === 0 ? (
-              <p className="py-8 text-center text-sm text-slate-400">Noch keine Aufgaben vorhanden.</p>
+              <p className="py-8 text-center text-sm text-slate-400">
+                Noch keine Aufgaben vorhanden.
+              </p>
             ) : (
               rows.map((row) => {
                 const cell = row.cells[selectedDayIdx];
@@ -243,18 +255,38 @@ export default function DashboardPage() {
                   <button
                     key={row.id}
                     type="button"
-                    onClick={() => setModal({ taskId: row.id, taskName: row.name, dayIdx: selectedDayIdx })}
+                    onClick={() =>
+                      setModal({
+                        taskId: row.id,
+                        taskName: row.name,
+                        dayIdx: selectedDayIdx,
+                      })
+                    }
                     className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm hover:bg-brand-50 transition-colors active:scale-[0.98]"
                   >
-                    <span className="text-sm font-medium text-slate-800">{row.name}</span>
+                    <span className="text-sm font-medium text-slate-800">
+                      {row.name}
+                    </span>
                     {cell?.assigneeName ? (
                       cell.completerDiffers ? (
                         <span className="flex items-center -space-x-2">
-                          <UserAvatar initial={cell.assigneeName[0]} color={cell.assigneeColor ?? "#94a3b8"} completed={false} />
-                          <UserAvatar initial={cell.completedByName![0]} color={cell.completedByColor ?? "#22c55e"} completed={true} />
+                          <UserAvatar
+                            initial={cell.assigneeName[0]}
+                            color={cell.assigneeColor ?? "#94a3b8"}
+                            completed={false}
+                          />
+                          <UserAvatar
+                            initial={cell.completedByName![0]}
+                            color={cell.completedByColor ?? "#22c55e"}
+                            completed={true}
+                          />
                         </span>
                       ) : (
-                        <UserAvatar initial={cell.assigneeName[0]} color={cell.assigneeColor ?? "#94a3b8"} completed={cell.isCompleted} />
+                        <UserAvatar
+                          initial={cell.assigneeName[0]}
+                          color={cell.assigneeColor ?? "#94a3b8"}
+                          completed={cell.isCompleted}
+                        />
                       )
                     ) : (
                       <AddButton />
