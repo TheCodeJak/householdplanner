@@ -34,6 +34,7 @@ export type CellModalProps = {
   onUnassign?: () => void;
   onComplete?: () => void;
   onUncomplete?: () => void;
+  onQuickComplete?: () => void;
 };
 
 export default function CellModal({
@@ -45,6 +46,7 @@ export default function CellModal({
   onUnassign,
   onComplete,
   onUncomplete,
+  onQuickComplete,
 }: CellModalProps) {
   const deIdx = weekDay.getDay() === 0 ? 6 : weekDay.getDay() - 1;
   const dayLabel = `${DAY_DE[deIdx]}, ${weekDay.getDate()}.${weekDay.getMonth() + 1}.`;
@@ -136,14 +138,26 @@ export default function CellModal({
 
           <div className="flex flex-col gap-2">
             {!hasAssignee && (
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={onAssign}
-                className="w-full"
-              >
-                Ich mache das
-              </Button>
+              <>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={onAssign}
+                  className="w-full"
+                >
+                  Ich mache das
+                </Button>
+                {onQuickComplete && (
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    onClick={onQuickComplete}
+                    className="w-full"
+                  >
+                    Sofort erledigen
+                  </Button>
+                )}
+              </>
             )}
 
             {hasAssignee && !isCompleted && (

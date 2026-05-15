@@ -3,8 +3,8 @@ import { db } from "@/db";
 import { user } from "@/db/schema";
 import { hashPassword } from "@/lib/auth";
 import { eq } from "drizzle-orm";
-import { Button } from "@/app/components/common/button";
-import { Input } from "@/app/components/common/input";
+import { Button } from "@/app/components/shared/button";
+import { Input } from "@/app/components/shared/input";
 
 export default function RegisterPage() {
   async function action(formData: FormData) {
