@@ -26,7 +26,9 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const currentUserId = session?.user?.id ?? null;
 
+  const todayDayIdx = (new Date().getDay() + 6) % 7;
   const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDayIdx, setSelectedDayIdx] = useState(todayDayIdx);
   const [modal, setModal] = useState<{
     taskId: string;
     taskName: string;
@@ -187,13 +189,13 @@ export default function DashboardPage() {
         </p>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <NavButton onClick={() => setWeekOffset((o) => o - 1)} dir="left" />
+            <NavButton onClick={() => { setWeekOffset((o) => o - 1); setSelectedDayIdx(0); }} dir="left" />
             <span className="w-55 text-center text-xl font-semibold text-slate-800">
               {formatDate(weekDays[0])} – {formatDate(weekDays[6])}
               {weekDays[6].getFullYear()}
             </span>
             <NavButton
-              onClick={() => setWeekOffset((o) => o + 1)}
+              onClick={() => { setWeekOffset((o) => o + 1); setSelectedDayIdx(0); }}
               dir="right"
             />
           </div>
@@ -207,7 +209,65 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {/* Mobile: Tagesansicht */}
+        <div className="md:hidden">
+          <div className="flex rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden mb-4">
+            {["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((day, i) => {
+              const isToday = weekOffset === 0 && i === todayDayIdx;
+              const isSelected = i === selectedDayIdx;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedDayIdx(i)}
+                  className={`flex-1 flex flex-col items-center py-2.5 text-xs font-semibold transition-colors
+                    ${isSelected ? "bg-brand-600 text-white" : isToday ? "text-brand-600" : i >= 5 ? "text-slate-400" : "text-slate-600"}
+                    ${isSelected ? "" : "hover:bg-slate-50"}`}
+                >
+                  <span>{day}</span>
+                  <span className={`text-[10px] mt-0.5 ${isSelected ? "text-brand-100" : "text-slate-400"}`}>
+                    {formatDate(weekDays[i])}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {rows.length === 0 ? (
+              <p className="py-8 text-center text-sm text-slate-400">Noch keine Aufgaben vorhanden.</p>
+            ) : (
+              rows.map((row) => {
+                const cell = row.cells[selectedDayIdx];
+                return (
+                  <button
+                    key={row.id}
+                    type="button"
+                    onClick={() => setModal({ taskId: row.id, taskName: row.name, dayIdx: selectedDayIdx })}
+                    className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm hover:bg-brand-50 transition-colors active:scale-[0.98]"
+                  >
+                    <span className="text-sm font-medium text-slate-800">{row.name}</span>
+                    {cell?.assigneeName ? (
+                      cell.completerDiffers ? (
+                        <span className="flex items-center -space-x-2">
+                          <UserAvatar initial={cell.assigneeName[0]} color={cell.assigneeColor ?? "#94a3b8"} completed={false} />
+                          <UserAvatar initial={cell.completedByName![0]} color={cell.completedByColor ?? "#22c55e"} completed={true} />
+                        </span>
+                      ) : (
+                        <UserAvatar initial={cell.assigneeName[0]} color={cell.assigneeColor ?? "#94a3b8"} completed={cell.isCompleted} />
+                      )
+                    ) : (
+                      <AddButton />
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Desktop: Wochenübersicht */}
+        <div className="hidden md:block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full table-fixed">
             <colgroup>
               <col className="w-44" />
@@ -303,6 +363,7 @@ export default function DashboardPage() {
               )}
             </tbody>
           </table>
+        </div>
         </div>
       </div>
       {modal &&
