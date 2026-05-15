@@ -1,6 +1,6 @@
 import { IconProps } from ".";
 
-export function AddIcon({ size = 24, className }: IconProps) {
+export function AddIcon({ size = 14, className }: IconProps) {
   return (
     <svg
       width={size}
