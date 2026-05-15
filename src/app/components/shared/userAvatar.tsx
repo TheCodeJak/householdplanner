@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 const INITIAL_COLORS: Record<string, string> = {
   A: "#EF6C6C",
   B: "#F28B4F",
@@ -31,7 +33,6 @@ function getColor(initial: string): string {
   return INITIAL_COLORS[initial.toUpperCase()] ?? "#8A9BB5";
 }
 
-// Lightens a hex color by mixing with white for the gradient highlight
 function lightenHex(hex: string, amount = 0.35): string {
   const n = parseInt(hex.slice(1), 16);
   const r = Math.round(
@@ -40,49 +41,6 @@ function lightenHex(hex: string, amount = 0.35): string {
   const g = Math.round(((n >> 8) & 0xff) + (255 - ((n >> 8) & 0xff)) * amount);
   const b = Math.round((n & 0xff) + (255 - (n & 0xff)) * amount);
   return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-}
-
-interface AddButtonProps {
-  size?: number;
-}
-
-export function AddButton({ size = 24 }: AddButtonProps) {
-  const r = size / 2;
-  const strokeW = 1.5;
-  const armLen = size * 0.175;
-
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none">
-      <circle
-        cx={r}
-        cy={r}
-        r={r - strokeW}
-        stroke="#CBD5E1"
-        strokeWidth={1}
-        strokeDasharray="2 2"
-        strokeLinecap="round"
-        fill="#F8FAFC"
-      />
-      <line
-        x1={r}
-        y1={r - armLen}
-        x2={r}
-        y2={r + armLen}
-        stroke="#94A3B8"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-      />
-      <line
-        x1={r - armLen}
-        y1={r}
-        x2={r + armLen}
-        y2={r}
-        stroke="#94A3B8"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 }
 
 interface UserAvatarProps {
@@ -98,11 +56,12 @@ export function UserAvatar({
   completed = false,
   size = 24,
 }: UserAvatarProps) {
+  const uid = useId();
   const bgColor = color ?? getColor(initial);
   const highlightColor = lightenHex(bgColor, 0.4);
   const r = size / 2;
-  const gradId = `grad-${initial.toUpperCase()}`;
-  const maskId = `mask-${initial.toUpperCase()}`;
+  const gradId = `grad-${uid}`;
+  const maskId = `mask-${uid}`;
 
   const badgeR = size * 0.21;
   const badgeX = size - badgeR * 0.72;
@@ -128,15 +87,12 @@ export function UserAvatar({
         )}
       </defs>
 
-      {/* Avatar circle */}
       <circle cx={r} cy={r} r={r} fill={`url(#${gradId})`} />
 
-      {/* Completed: subtle dark overlay */}
       {completed && (
         <circle cx={r} cy={r} r={r} fill="black" fillOpacity={0.12} />
       )}
 
-      {/* Initial */}
       <text
         x={r}
         y={r}
@@ -150,7 +106,6 @@ export function UserAvatar({
         {initial.toUpperCase()}
       </text>
 
-      {/* Completed badge */}
       {completed && (
         <g transform={`translate(${badgeX} ${badgeY})`}>
           <circle r={badgeR} fill="#22C55E" />

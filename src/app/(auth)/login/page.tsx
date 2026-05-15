@@ -1,6 +1,6 @@
 import { signIn } from "@/lib/auth";
-import { Button } from "@/app/components/common/button";
-import { Input } from "@/app/components/common/input";
+import { Button } from "@/app/components/shared/button";
+import { Input } from "@/app/components/shared/input";
 
 export default function LoginPage() {
   async function action(formData: FormData) {

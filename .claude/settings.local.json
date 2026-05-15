@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Jakob\\\\Documents\\\\dev\\\\householdplaner\" -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch 'node_modules' -and $_.FullName -notmatch '\\\\.next' -and $_.FullName -notmatch '\\\\.git' } | Select-Object @{Name='Path';Expression={$_.FullName -replace [regex]::Escape\\(\"C:\\\\Users\\\\Jakob\\\\Documents\\\\dev\\\\householdplaner\"\\), \".\"}} | Sort-Object Path)"
+    ]
+  }
+}
