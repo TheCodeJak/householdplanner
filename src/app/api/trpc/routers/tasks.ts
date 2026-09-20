@@ -13,6 +13,7 @@ export const tasksRouter = router({
         description: z.string().optional(),
         familyId: z.uuid(),
         category: z.string().optional(),
+        slots: z.array(z.string()).optional(),
       }),
     )
     .mutation(({ input, ctx }) =>

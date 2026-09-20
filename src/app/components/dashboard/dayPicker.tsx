@@ -23,7 +23,7 @@ export default function DayPicker({
             <button
               key={i}
               onClick={() => onSelect(i)}
-              className={`flex flex-1 flex-col items-center justify-center border border-gray-200 rounded-3xl shadow-xs transition-all snap-center bg-white shrink-0 min-w-15 min-h-25 ${
+              className={`flex flex-1 flex-col items-center justify-center border border-gray-200 rounded-3xl shadow-xs transition-all snap-center bg-white shrink-0 min-w-15 max-w-20 min-h-25 ${
                 isSelected
                   ? "bg-linear-to-b from-orange-500 to-orange-400/50 scale-105"
                   : "bg-white border-gray-200 hover:bg-orange-50 text-stone-500"

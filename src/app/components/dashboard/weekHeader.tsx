@@ -1,7 +1,7 @@
 "use client";
 
 import { getWeekNumber, formatDate } from "@/lib/dateUtils";
-import NavButton from "../../components/layout/navButton";
+import NavButton from "@/app/components/layout/navButton";
 
 type WeekHeaderProps = {
   monday: Date;

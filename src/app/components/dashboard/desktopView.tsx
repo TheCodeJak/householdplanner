@@ -8,7 +8,7 @@ import { shortenWeekDays } from "@/types";
 type DesktopViewProps = {
   rows: Row[];
   weekDays: Date[];
-  onCellClick: (taskId: string, taskName: string, dayIdx: number) => void;
+  onCellClick: (taskId: string, taskName: string, slotId: string | null, dayIdx: number) => void;
 };
 
 export default function DesktopView({
@@ -71,7 +71,7 @@ export default function DesktopView({
                   <td key={dayIdx} className="p-1 align-middle">
                     <TaskCell
                       cell={cell}
-                      onClick={() => onCellClick(row.id, row.name, dayIdx)}
+                      onClick={(slotId) => onCellClick(row.id, row.name, slotId, dayIdx)}
                     />
                   </td>
                 ))}

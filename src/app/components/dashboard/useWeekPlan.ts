@@ -1,7 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { colorFromUserId } from "@/lib/color";
 import { getMonday, toIsoDate } from "@/lib/dateUtils";
-import type { Row } from "@/types/plan";
+import type { Row, AssignmentData } from "@/types/plan";
 import { useSession } from "next-auth/react";
 
 export const FAMILY_ID = "65183ae8-fc81-4228-97c5-dd3dd99c6322";
@@ -41,37 +41,57 @@ export function useWeekPlan(weekOffset: number) {
     onSuccess: () => utils.assignments.getForWeek.invalidate(),
   });
 
+  // Key: "taskId_slotId_date"
   const assignmentMap = new Map(
-    (assignments ?? []).map((a) => [`${a.taskId}_${a.date}`, a]),
+    (assignments ?? []).map((a) => [
+      `${a.taskId}_${a.slotId ?? "null"}_${a.date}`,
+      a,
+    ]),
   );
+
+  function buildAssignment(
+    taskId: string,
+    slotId: string | null,
+    day: Date,
+  ): AssignmentData | null {
+    const key = `${taskId}_${slotId ?? "null"}_${toIsoDate(day)}`;
+    const a = assignmentMap.get(key);
+    if (!a) return null;
+    const isCompleted = a.completedAt !== null;
+    const completerDiffers =
+      isCompleted &&
+      a.completedById !== null &&
+      a.completedById !== a.assignedToId;
+    return {
+      assignmentId: a.assignmentId,
+      assigneeName: a.assigneeName,
+      assigneeColor: colorFromUserId(a.assignedToId),
+      assignedToId: a.assignedToId,
+      isCompleted,
+      isCurrentUser: a.assignedToId === currentUserId,
+      completedByName: a.completedByName ?? null,
+      completedByColor: a.completedById
+        ? colorFromUserId(a.completedById)
+        : null,
+      isCompletedByCurrentUser:
+        a.completedById !== null && a.completedById === currentUserId,
+      completerDiffers,
+      note: a.notes,
+    };
+  }
 
   const rows: Row[] = (tasks ?? []).map((task) => ({
     id: task.id,
     name: task.title,
     cells: weekDays.map((day) => {
-      const a = assignmentMap.get(`${task.id}_${toIsoDate(day)}`);
-      if (!a) return null;
-      const isCompleted = a.completedAt !== null;
-      const completerDiffers =
-        isCompleted &&
-        a.completedById !== null &&
-        a.completedById !== a.assignedToId;
-      return {
-        assignmentId: a.assignmentId,
-        assigneeName: a.assigneeName,
-        assigneeColor: colorFromUserId(a.assignedToId),
-        assignedToId: a.assignedToId,
-        isCompleted,
-        isCurrentUser: a.assignedToId === currentUserId,
-        completedByName: a.completedByName ?? null,
-        completedByColor: a.completedById
-          ? colorFromUserId(a.completedById)
-          : null,
-        isCompletedByCurrentUser:
-          a.completedById !== null && a.completedById === currentUserId,
-        completerDiffers,
-        note: a.notes,
-      };
+      if (task.slots.length === 0) {
+        return [{ slotId: null, label: null, data: buildAssignment(task.id, null, day) }];
+      }
+      return task.slots.map((slot) => ({
+        slotId: slot.id,
+        label: slot.label,
+        data: buildAssignment(task.id, slot.id, day),
+      }));
     }),
   }));
 

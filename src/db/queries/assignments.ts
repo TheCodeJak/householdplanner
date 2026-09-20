@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, sql } from "drizzle-orm";
+import { eq, and, gte, lte, sql, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "..";
 import { task, taskAssignment, taskSlot, user } from "../schema";
@@ -40,6 +40,7 @@ export async function getAssignmentsForWeek(mondayDate: string, familyId: string
     .select({
       assignmentId: taskAssignment.id,
       taskId: taskAssignment.taskId,
+      slotId: taskAssignment.slotId,
       date: taskAssignment.date,
       assignedToId: taskAssignment.assignedToId,
       assigneeName: assignedUser.name,
@@ -61,11 +62,21 @@ export async function getAssignmentsForWeek(mondayDate: string, familyId: string
     );
 }
 
-export async function findAssignment(taskId: string, date: string) {
+export async function findAssignment(taskId: string, date: string, slotId?: string | null) {
+  const conditions = [
+    eq(taskAssignment.taskId, taskId),
+    eq(taskAssignment.date, date),
+  ];
+  if (slotId) {
+    conditions.push(eq(taskAssignment.slotId, slotId));
+  } else {
+    conditions.push(isNull(taskAssignment.slotId));
+  }
+
   const [row] = await db
     .select()
     .from(taskAssignment)
-    .where(and(eq(taskAssignment.taskId, taskId), eq(taskAssignment.date, date)))
+    .where(and(...conditions))
     .limit(1);
   return row ?? null;
 }
@@ -92,6 +103,7 @@ export async function createAssignment(data: {
   taskId: string;
   assignedToId: string;
   date: string;
+  slotId?: string | null;
 }) {
   const [assignment] = await db.insert(taskAssignment).values(data).returning();
   return assignment;

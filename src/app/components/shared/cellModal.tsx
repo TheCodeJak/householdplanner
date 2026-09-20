@@ -4,6 +4,7 @@ import { AvatarDot } from "./avatarDot";
 import Modal from "./modal";
 import { CloseButton } from "../icons/close";
 import { Button } from "./button";
+import type { AssignmentData } from "@/types/plan";
 
 const DAY_DE = [
   "Montag",
@@ -17,17 +18,7 @@ const DAY_DE = [
 
 export type CellModalProps = {
   taskName: string;
-  cell: {
-    assignmentId?: string | null;
-    assigneeName?: string | null;
-    assigneeColor?: string | null;
-    isCompleted: boolean;
-    isCurrentUser?: boolean;
-    completedByName?: string | null;
-    completedByColor?: string | null;
-    isCompletedByCurrentUser?: boolean;
-    note?: string | null;
-  } | null;
+  cell: AssignmentData | null;
   weekDay: Date;
   onClose: () => void;
   onAssign?: () => void;
@@ -77,7 +68,7 @@ export default function CellModal({
             {hasAssignee ? (
               <div className="flex items-center gap-3">
                 <AvatarDot
-                  name={cell!.assigneeName!}
+                  name={cell!.assigneeName}
                   color={cell!.assigneeColor ?? "#94a3b8"}
                   completed={false}
                 />
@@ -96,10 +87,8 @@ export default function CellModal({
             <Section label="Erledigt von">
               <div className="flex items-center gap-3">
                 <AvatarDot
-                  name={completedByName ?? cell!.assigneeName!}
-                  color={
-                    cell?.completedByColor ?? cell?.assigneeColor ?? "#22c55e"
-                  }
+                  name={completedByName ?? cell!.assigneeName}
+                  color={cell?.completedByColor ?? cell?.assigneeColor ?? "#22c55e"}
                   completed={true}
                 />
                 <span className="text-sm font-medium text-slate-700">
@@ -139,21 +128,11 @@ export default function CellModal({
           <div className="flex flex-col gap-2">
             {!hasAssignee && (
               <>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={onAssign}
-                  className="w-full"
-                >
+                <Button variant="primary" size="lg" onClick={onAssign} className="w-full">
                   Ich mache das
                 </Button>
                 {onQuickComplete && (
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={onQuickComplete}
-                    className="w-full"
-                  >
+                  <Button variant="ghost" size="lg" onClick={onQuickComplete} className="w-full">
                     Sofort erledigen
                   </Button>
                 )}
@@ -162,23 +141,11 @@ export default function CellModal({
 
             {hasAssignee && !isCompleted && (
               <>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={onComplete}
-                  className="w-full"
-                >
-                  {isCurrentUser
-                    ? "Als erledigt markieren"
-                    : "Ich habe das erledigt"}
+                <Button variant="primary" size="lg" onClick={onComplete} className="w-full">
+                  {isCurrentUser ? "Als erledigt markieren" : "Ich habe das erledigt"}
                 </Button>
                 {isCurrentUser && (
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={onUnassign}
-                    className="w-full"
-                  >
+                  <Button variant="ghost" size="lg" onClick={onUnassign} className="w-full">
                     Nicht mehr ich
                   </Button>
                 )}
@@ -186,12 +153,7 @@ export default function CellModal({
             )}
 
             {isCompleted && isCompletedByCurrentUser && (
-              <Button
-                variant="ghost"
-                size="lg"
-                onClick={onUncomplete}
-                className="w-full"
-              >
+              <Button variant="ghost" size="lg" onClick={onUncomplete} className="w-full">
                 Doch nicht erledigt
               </Button>
             )}
@@ -202,13 +164,7 @@ export default function CellModal({
   );
 }
 
-function Section({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="mb-5">
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
