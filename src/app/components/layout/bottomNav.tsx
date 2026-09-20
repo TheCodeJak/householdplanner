@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type Tab = "overview" | "calendar" | "stats" | "profile";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "overview", label: "Übersicht" },
-  { key: "calendar", label: "Kalender" },
-  { key: "stats", label: "Statistik" },
-  { key: "profile", label: "Profil" },
+const TABS: { key: Tab; label: string; href: string }[] = [
+  { key: "overview", label: "Übersicht", href: "/dashboard" },
+  { key: "calendar", label: "Kalender", href: "/calendar" },
+  { key: "stats", label: "Statistik", href: "/statistics" },
+  { key: "profile", label: "Profil", href: "/profile" },
 ];
 
 function TabIcon({ tab, active }: { tab: Tab; active: boolean }) {
@@ -78,24 +79,30 @@ function TabIcon({ tab, active }: { tab: Tab; active: boolean }) {
 }
 
 export default function BottomNav() {
-  const [active, setActive] = useState<Tab>("overview");
+  const pathname = usePathname();
+
+  function isActive(href: string) {
+    return pathname === href || pathname.startsWith(href + "/");
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
       <div className="flex items-center justify-around h-14">
-        {TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setActive(key)}
-            className={`flex flex-col items-center gap-0.5 pt-1.5 pb-1 px-3 transition-colors ${
-              active === key ? "text-orange-500" : "text-slate-400"
-            }`}
-          >
-            <TabIcon tab={key} active={active === key} />
-            <span className="text-[10px] font-semibold">{label}</span>
-          </button>
-        ))}
+        {TABS.map(({ key, label, href }) => {
+          const active = isActive(href);
+          return (
+            <Link
+              key={key}
+              href={href}
+              className={`flex flex-col items-center gap-0.5 pt-1.5 pb-1 px-3 transition-colors ${
+                active ? "text-orange-500" : "text-slate-400"
+              }`}
+            >
+              <TabIcon tab={key} active={active} />
+              <span className="text-[10px] font-semibold">{label}</span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

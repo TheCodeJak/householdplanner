@@ -1,4 +1,4 @@
-export type Cell = {
+export type AssignmentData = {
   assignmentId: string;
   assigneeName: string;
   assigneeColor: string;
@@ -10,6 +10,21 @@ export type Cell = {
   isCompletedByCurrentUser: boolean;
   completerDiffers: boolean;
   note: string | null;
-} | null;
+};
 
-export type Row = { id: string; name: string; cells: Cell[] };
+export type SlotEntry = {
+  slotId: string | null;
+  label: string | null;
+  data: AssignmentData | null;
+};
+
+// Each day cell is an array of slot entries.
+// Tasks without slots: [{ slotId: null, label: null, data: ... }]
+// Tasks with slots: [{ slotId, label, data }, ...]
+export type DayCell = SlotEntry[];
+
+export type Row = {
+  id: string;
+  name: string;
+  cells: DayCell[];
+};

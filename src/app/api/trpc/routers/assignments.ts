@@ -23,16 +23,29 @@ export const assignmentsRouter = router({
     ),
 
   assign: protectedProcedure
-    .input(z.object({ taskId: z.uuid(), date: z.string() }))
+    .input(
+      z.object({
+        taskId: z.uuid(),
+        date: z.string(),
+        slotId: z.uuid().nullish(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
-      const existing = await findAssignment(input.taskId, input.date);
+      const existing = await findAssignment(
+        input.taskId,
+        input.date,
+        input.slotId,
+      );
       if (existing) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "Aufgabe ist bereits jemandem zugewiesen.",
         });
       }
-      return createAssignment({ ...input, assignedToId: ctx.userId });
+      return createAssignment({
+        ...input,
+        assignedToId: ctx.userId,
+      });
     }),
 
   unassign: protectedProcedure
