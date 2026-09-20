@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 --experimental-https --experimental-https-key ./localhost+2-key.pem --experimental-https-cert ./localhost+2.pem",
+    "docker:dev": "docker compose --env-file .env.local up --build",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
