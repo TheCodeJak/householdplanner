@@ -1,20 +1,17 @@
+import { sql } from "drizzle-orm";
 import {
+  boolean,
+  date,
+  index,
+  integer,
   pgTable,
-  uuid,
   text,
   timestamp,
-  date,
-  boolean,
-  integer,
   unique,
-  index,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
-// ─────────────────────────────────────────────
-// FAMILIES
-// ─────────────────────────────────────────────
 export const family = pgTable("family", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
@@ -22,9 +19,6 @@ export const family = pgTable("family", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// ─────────────────────────────────────────────
-// user
-// ─────────────────────────────────────────────
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
   familyId: uuid("family_id").references(() => family.id, {
@@ -37,9 +31,6 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// ─────────────────────────────────────────────
-// TASKS  (Aufgaben-Vorlagen)
-// ─────────────────────────────────────────────
 export const task = pgTable(
   "task",
   {
@@ -61,21 +52,15 @@ export const task = pgTable(
   }),
 );
 
-// ─────────────────────────────────────────────
-// TASK SLOTS  (optionale Zeitfenster pro Task)
-// ─────────────────────────────────────────────
 export const taskSlot = pgTable("task_slot", {
   id: uuid("id").primaryKey().defaultRandom(),
   taskId: uuid("task_id")
     .notNull()
     .references(() => task.id, { onDelete: "cascade" }),
-  label: text("label").notNull(), // z.B. "Morgens", "Mittags", "Abends"
+  label: text("label").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
 });
 
-// ─────────────────────────────────────────────
-// TASK ASSIGNMENTS  (geplante + erledigte Aufgaben)
-// ─────────────────────────────────────────────
 export const taskAssignment = pgTable(
   "task_assignment",
   {
@@ -98,7 +83,6 @@ export const taskAssignment = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => ({
-    // Tasks MIT Slot: Kombination muss eindeutig sein
     uniqueWithSlot: unique("unique_with_slot").on(
       t.taskId,
       t.assignedToId,
@@ -106,8 +90,6 @@ export const taskAssignment = pgTable(
       t.slotId,
     ),
 
-    // Tasks OHNE Slot: Partial Index verhindert Duplikate wenn slotId = null
-    // (SQL NULL != NULL — der unique constraint oben greift für null-Werte nicht)
     uniqueWithoutSlot: uniqueIndex("unique_without_slot")
       .on(t.taskId, t.assignedToId, t.date)
       .where(sql`slot_id IS NULL`),

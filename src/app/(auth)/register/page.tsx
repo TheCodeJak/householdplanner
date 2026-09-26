@@ -1,10 +1,12 @@
-import { redirect } from "next/navigation";
+import { Button } from "@/app/components/shared/button";
+import FamilyModal from "@/app/components/shared/familyModal";
+import { Input } from "@/app/components/shared/input";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { hashPassword } from "@/lib/auth";
 import { eq } from "drizzle-orm";
-import { Button } from "@/app/components/shared/button";
-import { Input } from "@/app/components/shared/input";
+import { TextField } from "jaklib";
+import { redirect } from "next/navigation";
 
 export default function RegisterPage() {
   async function action(formData: FormData) {
@@ -31,6 +33,9 @@ export default function RegisterPage() {
           Registrieren
         </h1>
         <form action={action} className="flex flex-col gap-4">
+          <TextField label="Name" name="name" />
+          <TextField label="E-Mail" name="email" />
+          <TextField label="Passwort" name="password" />
           <Input
             label="Name"
             id="name"
@@ -55,6 +60,7 @@ export default function RegisterPage() {
             required
             autoComplete="new-password"
           />
+          <FamilyModal />
           <Button type="submit" size="lg" className="mt-2 w-full">
             Konto erstellen
           </Button>

@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Nur Abhängigkeiten kopieren für effizientes Caching
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY vendor ./vendor
 RUN npm install
 
 # Restlichen Code kopieren
