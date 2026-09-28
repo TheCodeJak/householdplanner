@@ -1,10 +1,8 @@
 "use client";
 
-import { AvatarDot } from "./avatarDot";
-import Modal from "./modal";
-import { CloseButton } from "../icons/close";
-import { Button } from "./button";
 import type { AssignmentData } from "@/types/plan";
+import { Button, Modal } from "jaklib/core";
+import { AvatarDot } from "./avatarDot";
 
 const DAY_DE = [
   "Montag",
@@ -17,6 +15,7 @@ const DAY_DE = [
 ];
 
 export type CellModalProps = {
+  open: boolean;
   taskName: string;
   cell: AssignmentData | null;
   weekDay: Date;
@@ -29,6 +28,7 @@ export type CellModalProps = {
 };
 
 export default function CellModal({
+  open,
   taskName,
   cell,
   weekDay,
@@ -51,120 +51,120 @@ export default function CellModal({
     isCompleted && !!completedByName && completedByName !== cell?.assigneeName;
 
   return (
-    <Modal onClose={onClose}>
-      {(close) => (
-        <>
-          <div className="mb-5 flex items-start justify-between">
-            <div>
-              <span className="text-lg font-semibold text-slate-800">
-                {taskName}
-              </span>
-              <p className="mt-0.5 text-sm text-slate-500">{dayLabel}</p>
-            </div>
-            <CloseButton onClose={close} />
+    <Modal open={open} onClose={onClose} variant="sheet" title={taskName}>
+      <p className="-mt-3 mb-5 text-sm text-slate-500">{dayLabel}</p>
+
+      <Section label="Geplant von">
+        {hasAssignee ? (
+          <div className="flex items-center gap-3">
+            <AvatarDot
+              name={cell!.assigneeName}
+              color={cell!.assigneeColor ?? "#94a3b8"}
+              completed={false}
+            />
+            <span className="text-sm font-medium text-slate-700">
+              {isCurrentUser ? "Du" : cell!.assigneeName}
+            </span>
           </div>
+        ) : (
+          <p className="text-sm italic text-slate-400">
+            Noch niemand eingeteilt.
+          </p>
+        )}
+      </Section>
 
-          <Section label="Geplant von">
-            {hasAssignee ? (
-              <div className="flex items-center gap-3">
-                <AvatarDot
-                  name={cell!.assigneeName}
-                  color={cell!.assigneeColor ?? "#94a3b8"}
-                  completed={false}
+      {isCompleted && (
+        <Section label="Erledigt von">
+          <div className="flex items-center gap-3">
+            <AvatarDot
+              name={completedByName ?? cell!.assigneeName}
+              color={cell?.completedByColor ?? cell?.assigneeColor ?? "#22c55e"}
+              completed={true}
+            />
+            <span className="text-sm font-medium text-slate-700">
+              {isCompletedByCurrentUser
+                ? "Du"
+                : (completedByName ?? cell!.assigneeName)}
+              {completerDiffers && (
+                <span className="ml-1 text-xs text-slate-400">
+                  (statt {cell!.assigneeName})
+                </span>
+              )}
+            </span>
+            <span className="ml-auto flex items-center gap-1 text-xs font-semibold text-green-600">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M2 6l3 3 5-5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
-                <span className="text-sm font-medium text-slate-700">
-                  {isCurrentUser ? "Du" : cell!.assigneeName}
-                </span>
-              </div>
-            ) : (
-              <p className="text-sm italic text-slate-400">
-                Noch niemand eingeteilt.
-              </p>
-            )}
-          </Section>
+              </svg>
+              Erledigt
+            </span>
+          </div>
+        </Section>
+      )}
 
-          {isCompleted && (
-            <Section label="Erledigt von">
-              <div className="flex items-center gap-3">
-                <AvatarDot
-                  name={completedByName ?? cell!.assigneeName}
-                  color={cell?.completedByColor ?? cell?.assigneeColor ?? "#22c55e"}
-                  completed={true}
-                />
-                <span className="text-sm font-medium text-slate-700">
-                  {isCompletedByCurrentUser
-                    ? "Du"
-                    : (completedByName ?? cell!.assigneeName)}
-                  {completerDiffers && (
-                    <span className="ml-1 text-xs text-slate-400">
-                      (statt {cell!.assigneeName})
-                    </span>
-                  )}
-                </span>
-                <span className="ml-auto flex items-center gap-1 text-xs font-semibold text-green-600">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path
-                      d="M2 6l3 3 5-5"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  Erledigt
-                </span>
-              </div>
-            </Section>
-          )}
+      {cell?.note && (
+        <Section label="Notiz">
+          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-slate-700">
+            {cell.note}
+          </div>
+        </Section>
+      )}
 
-          {cell?.note && (
-            <Section label="Notiz">
-              <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-slate-700">
-                {cell.note}
-              </div>
-            </Section>
-          )}
-
-          <div className="flex flex-col gap-2">
-            {!hasAssignee && (
-              <>
-                <Button variant="primary" size="lg" onClick={onAssign} className="w-full">
-                  Ich mache das
-                </Button>
-                {onQuickComplete && (
-                  <Button variant="ghost" size="lg" onClick={onQuickComplete} className="w-full">
-                    Sofort erledigen
-                  </Button>
-                )}
-              </>
-            )}
-
-            {hasAssignee && !isCompleted && (
-              <>
-                <Button variant="primary" size="lg" onClick={onComplete} className="w-full">
-                  {isCurrentUser ? "Als erledigt markieren" : "Ich habe das erledigt"}
-                </Button>
-                {isCurrentUser && (
-                  <Button variant="ghost" size="lg" onClick={onUnassign} className="w-full">
-                    Nicht mehr ich
-                  </Button>
-                )}
-              </>
-            )}
-
-            {isCompleted && isCompletedByCurrentUser && (
-              <Button variant="ghost" size="lg" onClick={onUncomplete} className="w-full">
-                Doch nicht erledigt
+      <div className="flex flex-col gap-2">
+        {!hasAssignee && (
+          <>
+            <Button variant="primary" onClick={onAssign} className="w-full">
+              Ich mache das
+            </Button>
+            {onQuickComplete && (
+              <Button
+                variant="ghost"
+                onClick={onQuickComplete}
+                className="w-full"
+              >
+                Sofort erledigen
               </Button>
             )}
-          </div>
-        </>
-      )}
+          </>
+        )}
+
+        {hasAssignee && !isCompleted && (
+          <>
+            <Button variant="primary" onClick={onComplete} className="w-full">
+              {isCurrentUser
+                ? "Als erledigt markieren"
+                : "Ich habe das erledigt"}
+            </Button>
+            {isCurrentUser && (
+              <Button variant="ghost" onClick={onUnassign} className="w-full">
+                Nicht mehr ich
+              </Button>
+            )}
+          </>
+        )}
+
+        {isCompleted && isCompletedByCurrentUser && (
+          <Button variant="ghost" onClick={onUncomplete} className="w-full">
+            Doch nicht erledigt
+          </Button>
+        )}
+      </div>
     </Modal>
   );
 }
 
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
+function Section({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="mb-5">
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">

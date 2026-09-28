@@ -1,8 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@/app/components/shared/button";
-import { Input } from "@/app/components/shared/input";
+import { Button, TextField } from "jaklib/core";
 import { registerAction, type AuthFormState } from "../actions";
 
 const initialState: AuthFormState = {};
@@ -15,27 +14,24 @@ export function RegisterForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <Input
+      <TextField
         label="Name"
-        id="name"
         name="name"
         type="text"
         required
         autoComplete="name"
         defaultValue={state.name}
       />
-      <Input
+      <TextField
         label="E-Mail"
-        id="email"
         name="email"
         type="email"
         required
         autoComplete="email"
         defaultValue={state.email}
       />
-      <Input
+      <TextField
         label="Passwort"
-        id="password"
         name="password"
         type="password"
         required

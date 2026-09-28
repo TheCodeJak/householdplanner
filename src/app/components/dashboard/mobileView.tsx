@@ -9,7 +9,7 @@ import {
   QuestionCircleIcon,
   PlusCircleIcon,
 } from "@/app/components/icons";
-import Card from "../shared/card";
+import { Card } from "jaklib/core";
 
 type MobileViewProps = {
   rows: Row[];

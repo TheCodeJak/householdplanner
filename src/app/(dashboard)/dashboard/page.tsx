@@ -20,6 +20,7 @@ export default function DashboardPage() {
     slotId: string | null;
     dayIdx: number;
   } | null>(null);
+  const [cellModalOpen, setCellModalOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
 
   const {
@@ -69,9 +70,10 @@ export default function DashboardPage() {
             rows={rows}
             weekDays={weekDays}
             selectedDayIdx={selectedDayIdx}
-            onCellClick={(taskId, taskName, slotId) =>
-              setModal({ taskId, taskName, slotId, dayIdx: selectedDayIdx })
-            }
+            onCellClick={(taskId, taskName, slotId) => {
+              setModal({ taskId, taskName, slotId, dayIdx: selectedDayIdx });
+              setCellModalOpen(true);
+            }}
           />
           <button
             type="button"
@@ -92,9 +94,10 @@ export default function DashboardPage() {
         <DesktopView
           rows={rows}
           weekDays={weekDays}
-          onCellClick={(taskId, taskName, slotId, dayIdx) =>
-            setModal({ taskId, taskName, slotId, dayIdx })
-          }
+          onCellClick={(taskId, taskName, slotId, dayIdx) => {
+            setModal({ taskId, taskName, slotId, dayIdx });
+            setCellModalOpen(true);
+          }}
         />
       </div>
 
@@ -109,10 +112,11 @@ export default function DashboardPage() {
 
           return (
             <CellModal
+              open={cellModalOpen}
               taskName={taskLabel}
               cell={liveCell}
               weekDay={weekDays[modal.dayIdx]}
-              onClose={() => setModal(null)}
+              onClose={() => setCellModalOpen(false)}
               onAssign={() =>
                 assignMutation.mutate({
                   taskId: modal.taskId,
@@ -150,7 +154,7 @@ export default function DashboardPage() {
             />
           );
         })()}
-      {taskModalOpen && <TaskModal onClose={() => setTaskModalOpen(false)} />}
+      <TaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} />
     </>
   );
 }

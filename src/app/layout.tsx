@@ -7,7 +7,7 @@ import { Providers } from "./providers";
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-sans", // wichtig für Tailwind
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {

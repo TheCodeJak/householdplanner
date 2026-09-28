@@ -22,6 +22,41 @@
   --color-error-700:   #b91c1c;
 }
 
+/*
+ * jaklib importiert vor dieser Datei (siehe layout.tsx) eigene Tokens mit
+ * einer eigenen Orange-Marke. Die rohen Tokens hier auf unsere bestehende
+ * Palette ummappen, damit alle jaklib-Komponenten automatisch das gleiche
+ * Branding wie der Rest der App bekommen.
+ */
+:root {
+  --brand: var(--color-brand-600);
+  --brand-deep: var(--color-brand-700);
+  --brand-light: var(--color-brand-400);
+  --danger: var(--color-error-600);
+  --danger-deep: var(--color-error-700);
+  --sage: var(--color-success-600);
+}
+
+/*
+ * Der Rest der App unterstützt aktuell keinen Dark Mode (feste weiß/slate
+ * Farben). jaklib schaltet über prefers-color-scheme aber automatisch auf ein
+ * dunkles Theme um. Damit neu eingebundene jaklib-Komponenten nicht aus dem
+ * Rahmen fallen, bleiben sie hier bewusst auf den hellen Werten - bis der
+ * Rest der App Dark Mode ebenfalls unterstützt.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--ink-50);
+    --surface: var(--white);
+    --border: var(--ink-300);
+    --text: var(--ink-900);
+    --text-muted: var(--ink-600);
+    --input-bg: var(--white);
+    --input-border: var(--ink-300);
+    --input-label: var(--ink-400);
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
