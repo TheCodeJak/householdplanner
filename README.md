@@ -31,10 +31,16 @@ docker compose exec web npx drizzle-kit push
 
 ## Datenbank
 
-```bash
-npm run db:push      # Schema auf die DB aus .env.local pushen
-npm run db:studio
-```
+Es gibt zwei Entwicklungsdatenbanken. Das Ziel steht im Skriptnamen, damit nicht versehentlich die falsche getroffen wird:
+
+| Skript | Datenbank | Gehört zu |
+|---|---|---|
+| `db:push:neon-dev` / `db:studio:neon-dev` | Neon-Branch `development` (aus `.env.local`) | `npm run dev` |
+| `db:push:docker` / `db:studio:docker` | lokales Postgres im Container (`.env.docker-db`) | `npm run docker:dev` |
+
+`.env.docker-db` enthält nur `DATABASE_URL=postgresql://postgres:<Passwort der Docker-DB>@127.0.0.1:5432/householdplaner` und wird nicht eingecheckt (`.env*` ist in `.gitignore`). `127.0.0.1` statt `localhost`, weil der Port nur auf IPv4 freigegeben ist.
+
+Für die Produktion gibt es bewusst kein Skript.
 
 ## Deployment
 

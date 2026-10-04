@@ -29,16 +29,18 @@ export type Row = {
   cells: DayCell[];
 };
 
-type TaskStatus = "open" | "claimed" | "completed";
+//! New Types
+// ==========================================================================
+export type TaskStatus = "open" | "claimed" | "completed";
 
-type Person = {
+export type Person = {
   id: string;
   name: string;
   color: string;
   isCurrentUser: boolean;
 };
 
-type SlotView = {
+export type SlotView = {
   slotId: string | null; // null = Aufgabe ohne Zeitslot
   label: string | null; // "Morgens" ...
   status: TaskStatus;
@@ -48,6 +50,6 @@ type SlotView = {
   note: string | null;
 };
 
-type TaskView = { taskId: string; title: string; slots: SlotView[] };
+export type TaskView = { taskId: string; title: string; slots: SlotView[] };
 
-type SlotRef = { taskId: string; slotId: string | null; date: string }; // ISO-Datum
+export type SlotRef = { taskId: string; slotId: string | null; date: string }; // ISO-Datum

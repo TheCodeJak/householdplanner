@@ -7,6 +7,7 @@ import { useWeekPlan } from "@/app/components/dashboard/useWeekPlan";
 import CellModal from "@/app/components/shared/cellModal";
 import TaskModal from "@/app/components/shared/taskModal";
 import { toIsoDate } from "@/lib/dateUtils";
+import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 
 export default function DashboardPage() {
@@ -33,8 +34,21 @@ export default function DashboardPage() {
     uncompleteMutation,
   } = useWeekPlan(weekOffset);
 
+  // TEMP (Schritt 5): Rohdaten von plan.getDay ansehen
+  const debugPlan = trpc.plan.getDay.useQuery(
+    { date: toIsoDate(new Date()) },
+    { retry: false },
+  );
+
   return (
     <>
+      <pre className="m-4 overflow-x-auto rounded-xl bg-slate-100 p-3 text-xs font-normal">
+        {debugPlan.isLoading
+          ? "lädt …"
+          : debugPlan.error
+            ? `${debugPlan.error.data?.code}: ${debugPlan.error.message}`
+            : JSON.stringify(debugPlan.data, null, 2)}
+      </pre>
       <DayNavigator
         dayOffset={dayOffset}
         onPrevDay={() => {

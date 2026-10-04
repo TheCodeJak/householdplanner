@@ -9,8 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:push": "dotenv -e .env.local -- drizzle-kit push",
-    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
+    "db:push:neon-dev": "dotenv -e .env.local -- drizzle-kit push",
+    "db:studio:neon-dev": "dotenv -e .env.local -- drizzle-kit studio",
+    "db:push:docker": "dotenv -e .env.docker-db -- drizzle-kit push",
+    "db:studio:docker": "dotenv -e .env.docker-db -- drizzle-kit studio"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",

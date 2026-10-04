@@ -1,84 +1,67 @@
-# Plan: Neue Struktur, Logik und Modal-Anbindung (Mobile First)
+# Plan: Neue Datenstruktur, Logik und Modal-Anbindung (Mobile First)
 
-Stand: 2026-10-04. Dieses Dokument ist nur ein Plan, es wurde dafür kein Code geändert.
+Stand: 2026-10-04. Dieses Dokument ist nur ein Plan. Es wurde dafür kein Code geändert.
 
-## 1. Ausgangslage (aus dem Code, nicht geraten)
+## 0. Arbeitsweise
 
-Bereits überarbeitet und beibehalten: `TaskWrapper` (Karte), `DaySelect`, `BottomNav`. Die jaklib-Migration von Button, Card, TextField und Modal ist erledigt (Plan 1).
+- **Du schreibst den Code, ich erkläre und prüfe.** Ich fasse keinen Code an, außer du bittest mich ausdrücklich darum.
+- Jeder Schritt hat ein Ziel, das Konzept dahinter, was du tust und einen Check. Danach sage mir Bescheid, ich lese deine Änderung und gebe Feedback.
+- **Die App bleibt nach jedem Schritt lauffähig.** Neues entsteht neben Altem, Altes wird erst gelöscht, wenn nichts mehr darauf zeigt.
+- Von unten nach oben: erst Datenbank und Server, dann der Browser, dann die Oberfläche.
 
-Probleme, die dieser Plan löst:
+## 1. Ausgangslage
 
 | # | Befund | Fundstelle |
 |---|---|---|
-| 1 | `dashboard/page.tsx` zeigt hartcodierte Demo-Karten. Die echten Daten laufen noch durch die alte `MobileView`. | `page.tsx:63-107` |
-| 2 | Drei getrennte Zustände für "welcher Tag": `dayOffset`, `weekOffset`, `selectedDayIdx`. Sie hängen nicht zusammen, `DaySelect` ändert die Daten nicht. | `page.tsx:14-16` |
-| 3 | Bug: `getDayByDayOffset(0)` liefert den **Montag** der Woche, nicht heute. Die Seite öffnet deshalb immer auf Montag. | `dateUtils.ts:40` |
-| 4 | `CellModal` hat 10 Props (8 Callbacks). `page.tsx` baut die Callbacks in einer verschachtelten IIFE zusammen. | `cellModal.tsx`, `page.tsx:174-236` |
-| 5 | Datenmodell `Row` > `DayCell` > `SlotEntry` > `AssignmentData` ist ein 7-Tage-Raster, die Mobile-Ansicht braucht aber nur einen Tag. | `types/plan.ts` |
-| 6 | `FAMILY_ID` ist hartcodiert und wird aus einer Hook-Datei exportiert. | `useWeekPlan.ts:7` |
-| 7 | "Sofort erledigen" macht zwei Requests (`assign`, dann `complete`). Schlägt der zweite fehl, bleibt die Aufgabe halb übernommen. | `page.tsx:222-232` |
-| 8 | Serverseitig prüft `unassign`/`uncomplete` nicht, wem die Zuweisung gehört. `tasks.add` prüft keine Familienzugehörigkeit. `title` hat keine Validierung. | `routers/*.ts` |
-| 9 | Komponenten liegen unter `src/app/components`. Unter `app/` sollten nur Routen liegen. | Ordnerstruktur |
+| 1 | `tasks.getByFamily` und `assignments.getForWeek` sind ohne Login abrufbar. Die `FAMILY_ID` steht im Browser-Code. | `routers/*.ts`, `useWeekPlan.ts:7` |
+| 2 | Zwei Leute können denselben Slot gleichzeitig übernehmen. Das Unique-Constraint enthält `assignedToId`, `assign` prüft erst und fügt dann ein. | `schema.ts:102`, `assignments.ts:34` |
+| 3 | Der Browser baut aus zwei Rohlisten selbst zusammen, wer was übernommen und erledigt hat. | `useWeekPlan.ts` |
+| 4 | Drei getrennte Zustände für den Tag (`dayOffset`, `weekOffset`, `selectedDayIdx`). `getDayByDayOffset(0)` liefert den Montag statt heute. | `page.tsx:14-16`, `dateUtils.ts:40` |
+| 5 | `CellModal` hat 10 Props. `page.tsx` baut die Callbacks in einer IIFE. | `cellModal.tsx`, `page.tsx:174` |
+| 6 | "Sofort erledigen" macht zwei Requests. Schlägt der zweite fehl, bleibt die Aufgabe halb übernommen. | `page.tsx:222` |
+| 7 | Nutzer werden ohne Familie angelegt (`familyId = null`). Es gibt keinen Beitritts- oder Gründungsweg. | `actions.ts` |
+| 8 | `unassign` und `uncomplete` prüfen nicht, wem die Zuweisung gehört. `title` hat keine Validierung. | `routers/*.ts` |
+| 9 | Komponenten liegen unter `src/app/components`. Dort sollten nur Routen liegen. | Ordnerstruktur |
 
 ## 2. Regeln
 
-- **Max. 5 Props pro Komponente.** Mehr bedeutet: aufteilen, oder Daten per Hook holen statt durchreichen. Ein gebündeltes Domänenobjekt (z. B. `task: TaskView`) zählt als 1 Prop.
-- **Hooks haben max. 3 Argumente.**
-- **Komponenten rendern, Hooks holen/ändern Daten, reine Funktionen berechnen.** Keine API-Aufrufe oder Datenumbauten im JSX.
-- **Eine Quelle der Wahrheit pro Zustand**, z. B. ein `selectedDate` statt drei Offsets.
-- **Neue Komponenten nutzen jaklib**, sofern dort eine existiert (`Button`, `Card`, `Modal`, `TextField`).
-- **Benennung:** Komponentendateien in PascalCase (`TaskCard.tsx`), Hooks und Funktionen in camelCase (`useDayPlan.ts`). Ordner sind nach Dateityp gegliedert (`components`, `hooks`, `lib`, `types`), nicht nach Feature. Siehe offene Entscheidung A.
+- **Max. 5 Props pro Komponente, max. 3 Argumente pro Hook.** Ein gebündeltes Objekt (z. B. `task: TaskView`) zählt als 1.
+- **Komponenten rendern, Hooks holen oder ändern Daten, reine Funktionen berechnen.** Keine Datenumbauten im JSX.
+- **Die Familie kommt nie vom Browser**, sondern immer aus der Session.
+- **Eine Quelle der Wahrheit pro Zustand**, z. B. ein `selectedDate`.
+- **jaklib verwenden**, wo es eine Komponente gibt (`Button`, `Card`, `Modal`, `TextField`).
+- **Benennung:** Komponentendateien in PascalCase (`TaskCard.tsx`), Hooks und Funktionen in camelCase (`useDayPlan.ts`). Ordner nach Dateityp, nicht nach Feature.
 
-## 3. Zielstruktur
+## 3. Der neue Datenweg
 
 ```
-src/
-  app/                          nur Routen und Layouts
-    (auth)/                     unverändert
-    (dashboard)/
-      layout.tsx
-      dashboard/page.tsx        setzt Hooks und Komponenten zusammen
-      calendar/ profile/ statistics/   unverändert
-    api/                        unverändert
-  components/
-    layout/
-      BottomNav.tsx             (bleibt)
-      NavButton.tsx             (bleibt)
-    dashboard/
-      DayNavigator.tsx          (war daySelect.tsx)
-      StatusFilter.tsx          Alle/Offen/Erledigt
-      TaskCardList.tsx
-      TaskCard.tsx              (war taskWrapper.tsx)
-      TaskSlotRow.tsx
-      AddTaskButton.tsx         schwebender "+"-Button
-    modals/
-      TaskDetailModal.tsx       (war cellModal.tsx)
-      NewTaskModal.tsx          (war taskModal.tsx)
-      SlotListEditor.tsx        Zeitslots im NewTaskModal
-    ui/
-      TaskStatusIcon.tsx
-      PersonDot.tsx
-    icons/                      nur noch tatsächlich genutzte Icons
-  hooks/
-    useSelectedDay.ts
-    useDayPlan.ts
-    useAssignmentActions.ts
-    useCreateTask.ts
-    useModalTarget.ts
-  lib/
-    dateUtils.ts, color.ts, trpc.tsx, auth.ts, family.ts   (vorhanden)
-    buildDayPlan.ts             reine Funktion: API-Daten -> TaskView[]
-    getSlotActions.ts           reine Funktion: Slot -> verfügbare Aktionen
-  types/
-    plan.ts                     TaskView, SlotView, Person, TaskStatus, SlotRef
-  db/                           unverändert
+Browser                                   Server
+─────────────────────────────────         ───────────────────────────────────────────
+useDayPlan(date)  ───────────────────►    plan.getDay({ date })              [router]
+                                            familyProcedure: userId + familyId aus Session
+                                            db/queries/dayPlan.ts: 1 SQL-Abfrage
+                                              task ⟕ task_slot ⟕ task_assignment(Tag) ⟕ user ⟕ user
+                                            groupDayPlan(rows, userId)       [reine Funktion]
+                  ◄───────────────────    TaskView[]
+TaskCardList → TaskCard → TaskSlotRow
+
+useAssignmentActions()  ─────────────►    assignments.claim / release / complete / reopen / claimAndComplete
+  danach: invalidate plan.getDay          prüft Familie + Besitzerregeln, schreibt, fertig
 ```
 
-Die Aufteilung nach Dateityp ist die, die das Projekt schon hat (`lib/`, `types/`). `components/` zieht nur aus `app/` heraus und wird in vier kleine Ordner gegliedert. Es gibt keine Feature-Ordner und keinen Screen-Wrapper: `dashboard/page.tsx` setzt Navigator, Liste und Modals selbst zusammen. Das bleibt unter 5 Hook-Aufrufen und ist damit lesbar.
+Der Browser bekommt fertige Karten. Er weiß nichts von Joins, Farben oder `completedAt`.
 
-## 4. Datenmodell (UI)
+## 4. Wer hat übernommen, wer hat erledigt
 
-Ersetzt `types/plan.ts`.
+Das bleibt in der Datenbank so wie heute, es wird **nichts** zusammengelegt:
+
+| Spalte in `task_assignment` | Bedeutung |
+|---|---|
+| `assigned_to_id` | wer die Aufgabe **übernommen** hat |
+| `completed_by_id` | wer sie **erledigt** hat (kann jemand anderes sein) |
+| `completed_at` | wann |
+
+Im UI-Modell (`types/plan.ts`) wird daraus:
 
 ```ts
 type TaskStatus = "open" | "claimed" | "completed";
@@ -86,30 +69,76 @@ type TaskStatus = "open" | "claimed" | "completed";
 type Person = { id: string; name: string; color: string; isCurrentUser: boolean };
 
 type SlotView = {
-  slotId: string | null;        // null = Aufgabe ohne Zeitslot
-  label: string | null;         // "Morgens" ...
+  slotId: string | null;     // null = Aufgabe ohne Zeitslot
+  label: string | null;      // "Morgens" ...
   status: TaskStatus;
   assignmentId: string | null;
-  assignee: Person | null;
-  completedBy: Person | null;   // nur gesetzt, wenn abweichend vom Assignee
+  assignee: Person | null;   // Übernommen von
+  completedBy: Person | null;// Erledigt von, immer gesetzt, sobald erledigt
   note: string | null;
 };
 
 type TaskView = { taskId: string; title: string; slots: SlotView[] };
-
-type SlotRef = { taskId: string; slotId: string | null; date: string }; // ISO-Datum
+type SlotRef  = { taskId: string; slotId: string | null; date: string }; // ISO-Datum
 ```
 
-Statusableitung in `buildDayPlan`: keine Zuweisung = `open`, Zuweisung ohne `completedAt` = `claimed`, mit `completedAt` = `completed`. `completedBy` wird nur gesetzt, wenn `completedById !== assignedToId`. Das entspricht dem Pfeil "J → L" in `TaskCard`.
+Der Pfeil "J → L" in `TaskCard` erscheint, wenn `completedBy.id !== assignee.id`. Die Entscheidung liegt damit in der Komponente, der Server liefert nur Fakten.
 
-## 5. Komponenten und Props (alle <= 5)
+Status: keine Zuweisung = `open`, Zuweisung ohne `completed_at` = `claimed`, mit `completed_at` = `completed`.
+
+## 5. Regeln der Aktionen (Server)
+
+| Aktion | Wer darf | Wirkung |
+|---|---|---|
+| `claim` | jedes Familienmitglied | legt eine Zuweisung an (`assigned_to` = ich). `CONFLICT`, wenn der Slot schon vergeben ist. |
+| `release` | nur der Übernehmende, nur solange nicht erledigt | löscht die Zuweisung |
+| `complete` | jedes Familienmitglied | setzt `completed_by` = ich und `completed_at` = jetzt |
+| `reopen` | nur wer erledigt hat | leert `completed_by` und `completed_at`, die Übernahme bleibt |
+| `claimAndComplete` | jedes Familienmitglied | **ein** INSERT mit `assigned_to` = ich, `completed_by` = ich, `completed_at` = jetzt |
+
+Jede Aktion prüft zuerst, dass die Zuweisung zur Familie des Nutzers gehört. `claimAndComplete` braucht keine Transaktion mehr, weil es nur noch ein Statement ist.
+
+## 6. Datenbank-Änderungen
+
+1. **Unique-Index `(task_id, date, slot_id)` mit `NULLS NOT DISTINCT`** ersetzt `unique_with_slot` und `unique_without_slot`. Damit gibt es pro Aufgabe, Tag und Slot höchstens eine Zuweisung, auch bei gleichzeitigen Klicks. `NULLS NOT DISTINCT` braucht Postgres 15+ und sorgt dafür, dass auch Aufgaben ohne Slot (`slot_id` = NULL) geschützt sind.
+2. **Kein neues Feld für die Familie.** `user.family_id` und `family.invite_code` gibt es bereits.
+3. Vor dem Anlegen des Index prüfen, ob es schon Duplikate gibt (Schritt 3).
+
+## 7. Zielstruktur
+
+```
+src/
+  app/                          nur Routen und Layouts
+    (auth)/                     login, register (unverändert) + onboarding/ (neu)
+    (dashboard)/
+      layout.tsx                leitet auf /onboarding um, wenn keine Familie
+      dashboard/page.tsx        setzt Hooks und Komponenten zusammen
+    api/trpc/routers/
+      plan.ts                   getDay                          (neu)
+      assignments.ts            claim, release, complete, reopen, claimAndComplete
+      tasks.ts                  add
+      family.ts                 create, join                    (neu)
+  components/
+    layout/      BottomNav, NavButton
+    dashboard/   DayNavigator, StatusFilter, TaskCardList, TaskCard, TaskSlotRow, AddTaskButton
+    modals/      TaskDetailModal, NewTaskModal, SlotListEditor
+    ui/          TaskStatusIcon, PersonDot
+    icons/
+  hooks/         useSelectedDay, useDayPlan, useAssignmentActions, useCreateTask, useModalTarget
+  lib/           dateUtils, color, trpc, auth, getSlotActions
+  types/         plan.ts
+  db/
+    queries/     dayPlan.ts (neu), assignments.ts (nur Schreiben), tasks.ts (nur createTask), family.ts (neu)
+```
+
+## 8. Komponenten und Props
 
 | Komponente | Props | Anzahl |
 |---|---|---|
-| `DashboardPage` (page.tsx) | keine | 0 |
+| `DashboardPage` | keine | 0 |
 | `DayNavigator` | `date`, `isToday`, `onShift(delta)`, `onToday` | 4 |
 | `StatusFilter` | `value`, `onChange` | 2 |
-| `TaskCardList` | `tasks`, `onSelect(ref)`, `date` | 3 |
+| `TaskCardList` | `tasks`, `onSelect(slotRef)` | 2 |
 | `TaskCard` | `task`, `onSelect(slotId)` | 2 |
 | `TaskSlotRow` | `slot`, `onSelect` | 2 |
 | `TaskStatusIcon` | `status` | 1 |
@@ -119,104 +148,128 @@ Statusableitung in `buildDayPlan`: keine Zuweisung = `open`, Zuweisung ohne `com
 | `NewTaskModal` | `open`, `onClose` | 2 |
 | `SlotListEditor` | `value`, `onChange` | 2 |
 
-`TaskDetailModal` bekommt keine Callbacks mehr. Es holt den aktuellen Slot über `useDayPlan(target.date)` und führt Aktionen über `useAssignmentActions()` aus.
-
-## 6. Hooks
-
-| Hook | Aufgabe |
-|---|---|
-| `useSelectedDay()` | Ein `selectedDate`. Liefert `{ date, isToday, shift(n), goToday }`. Startwert ist **heute**. |
-| `useDayPlan(date)` | Lädt `tasks.getByFamily` und `assignments.getForWeek` (Montag des Datums) und liefert `TaskView[]` über `buildDayPlan`. Tagwechsel innerhalb einer Woche ist ein Cache-Treffer und damit sofort da. |
-| `useAssignmentActions()` | `claim`, `release`, `complete`, `reopen`, `claimAndComplete`, `isPending`, `error`. Kapselt die vier Mutationen samt Cache-Invalidierung und optimistischem Update. |
-| `useCreateTask()` | `tasks.add` samt Invalidierung und Fehlertext. |
-| `useModalTarget<T>()` | `{ target, isOpen, openFor(t), close }`. Behält `target` nach `close()`, damit das Sheet beim Ausblenden nicht leer wird. Ersetzt `modal`, `cellModalOpen` und die IIFE in `page.tsx`. |
-
-## 7. API-Anbindung
-
-Wiederverwendet (unverändert): `tasks.getByFamily`, `assignments.getForWeek`, `assign`, `unassign`, `complete`, `uncomplete`, `tasks.add`.
-
-Zu ändern oder neu (kleiner Backend-Umfang, Phase 2 und 7):
-
-1. **`assignments.assignAndComplete`** (neu): eine Transaktion statt zweier Requests. Löst Befund 7.
-2. **Berechtigungen:** `unassign` nur durch den Assignee. `uncomplete` nur durch den, der erledigt hat. `complete` darf jeder in der Familie, das passt zum UI-Text "Ich habe das erledigt".
-3. **Validierung (zod):** `title` mit `.trim().min(1).max(80)`, `slots` höchstens 6 Einträge mit je max. 20 Zeichen, `date` als ISO-Muster `YYYY-MM-DD`.
-4. **`familyId` aus der Session:** `familyId` in den JWT und die Session aufnehmen (`lib/auth.ts` Callbacks). Die Router leiten die Familie aus `ctx` ab, statt sie vom Client zu nehmen. `FAMILY_ID` entfällt. Löst Befund 6 und 8.
-5. **`assignments.getForDate`** wird nicht benutzt und kann gelöscht werden.
-
-Optimistische Updates (Phase 2): `complete`, `reopen`, `claim` und `release` schreiben per `onMutate` in den Cache von `getForWeek` und rollen bei `onError` zurück. Das ist auf dem Handy der Unterschied zwischen "träge" und "fühlt sich nativ an". Fehler zeigt die UI inline im Modal oder als Text unter der Karte. Das aktuelle `alert(err.message)` fällt weg.
-
-## 8. Modal-Verhalten
-
-`TaskDetailModal` (jaklib `Modal`, `variant="sheet"`):
-
-- Titel `task.title` (plus Slot-Label), Untertitel das Datum.
-- Abschnitte: "Geplant von", "Erledigt von", "Notiz". Jeder ist eine eigene kleine Komponente mit `person` bzw. `note` als Prop.
-- Buttons kommen aus `getSlotActions(slot)`, einer reinen Funktion, die eine Liste `{ key, label, variant }` liefert. Das ersetzt die verschachtelten `&&`-Blöcke:
+`TaskDetailModal` bekommt keine Callbacks. Es holt den Slot über `useDayPlan(target.date)` und führt Aktionen über `useAssignmentActions()` aus. Die Buttons kommen aus `getSlotActions(slot)`:
 
 | Zustand | Aktionen |
 |---|---|
-| offen | "Ich mache das" (primary), "Sofort erledigen" (ghost) |
-| übernommen, von mir | "Als erledigt markieren" (primary), "Nicht mehr ich" (ghost) |
-| übernommen, von anderem | "Ich habe das erledigt" (primary) |
-| erledigt, von mir | "Doch nicht erledigt" (ghost) |
-| erledigt, von anderem | keine |
+| offen | "Ich mache das" (`claim`), "Sofort erledigen" (`claimAndComplete`) |
+| übernommen, von mir | "Als erledigt markieren" (`complete`), "Nicht mehr ich" (`release`) |
+| übernommen, von anderem | "Ich habe das erledigt" (`complete`) |
+| erledigt, von mir erledigt | "Doch nicht erledigt" (`reopen`) |
+| erledigt, von anderem erledigt | keine |
 
-- Nach erfolgreicher Aktion schließt das Sheet (siehe offene Entscheidung B). Die Karte in der Liste zeigt den neuen Zustand sofort (optimistisch).
+## 9. Schritte
 
-`NewTaskModal`: `TextField` für den Titel, `SlotListEditor` für die Zeitslots (Eingabe per `TextField`, Chips mit Entfernen-Button). Der Button ist deaktiviert, bis der Titel gültig ist. Serverfehler erscheinen als Text im Sheet.
+Jeder Schritt: **Ziel**, **Konzept**, **Du tust**, **Check**. Die Reihenfolge ist so gewählt, dass die App durchgehend läuft.
 
-## 9. Phasen
+### Teil A: Vorbereitung
 
-Jede Phase endet mit einer lauffähigen App. Prüfung jeweils: `npx tsc --noEmit`, `npx eslint src` und manuell im Mobile-Viewport (375x812) mit dem lokalen Testaccount.
+**Schritt 0: Stand sichern**
+- Ziel: ein sauberer Ausgangspunkt.
+- Du tust: aktuellen Stand committen (jaklib-Migration plus deine Redesigns), neuen Branch `refactor/day-plan`.
+- Check: `git status` ist sauber.
 
-**Phase 0: Vorbereitung**
-- Aktuellen Stand committen (jaklib-Migration plus deine Redesigns), danach Branch `refactor/day-plan`.
-- Optional: Vitest einrichten, nur für reine Funktionen (`buildDayPlan`, `getSlotActions`, `dateUtils`).
+**Schritt 1: Daten ansehen und Familie setzen**
+- Ziel: verstehen, was in der Datenbank liegt. Sicherstellen, dass dein Account einer Familie angehört.
+- Konzept: Der neue Server leitet die Familie aus dem Nutzer ab. Ohne `user.family_id` sieht dein Account nach dem Umbau nichts.
+- Du tust: `npm run db:studio`, Tabellen `family`, `user`, `task`, `task_slot`, `task_assignment` ansehen. Bei deinen Accounts `family_id` auf die bestehende Familie setzen (die ID aus `FAMILY_ID`).
+- Check: jeder Account, mit dem du testen willst, hat eine `family_id`.
 
-**Phase 1: Fundament (keine sichtbare Änderung außer dem Tag-Bug)**
-- `types/plan.ts` (neues Modell), `lib/buildDayPlan.ts`, `lib/getSlotActions.ts`.
-- `dateUtils`: `addDays`, `isSameDay`, `getMonday(date)` ergänzen. `getDayByDayOffset` und `getDayByWeekOffset` entfernen.
-- `useSelectedDay`. Der Navigator öffnet damit auf **heute** (Befund 3).
-- `lib/family.ts` mit der Konstante `FAMILY_ID` als Übergang bis Phase 7.
+### Teil B: Server
 
-**Phase 2: Datenlayer**
-- `useDayPlan`, `useAssignmentActions` (mit optimistischen Updates), `useCreateTask`.
-- Backend: `assignAndComplete`, Berechtigungsprüfungen, zod-Validierung.
-- Alte `useWeekPlan.ts` bleibt noch bestehen, bis Phase 3 sie ablöst.
+**Schritt 2: Der Typ-Vertrag**
+- Ziel: `types/plan.ts` mit `TaskStatus`, `Person`, `SlotView`, `TaskView`, `SlotRef` (siehe Abschnitt 4).
+- Konzept: Server und Browser teilen sich diese Typen. Alles Weitere arbeitet auf sie hin. Die alten Typen (`Row`, `DayCell`, …) bleiben, bis die alte Oberfläche weg ist. Lege die neuen daneben, z. B. in derselben Datei.
+- Check: `npx tsc --noEmit` ist grün.
 
-**Phase 3: Liste mit echten Daten**
-- `TaskCard` (aus `taskWrapper.tsx`, Logik unverändert), `TaskSlotRow`, `TaskStatusIcon`, `PersonDot`, `TaskCardList`, `StatusFilter`, `DayNavigator`.
-- `dashboard/page.tsx` auf die neuen Komponenten und Hooks umbauen. Demo-Karten und alte `MobileView` entfallen.
+**Schritt 3: Unique-Index**
+- Ziel: doppeltes Übernehmen in der Datenbank verhindern.
+- Konzept: Eine Regel in der Datenbank gilt immer, auch wenn zwei Requests gleichzeitig laufen. Eine Prüfung im Code (`findAssignment`) gilt das nicht.
+- Du tust: In Drizzle-Studio oder per SQL nach Duplikaten suchen (`GROUP BY task_id, date, slot_id HAVING count(*) > 1`) und bereinigen. In `schema.ts` die beiden alten Unique-Definitionen durch einen auf `(taskId, date, slotId)` mit `.nullsNotDistinct()` ersetzen. Postgres-Version prüfen (`select version();`, mindestens 15). `npm run db:push`.
+- Check: In Drizzle-Studio zwei Zeilen mit gleicher Aufgabe, Datum und Slot einfügen. Die zweite muss abgelehnt werden.
 
-**Phase 4: Detail-Modal**
-- `useModalTarget`, `TaskDetailModal` mit `useDayPlan` und `useAssignmentActions`. `cellModal.tsx` und die IIFE entfallen.
+**Schritt 4: `familyProcedure`**
+- Ziel: eine Procedure, die Login und Familie verlangt und `ctx.userId` und `ctx.familyId` liefert.
+- Konzept: In `init.ts` baut `protectedProcedure` bereits auf `publicProcedure` auf und prüft die Session. `familyProcedure` setzt noch eine Stufe darauf: sie lädt `user.family_id` aus der Datenbank und wirft `FORBIDDEN`, wenn es fehlt. Die ID steht bewusst **nicht** im Token. Sonst würde sie nach dem Beitritt zu einer Familie veralten, und der Nutzer müsste sich neu anmelden.
+- Du tust: `familyProcedure` in `init.ts` ergänzen.
+- Check: noch keine Wirkung. Weiter mit Schritt 5, dort wird sie benutzt.
 
-**Phase 5: Neue Aufgabe**
-- `NewTaskModal`, `SlotListEditor`, `AddTaskButton`. `taskModal.tsx` entfällt.
+**Schritt 5: Die Abfrage `db/queries/dayPlan.ts`**
+- Ziel: eine Funktion `getDayPlanRows(familyId, date)`, die pro Aufgabe und Slot eine Zeile liefert, inklusive Zuweisung und beider Personen.
+- Konzept: Ein `LEFT JOIN` behält Aufgaben, auch wenn es keine Zuweisung gibt. Die Zuweisung wird nur für den gewählten Tag angehängt. Slot-Gleichheit ohne Slot braucht `IS NOT DISTINCT FROM`, weil `NULL = NULL` in SQL nicht wahr ist. Für `assignedUser` und `completedUser` gibt es schon zwei `alias`-Beispiele in `queries/assignments.ts`.
+- Du tust: die Abfrage schreiben, sortiert nach Kategorie, Titel und Slot-Reihenfolge.
+- Check: Zeilen ansehen, bevor du weitermachst (Schritt 6). Eine Aufgabe ohne Slot ergibt eine Zeile, eine mit drei Slots drei.
 
-**Phase 6: Aufräumen**
-- Löschen nach Grep-Prüfung: `mobileView.tsx`, `desktopView.tsx`, `dayPicker.tsx`, `weekHeader.tsx`, `taskCell.tsx`, `useWeekPlan.ts`, `cellModal.tsx`, `taskModal.tsx`, `userAvatar.tsx`, `avatarDot.tsx`, `addButton.tsx`, `plusDot.tsx`, `types/plan.ts`, `HomeIcon`, `CloseButton`, ungenutzte Icons.
-- Komponenten aus `src/app/components` nach `src/components/{layout,dashboard,modals,ui,icons}` verschieben, Importpfade anpassen.
-- `formik` aus `devDependencies` nach `dependencies` verschieben (wird zur Laufzeit im Login benutzt).
+**Schritt 6: `groupDayPlan` und der Router `plan.getDay`**
+- Ziel: aus den Zeilen `TaskView[]` machen und über `plan.getDay` anbieten.
+- Konzept: `groupDayPlan(rows, currentUserId)` ist eine reine Funktion. Sie sammelt Zeilen pro Aufgabe, leitet den Status ab und baut die `Person`-Objekte (Farbe über `colorFromUserId`, `isCurrentUser` aus der ID). Rein heißt: gleiche Eingabe, gleiche Ausgabe, kein Datenbankzugriff. Deshalb ist sie leicht zu testen.
+- Du tust: `groupDayPlan` schreiben, `routers/plan.ts` mit `getDay` (Eingabe: `date` als `YYYY-MM-DD`, geprüft per zod-Regex), in `_app.ts` eintragen.
+- Check: auf `dashboard/page.tsx` vorübergehend `trpc.plan.getDay.useQuery(...)` aufrufen und das Ergebnis als `<pre>{JSON.stringify(data, null, 2)}</pre>` ausgeben. Prüfen: offen, übernommen, erledigt von einem anderen.
 
-**Phase 7: Familie aus der Session**
-- `familyId` in JWT und Session, Router leiten sie aus `ctx` ab, `FAMILY_ID` und `lib/family.ts` entfallen. Eigene Phase, weil sie die Anmeldung berührt. Bestehende Sessions müssen sich danach neu anmelden.
+**Schritt 7: Die neuen Aktionen (neben den alten)**
+- Ziel: `claim`, `release`, `complete`, `reopen`, `claimAndComplete` im Router `assignments`, alle als `familyProcedure`.
+- Konzept: Siehe Abschnitt 5. Zuerst die Familienprüfung, dann die Besitzerregel, dann schreiben. `claim` fängt die Unique-Verletzung aus Schritt 3 ab und antwortet mit `CONFLICT`. Die alten Procedures `assign`, `unassign`, `complete`, `uncomplete` bleiben vorerst bestehen, damit die alte Oberfläche weiterläuft. Gleiche Namen wie `complete` sind kein Problem: lege die neuen in einem eigenen Router `assignmentsV2` an oder benenne die alten vorher um, entscheide, was dir übersichtlicher ist.
+- Du tust: eine Aktion nach der anderen in `db/queries/assignments.ts` und im Router.
+- Check: jede Aktion einzeln aus dem Browser aufrufen (z. B. über einen temporären Button), inklusive der Fehlerfälle: fremde Zuweisung freigeben, schon vergebenen Slot übernehmen.
 
-**Phase 8: Design-Pass**
+### Teil C: Browser
+
+**Schritt 8: Der gewählte Tag**
+- Ziel: ein einziger Zustand `selectedDate`, der mit **heute** startet.
+- Konzept: Aus einem Datum lässt sich alles ableiten (Wochentag, Monat, "ist heute"). Drei Offsets, die sich gegenseitig nicht kennen, sind die Ursache des Montag-Bugs.
+- Du tust: `lib/dateUtils.ts` um `addDays` und `isSameDay` ergänzen. `hooks/useSelectedDay.ts` schreiben, es liefert `{ date, isToday, shift(n), goToday }`. `DayNavigator` (bisher `daySelect.tsx`) darauf umstellen.
+- Check: Seite öffnet auf dem heutigen Datum. Vor und zurück funktioniert über Monatsgrenzen. "Heute" erscheint nur, wenn du nicht auf heute stehst.
+
+**Schritt 9: Liste mit echten Daten**
+- Ziel: die Karten zeigen die echten Daten von `plan.getDay`.
+- Konzept: `useDayPlan(date)` ist jetzt ein Einzeiler um `trpc.plan.getDay.useQuery`. Der Query-Schlüssel enthält das Datum, deshalb hat jeder Tag seinen eigenen Cache-Eintrag. Beim Zurückkehren auf einen Tag erscheint er sofort. React Query lädt beim Zurückkehren auf den Tab im Hintergrund nach, so siehst du Änderungen anderer Familienmitglieder.
+- Du tust: `useDayPlan`, `TaskCardList`, `TaskCard` (aus `taskWrapper.tsx`, die Logik bleibt, `slots` kommt jetzt aus `SlotView`), `TaskSlotRow`, `TaskStatusIcon`, `PersonDot` in den neuen Ordnern. In `dashboard/page.tsx` Demo-Karten und die alte `MobileView` ersetzen.
+- Check: erledigte, übernommene und offene Aufgaben erscheinen richtig. "J → L" zeigt sich genau dann, wenn Übernehmender und Erledigender verschieden sind.
+
+**Schritt 10: Das Detail-Modal**
+- Ziel: Aktionen aus dem Modal, ohne dass `page.tsx` Callbacks zusammenbaut.
+- Konzept: `useModalTarget` behält das Ziel nach dem Schließen, damit das Sheet beim Ausblenden nicht leer wird (vorher gelöst über zwei getrennte State-Variablen). `useAssignmentActions` kapselt die Mutationen und lädt danach `plan.getDay` neu. `getSlotActions(slot)` entscheidet, welche Buttons erscheinen (Tabelle in Abschnitt 8).
+- Du tust: `useModalTarget`, `useAssignmentActions`, `getSlotActions`, `TaskDetailModal`. `cellModal.tsx` und die IIFE aus `page.tsx` entfernen.
+- Check: alle Zeilen der Tabelle in Abschnitt 8 einmal durchspielen. Zusätzlich mit zwei Accounts: A übernimmt, B erledigt, danach zeigt die Karte beide.
+
+**Schritt 11: Neue Aufgabe**
+- Ziel: `NewTaskModal` mit zod-Validierung und `tasks.add` als `familyProcedure`.
+- Du tust: `tasks.add` auf `familyProcedure` umstellen (die `familyId` aus dem Input entfällt), `title` mit `.trim().min(1).max(80)`, `slots` höchstens 6 mit je max. 20 Zeichen. `SlotListEditor` und `NewTaskModal` bauen, `useCreateTask` und `AddTaskButton`.
+- Check: Aufgabe mit und ohne Slots anlegen, leeren Titel testen (Button deaktiviert, Server lehnt trotzdem ab).
+
+### Teil D: Familie
+
+**Schritt 12: Familie gründen und beitreten**
+- Ziel: neue Nutzer gelangen nach der Registrierung in eine Familie.
+- Konzept: `family.create({ name })` legt die Familie an, erzeugt einen Einladungscode (z. B. 8 Zeichen ohne verwechselbare Buchstaben) und setzt `user.family_id`. `family.join({ code })` sucht die Familie über `family.invite_code` und setzt `user.family_id`. Beide sind `protectedProcedure`, weil der Nutzer noch keine Familie hat.
+- Du tust: `db/queries/family.ts`, `routers/family.ts`, Seite `app/(auth)/onboarding/page.tsx` mit zwei Wegen ("Familie erstellen", "Mit Code beitreten"). In `(dashboard)/layout.tsx` auf `/onboarding` umleiten, wenn der Nutzer keine Familie hat. Auf `/onboarding` selbst nicht umleiten, wenn er schon eine hat.
+- Check: frischen Account registrieren, anmelden, `/onboarding` erscheint. Familie erstellen, Dashboard öffnet sich. Zweiten Account mit dem Code beitreten lassen und gegenseitig Aufgaben sehen.
+
+### Teil E: Aufräumen und Design
+
+**Schritt 13: Altes löschen**
+- Löschen nach Grep-Prüfung auf Restverwendungen: `mobileView.tsx`, `desktopView.tsx`, `dayPicker.tsx`, `weekHeader.tsx`, `taskCell.tsx`, `useWeekPlan.ts`, `cellModal.tsx`, `taskModal.tsx`, `userAvatar.tsx`, `avatarDot.tsx`, `addButton.tsx`, `plusDot.tsx`, `HomeIcon`, `CloseButton`, ungenutzte Icons.
+- Server: `assign`, `unassign`, `uncomplete`, `getForDate`, `getForWeek`, `getByFamily`, `getAssignmentForDate`, `getAssignmentsForWeek` und `FAMILY_ID`.
+- Alte Typen `Row`, `DayCell`, `SlotEntry`, `AssignmentData` aus `types/plan.ts`.
+- `formik` von `devDependencies` nach `dependencies` verschieben (wird zur Laufzeit im Login benutzt).
+- Rest aus `src/app/components` nach `src/components/{layout,dashboard,modals,ui,icons}` verschieben.
+
+**Schritt 14: Design-Pass**
 - Aus `TaskCard`, `DayNavigator` und `BottomNav` die verwendeten Werte (Radien, Schatten, Weiß-Transparenz, Textgrößen) als Tokens in `globals.css` festhalten.
-- Harte Farben (`text-orange-500`, `bg-[#FEF9F6]`, `slate-*`) in den übrigen Komponenten durch diese Tokens ersetzen. Status-Farben (`open`, `claimed`, `completed`) einmal zentral definieren, nicht je Komponente.
-- jaklib-`Avatar` einbauen, sobald dort `size` und `completed` existieren. Bis dahin bleibt `PersonDot` die einzige Avatar-Komponente.
+- Harte Farben (`text-orange-500`, `bg-[#FEF9F6]`, `slate-*`) in den übrigen Komponenten durch diese Tokens ersetzen. Die Status-Farben (`open`, `claimed`, `completed`) einmal zentral definieren.
+- jaklib-`Avatar` einbauen, sobald dort `size` und `completed` existieren. Bis dahin ist `PersonDot` die einzige Avatar-Komponente.
 
 ## 10. Offene Entscheidungen (mit meinem Default)
 
-- **A. Dateinamen:** PascalCase für Komponenten (Default) oder weiter camelCase wie jetzt (`taskWrapper.tsx`)?
-- **B. Sheet nach Aktion:** schließen (Default, Feedback kommt über die Karte) oder offen lassen wie heute?
-- **C. Desktop:** Bis zum neuen Layout zeigt Desktop dieselbe Spalte mit begrenzter Breite (Default), `DesktopView` wird gelöscht (bleibt in Git-Historie).
-- **D. Wochenfortschritt und Nutzer-Balken** der alten `MobileView`: weglassen (Default, vorher nicht im neuen Design) oder als `DayProgress` auf den gewählten Tag umgebaut zurückholen?
-- **E. Vitest:** einrichten (Default, nur für die reinen Funktionen) oder nur manuell prüfen?
+- **A. Dateinamen:** PascalCase für Komponenten (Default) oder weiter camelCase?
+- **B. Sheet nach Aktion:** schließen (Default, das Feedback kommt über die Karte) oder offen lassen wie heute?
+- **C. Desktop:** bis zum neuen Layout dieselbe Spalte mit begrenzter Breite (Default). `DesktopView` wird gelöscht und bleibt in der Git-Historie.
+- **D. Wochenfortschritt und Nutzer-Balken** der alten `MobileView`: weglassen (Default) oder später als Tagesfortschritt zurückholen?
+- **E. Vitest** für `groupDayPlan` und `getSlotActions`: einrichten (Default, nur reine Funktionen) oder nur manuell prüfen?
+- **F. `reopen`:** nur wer erledigt hat (Default) oder auch der Übernehmende?
 
 ## 11. Risiken
 
-- Optimistische Updates können bei zwei gleichzeitigen Änderungen kurz Flackern verursachen. Mitigation: nach jeder Mutation trotzdem `invalidate`.
-- Phase 7 macht alte Sessions ungültig (Familie fehlt im Token). Einmalig neu anmelden.
-- Das Löschen in Phase 6 ist erst nach Grep auf Restverwendungen sicher. Zwischenstände sind per Git wiederherstellbar.
+- Schritt 3 ändert die Datenbank. Vorher Duplikate prüfen und Sicherung machen (bei Neon z. B. ein Branch).
+- Zwischen Schritt 4 und 12 müssen alle Accounts, mit denen du testest, manuell eine `family_id` haben (Schritt 1).
+- Solange alte und neue Procedures nebeneinander existieren (Schritt 7 bis 13), nicht beide in derselben Oberfläche mischen.
