@@ -1,15 +1,15 @@
 "use client";
 
-import { useRef, useState } from "react";
-import type { Row } from "@/types/plan";
-import { UserAvatar } from "@/app/components/shared/userAvatar";
 import {
-  CheckIcon,
   CheckCircleIcon,
-  QuestionCircleIcon,
+  CheckIcon,
   PlusCircleIcon,
+  QuestionCircleIcon,
 } from "@/app/components/icons";
+import { UserAvatar } from "@/app/components/shared/userAvatar";
+import type { Row } from "@/types/plan";
 import { Card } from "jaklib/core";
+import { useRef, useState } from "react";
 
 type MobileViewProps = {
   rows: Row[];
@@ -86,7 +86,7 @@ export default function MobileView({
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4">
-      {totalCount > 0 && (
+      {/* {totalCount > 0 && (
         <div className="flex items-center gap-4 rounded-2xl bg-orange-50 border border-orange-100 px-4 py-3.5">
           <div className="shrink-0 relative h-16 w-16">
             <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
@@ -143,7 +143,7 @@ export default function MobileView({
             )}
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="flex items-center justify-between">
         <span className="text-base font-bold text-slate-800">Aufgaben</span>

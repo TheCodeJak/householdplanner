@@ -1,7 +1,7 @@
-import { trpc } from "@/lib/trpc";
 import { colorFromUserId } from "@/lib/color";
 import { getMonday, toIsoDate } from "@/lib/dateUtils";
-import type { Row, AssignmentData } from "@/types/plan";
+import { trpc } from "@/lib/trpc";
+import type { AssignmentData, Row } from "@/types/plan";
 import { useSession } from "next-auth/react";
 
 export const FAMILY_ID = "65183ae8-fc81-4228-97c5-dd3dd99c6322";
@@ -85,7 +85,13 @@ export function useWeekPlan(weekOffset: number) {
     name: task.title,
     cells: weekDays.map((day) => {
       if (task.slots.length === 0) {
-        return [{ slotId: null, label: null, data: buildAssignment(task.id, null, day) }];
+        return [
+          {
+            slotId: null,
+            label: null,
+            data: buildAssignment(task.id, null, day),
+          },
+        ];
       }
       return task.slots.map((slot) => ({
         slotId: slot.id,

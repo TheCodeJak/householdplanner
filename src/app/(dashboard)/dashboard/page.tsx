@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { toIsoDate } from "@/lib/dateUtils";
+import DayNavigator from "@/app/components/dashboard/DayNavigator";
+import MobileView from "@/app/components/dashboard/mobileView";
+import { TaskCard } from "@/app/components/dashboard/TaskCard";
+import { useWeekPlan } from "@/app/components/dashboard/useWeekPlan";
 import CellModal from "@/app/components/shared/cellModal";
 import TaskModal from "@/app/components/shared/taskModal";
-import { useWeekPlan } from "@/app/components/dashboard/useWeekPlan";
-import WeekHeader from "@/app/components/dashboard/weekHeader";
-import DayPicker from "@/app/components/dashboard/dayPicker";
-import MobileView from "@/app/components/dashboard/mobileView";
-import DesktopView from "@/app/components/dashboard/desktopView";
+import { toIsoDate } from "@/lib/dateUtils";
+import { useState } from "react";
 
 export default function DashboardPage() {
-  const todayDayIdx = (new Date().getDay() + 6) % 7;
+  const todayIndex = (new Date().getDay() + 6) % 7;
   const [weekOffset, setWeekOffset] = useState(0);
-  const [selectedDayIdx, setSelectedDayIdx] = useState(todayDayIdx);
+  const [dayOffset, setDayOffset] = useState(0);
+  const [selectedDayIdx, setSelectedDayIdx] = useState(todayIndex);
   const [modal, setModal] = useState<{
     taskId: string;
     taskName: string;
@@ -35,7 +35,77 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-y-4 text-2xl font-semibold text-zinc-900">
+      <DayNavigator
+        dayOffset={dayOffset}
+        onPrevDay={() => {
+          setDayOffset((o) => o - 1);
+          setSelectedDayIdx(0);
+        }}
+        onNextDay={() => {
+          setDayOffset((o) => o + 1);
+          setSelectedDayIdx(0);
+        }}
+        onToday={() => {
+          setDayOffset(0);
+          setSelectedDayIdx(todayIndex);
+        }}
+      />
+
+      <MobileView
+        rows={rows}
+        weekDays={weekDays}
+        selectedDayIdx={selectedDayIdx}
+        onCellClick={(taskId, taskName, slotId) => {
+          setModal({ taskId, taskName, slotId, dayIdx: selectedDayIdx });
+          setCellModalOpen(true);
+        }}
+      />
+      <div className="flex flex-col m-4 gap-2">
+        <TaskCard
+          title="Geschirrspüler ausräumen / einräumen"
+          slots={[
+            {
+              status: "completed",
+              assignee: { name: "Jakob", color: "#F28B4F" },
+              completedBy: { name: "Lisa", color: "#4CAF82" },
+            },
+          ]}
+        />
+        <TaskCard
+          title="Gassi gehen"
+          slots={[
+            {
+              status: "completed",
+              assignee: { name: "Jakob", color: "#F28B4F" },
+              completedBy: { name: "Lisa", color: "#4CAF82" },
+              slotTitle: "Morgens",
+            },
+            {
+              status: "claimed",
+              assignee: { name: "Jakob", color: "#F28B4F" },
+              slotTitle: "Mittags",
+            },
+          ]}
+        />
+        <TaskCard
+          title="Müll rausbringen"
+          slots={[
+            {
+              status: "claimed",
+              assignee: { name: "Jakob", color: "#F28B4F" },
+            },
+          ]}
+        />
+        <TaskCard
+          title="Einkaufen"
+          slots={[
+            {
+              status: "open",
+            },
+          ]}
+        />
+      </div>
+      {/* <div className="flex flex-col gap-y-4 text-2xl font-semibold text-zinc-900">
         <div className="flex flex-col bg-[#FEF9F6]">
           <WeekHeader
             monday={monday}
@@ -99,7 +169,7 @@ export default function DashboardPage() {
             setCellModalOpen(true);
           }}
         />
-      </div>
+      </div> */}
 
       {modal &&
         (() => {
@@ -107,8 +177,9 @@ export default function DashboardPage() {
           const dayCell = row?.cells[modal.dayIdx] ?? [];
           const entry = dayCell.find((e) => e.slotId === modal.slotId) ?? null;
           const liveCell = entry?.data ?? null;
-          const taskLabel =
-            entry?.label ? `${modal.taskName} (${entry.label})` : modal.taskName;
+          const taskLabel = entry?.label
+            ? `${modal.taskName} (${entry.label})`
+            : modal.taskName;
 
           return (
             <CellModal
@@ -126,17 +197,26 @@ export default function DashboardPage() {
               }
               onUnassign={
                 liveCell?.assignmentId
-                  ? () => unassignMutation.mutate({ assignmentId: liveCell.assignmentId })
+                  ? () =>
+                      unassignMutation.mutate({
+                        assignmentId: liveCell.assignmentId,
+                      })
                   : undefined
               }
               onComplete={
                 liveCell?.assignmentId
-                  ? () => completeMutation.mutate({ assignmentId: liveCell.assignmentId })
+                  ? () =>
+                      completeMutation.mutate({
+                        assignmentId: liveCell.assignmentId,
+                      })
                   : undefined
               }
               onUncomplete={
                 liveCell?.assignmentId
-                  ? () => uncompleteMutation.mutate({ assignmentId: liveCell.assignmentId })
+                  ? () =>
+                      uncompleteMutation.mutate({
+                        assignmentId: liveCell.assignmentId,
+                      })
                   : undefined
               }
               onQuickComplete={

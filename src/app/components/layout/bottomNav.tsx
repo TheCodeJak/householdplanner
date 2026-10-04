@@ -86,15 +86,15 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
-      <div className="flex items-center justify-around h-14">
+    <nav className="fixed bottom-4 left-8 right-8 z-40 shadow-xl shadow-gray-200 rounded-4xl bg-[rgba(255,255,255,0.95)] md:hidden">
+      <div className="flex items-center justify-around h-14 px-4">
         {TABS.map(({ key, label, href }) => {
           const active = isActive(href);
           return (
             <Link
               key={key}
               href={href}
-              className={`flex flex-col items-center gap-0.5 pt-1.5 pb-1 px-3 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 pt-1.5 pb-1 px-2 transition-colors ${
                 active ? "text-orange-500" : "text-slate-400"
               }`}
             >
