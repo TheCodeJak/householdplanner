@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, sql, isNull } from "drizzle-orm";
+import { and, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "..";
 import { task, taskAssignment, taskSlot, user } from "../schema";
@@ -31,7 +31,10 @@ export async function getAssignmentForDate(date: string, familyId: string) {
     .orderBy(task.category, task.title, taskSlot.sortOrder);
 }
 
-export async function getAssignmentsForWeek(mondayDate: string, familyId: string) {
+export async function getAssignmentsForWeek(
+  mondayDate: string,
+  familyId: string,
+) {
   const [y, m, d] = mondayDate.split("-").map(Number);
   const sunday = new Date(y, m - 1, d + 6);
   const sundayDate = `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, "0")}-${String(sunday.getDate()).padStart(2, "0")}`;
@@ -62,11 +65,31 @@ export async function getAssignmentsForWeek(mondayDate: string, familyId: string
     );
 }
 
-export async function findAssignment(taskId: string, date: string, slotId?: string | null) {
+export async function findAssignment(
+  taskId: string,
+  date: string,
+  slotId?: string | null,
+) {
   const conditions = [
     eq(taskAssignment.taskId, taskId),
     eq(taskAssignment.date, date),
   ];
+  if (slotId) {
+    conditions.push(eq(taskAssignment.slotId, slotId));
+  } else {
+    conditions.push(isNull(taskAssignment.slotId));
+  }
+
+  const [row] = await db
+    .select()
+    .from(taskAssignment)
+    .where(and(...conditions))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function findSlot(slotId: string) {
+  const conditions = [];
   if (slotId) {
     conditions.push(eq(taskAssignment.slotId, slotId));
   } else {

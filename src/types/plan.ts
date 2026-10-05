@@ -46,8 +46,8 @@ export type SlotView = {
   status: TaskStatus;
   assignmentId: string | null;
   assignee: Person | null;
-  completedBy: Person | null; // nur gesetzt, wenn abweichend vom Assignee
-  note: string | null;
+  completedBy: Person | null;
+  notes: string | null;
 };
 
 export type TaskView = { taskId: string; title: string; slots: SlotView[] };
