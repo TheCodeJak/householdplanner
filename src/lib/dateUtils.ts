@@ -31,22 +31,10 @@ export function getMonth(monthIndex: number): string {
   return months[monthIndex];
 }
 
-function today(): Date {
+export function startOfToday(): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today;
-}
-
-export function getDayByDayOffset(offset: number): Date {
-  const day = today();
-  day.setDate(today().getDate() - ((today().getDay() + 6) % 7) + offset);
-  return day;
-}
-
-export function getDayByWeekOffset(offset: number): Date {
-  const monday = today();
-  monday.setDate(today().getDate() - ((today().getDay() + 6) % 7) + offset * 7);
-  return monday;
 }
 
 export function getMonday(weekOffset: number): Date {
@@ -79,4 +67,23 @@ export function getWeekNumber(d: Date): number {
         7,
     )
   );
+}
+
+export function addDays(date: Date, n: number) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + n);
+  return result;
+}
+
+export function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+export function fromIsoDate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
 }

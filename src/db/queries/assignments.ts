@@ -1,4 +1,13 @@
-import { and, eq, gte, isNull, lte, sql } from "drizzle-orm";
+import {
+  and,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "..";
 import { task, taskAssignment, taskSlot, user } from "../schema";
@@ -140,127 +149,113 @@ export async function deleteAssignment(assignmentId: string) {
 // ====================NEU=========================
 // ================================================
 
-// const queryCondition = (data: {
-//   taskId: string;
-//   slotId?: string | null;
-//   date: string;
-// }) => {
+type SlotKey = { taskId: string; slotId?: string | null; date: string };
 
-// }
+const slotMatch = (key: SlotKey) =>
+  and(
+    eq(taskAssignment.taskId, key.taskId),
+    eq(taskAssignment.date, key.date),
+    key.slotId
+      ? eq(taskAssignment.slotId, key.slotId)
+      : isNull(taskAssignment.slotId),
+  );
 
-export async function resolveAssignment(data: {
-  taskId: string;
-  slotId?: string | null;
-  assignedToId: string;
-  completedById?: string | null;
-  date: string;
-}) {
-  const [assignment] = await db.insert(taskAssignment).values(data).returning();
-  return assignment;
-}
+const taskIdsOfFamily = (familyId: string) =>
+  db.select({ id: task.id }).from(task).where(eq(task.familyId, familyId));
 
-export async function completeAssignmentv2(data: {
-  taskId: string;
-  slotId?: string | null;
-  completedById: string;
-  date: string;
-}) {
-  const [assignment] = await db
-    .update(taskAssignment)
-    .set({
-      completedById: data.completedById,
-    })
+export async function slotBelongsToFamily(
+  familyId: string,
+  key: SlotKey,
+): Promise<boolean> {
+  const [found] = await db
+    .select({ id: task.id })
+    .from(task)
     .where(
       and(
-        eq(taskAssignment.taskId, data.taskId),
-        eq(taskAssignment.date, data.date),
-        data.slotId
-          ? eq(taskAssignment.slotId, data.slotId)
-          : isNull(taskAssignment.slotId),
+        eq(task.id, key.taskId),
+        eq(task.familyId, familyId),
+        eq(task.isActive, true),
       ),
-    )
-    .returning();
-  return assignment;
+    );
+  if (!found) return false;
+
+  const slots = await db
+    .select({ id: taskSlot.id })
+    .from(taskSlot)
+    .where(eq(taskSlot.taskId, key.taskId));
+
+  return key.slotId
+    ? slots.some((s) => s.id === key.slotId)
+    : slots.length === 0;
 }
 
-export async function deleteAssignmentv2(data: {
-  taskId: string;
-  slotId?: string | null;
-  date: string;
-}) {
-  await db
+export async function claimSlot(
+  data: SlotKey & { userId: string; alsoComplete?: boolean },
+) {
+  const [row] = await db
+    .insert(taskAssignment)
+    .values({
+      taskId: data.taskId,
+      slotId: data.slotId ?? null,
+      date: data.date,
+      assignedToId: data.userId,
+      ...(data.alsoComplete
+        ? { completedById: data.userId, completedAt: sql`now()` }
+        : {}),
+    })
+    .onConflictDoNothing()
+    .returning();
+  return row ?? null;
+}
+
+export async function releaseSlot(
+  data: SlotKey & { familyId: string; userId: string },
+) {
+  const [row] = await db
     .delete(taskAssignment)
     .where(
       and(
-        eq(taskAssignment.taskId, data.taskId),
-        eq(taskAssignment.date, data.date),
-        data.slotId
-          ? eq(taskAssignment.slotId, data.slotId)
-          : isNull(taskAssignment.slotId),
-      ),
-    );
-}
-
-export async function uncompleteAssignmentv2(
-  taskId: string,
-  slotId: string | null,
-  date: string,
-) {
-  const [assignment] = await db
-    .update(taskAssignment)
-    .set({
-      completedById: null,
-      completedAt: null,
-    })
-    .where(
-      and(
-        eq(taskAssignment.taskId, taskId),
-        eq(taskAssignment.date, date),
-        slotId
-          ? eq(taskAssignment.slotId, slotId)
-          : isNull(taskAssignment.slotId),
+        slotMatch(data),
+        eq(taskAssignment.assignedToId, data.userId),
+        isNull(taskAssignment.completedAt),
+        inArray(taskAssignment.taskId, taskIdsOfFamily(data.familyId)),
       ),
     )
     .returning();
-  return assignment;
+  return row ?? null;
 }
 
-export async function getCompletedUser(
-  taskId: string,
-  slotId: string | null,
-  date: string,
+export async function completeSlot(
+  data: SlotKey & { familyId: string; userId: string },
 ) {
-  const [completer] = await db
-    .select()
-    .from(taskAssignment)
+  const [row] = await db
+    .update(taskAssignment)
+    .set({ completedById: data.userId, completedAt: sql`now()` })
     .where(
       and(
-        eq(taskAssignment.taskId, taskId),
-        eq(taskAssignment.date, date),
-        slotId
-          ? eq(taskAssignment.slotId, slotId)
-          : isNull(taskAssignment.slotId),
+        slotMatch(data),
+        isNull(taskAssignment.completedAt),
+        inArray(taskAssignment.taskId, taskIdsOfFamily(data.familyId)),
       ),
-    );
-  return completer?.completedById ?? null;
+    )
+    .returning();
+  return row ?? null;
 }
 
-export async function isAssignmentCompleted(
-  taskId: string,
-  slotId: string | null,
-  date: string,
+export async function reopenSlot(
+  data: SlotKey & { familyId: string; userId: string },
 ) {
-  const [assignment] = await db
-    .select()
-    .from(taskAssignment)
+  const [row] = await db
+    .update(taskAssignment)
+    .set({ completedById: null, completedAt: null })
     .where(
       and(
-        eq(taskAssignment.taskId, taskId),
-        eq(taskAssignment.date, date),
-        slotId
-          ? eq(taskAssignment.slotId, slotId)
-          : isNull(taskAssignment.slotId),
+        slotMatch(data),
+        eq(taskAssignment.completedById, data.userId),
+        isNotNull(taskAssignment.completedAt),
+        inArray(taskAssignment.taskId, taskIdsOfFamily(data.familyId)),
       ),
-    );
-  return assignment?.completedAt !== null;
+    )
+    .returning();
+  return row ?? null;
 }

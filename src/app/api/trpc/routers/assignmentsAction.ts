@@ -1,159 +1,92 @@
 import {
-  completeAssignmentv2,
-  deleteAssignmentv2,
-  findAssignment,
-  findSlot,
-  getCompletedUser,
-  isAssignmentCompleted,
-  resolveAssignment,
-  uncompleteAssignmentv2,
+  claimSlot,
+  completeSlot,
+  releaseSlot,
+  reopenSlot,
+  slotBelongsToFamily,
 } from "@/db/queries/assignments";
 import { TRPCError } from "@trpc/server";
-import z from "zod";
+import { z } from "zod";
 import { familyProcedure, router } from "../init";
 
-const throwError = (code: TRPCError["code"], message: string) => {
-  throw new TRPCError({
-    code,
-    message,
-  });
-};
+const slotInput = z.object({
+  taskId: z.uuid(),
+  slotId: z.uuid().nullish(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
 
-const checkExistingSlot = async (slotId: string) => {
-  const existingSlot = await findSlot(slotId);
-  if (existingSlot) {
-    throwError("CONFLICT", "Dieser Slot ist bereits belegt.");
-  }
-};
+type SlotInput = z.infer<typeof slotInput>;
 
-const checkExistingAssignment = async (
-  taskId: string,
-  slotId: string,
-  date: string,
-) => {
-  const existingTask = await findAssignment(taskId, slotId, date);
-  if (!existingTask) {
-    throwError("BAD_REQUEST", "Diese Aufgabe existiert nicht.");
+function orConflict<T>(row: T | null): T {
+  if (!row) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Das ist nicht mehr möglich, die Aufgabe hat sich geändert.",
+    });
   }
-};
+  return row;
+}
+
+async function claim(
+  familyId: string,
+  userId: string,
+  input: SlotInput,
+  alsoComplete: boolean,
+) {
+  if (!(await slotBelongsToFamily(familyId, input))) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Aufgabe nicht gefunden.",
+    });
+  }
+  const created = await claimSlot({ ...input, userId, alsoComplete });
+  if (!created) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Diese Aufgabe ist bereits vergeben.",
+    });
+  }
+  return created;
+}
 
 export const assignmentActionsRouter = router({
   claim: familyProcedure
-    .input(
-      z.object({
-        taskId: z.uuid(),
-        slotId: z.uuid().optional(),
-        date: z.date(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      await checkExistingAssignment(
-        input.taskId,
-        input.slotId ?? "",
-        input.date.toISOString(),
-      );
-      await checkExistingSlot(input.slotId ?? "");
+    .input(slotInput)
+    .mutation(({ input, ctx }) =>
+      claim(ctx.familyId, ctx.userId, input, false),
+    ),
 
-      return resolveAssignment({
-        ...input,
-        assignedToId: ctx.userId,
-        date: input.date.toISOString(),
-      });
-    }),
   claimAndComplete: familyProcedure
-    .input(
-      z.object({
-        taskId: z.uuid(),
-        slotId: z.uuid().optional(),
-        date: z.date(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      await checkExistingAssignment(
-        input.taskId,
-        input.slotId ?? "",
-        input.date.toISOString(),
-      );
-      await checkExistingSlot(input.slotId ?? "");
+    .input(slotInput)
+    .mutation(({ input, ctx }) => claim(ctx.familyId, ctx.userId, input, true)),
 
-      return resolveAssignment({
+  release: familyProcedure.input(slotInput).mutation(async ({ input, ctx }) =>
+    orConflict(
+      await releaseSlot({
         ...input,
-        assignedToId: ctx.userId,
-        completedById: ctx.userId,
-        date: input.date.toISOString(),
-      });
-    }),
-  complete: familyProcedure
-    .input(
-      z.object({
-        taskId: z.uuid(),
-        slotId: z.uuid().optional(),
-        date: z.date(),
+        familyId: ctx.familyId,
+        userId: ctx.userId,
       }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      return completeAssignmentv2({
-        ...input,
-        completedById: ctx.userId,
-        date: input.date.toISOString(),
-      });
-    }),
-  release: familyProcedure
-    .input(
-      z.object({
-        taskId: z.uuid(),
-        slotId: z.uuid().optional(),
-        date: z.date(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      await checkExistingAssignment(
-        input.taskId,
-        input.slotId ?? "",
-        input.date.toISOString(),
-      );
-      const isCompleted = await isAssignmentCompleted(
-        input.taskId,
-        input.slotId ?? null,
-        input.date.toISOString(),
-      );
-      if (isCompleted) {
-        throwError(
-          "CONFLICT",
-          "Diese Aufgabe wurde bereits als erledigt markiert und kann nicht mehr freigegeben werden.",
-        );
-      }
+    ),
+  ),
 
-      return deleteAssignmentv2({
+  complete: familyProcedure.input(slotInput).mutation(async ({ input, ctx }) =>
+    orConflict(
+      await completeSlot({
         ...input,
-        date: input.date.toISOString(),
-      });
-    }),
-  reopen: familyProcedure
-    .input(
-      z.object({
-        taskId: z.uuid(),
-        slotId: z.uuid().optional(),
-        date: z.date(),
+        familyId: ctx.familyId,
+        userId: ctx.userId,
       }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const assignedUserId = await getCompletedUser(
-        input.taskId,
-        input.slotId ?? null,
-        input.date.toISOString(),
-      );
-      if (ctx.userId !== assignedUserId) {
-        throwError(
-          "CONFLICT",
-          "Nur der zugewiesene Benutzer kann die Aufgabe wieder öffnen.",
-        );
-      }
+    ),
+  ),
 
-      return uncompleteAssignmentv2(
-        input.taskId,
-        input.slotId ?? null,
-        input.date.toISOString(),
-      );
-    }),
+  reopen: familyProcedure.input(slotInput).mutation(async ({ input, ctx }) =>
+    orConflict(
+      await reopenSlot({
+        ...input,
+        familyId: ctx.familyId,
+        userId: ctx.userId,
+      }),
+    ),
+  ),
 });

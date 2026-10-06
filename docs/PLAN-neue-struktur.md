@@ -88,15 +88,24 @@ Status: keine Zuweisung = `open`, Zuweisung ohne `completed_at` = `claimed`, mit
 
 ## 5. Regeln der Aktionen (Server)
 
-| Aktion | Wer darf | Wirkung |
-|---|---|---|
-| `claim` | jedes Familienmitglied | legt eine Zuweisung an (`assigned_to` = ich). `CONFLICT`, wenn der Slot schon vergeben ist. |
-| `release` | nur der Übernehmende, nur solange nicht erledigt | löscht die Zuweisung |
-| `complete` | jedes Familienmitglied | setzt `completed_by` = ich und `completed_at` = jetzt |
-| `reopen` | nur wer erledigt hat | leert `completed_by` und `completed_at`, die Übernahme bleibt |
-| `claimAndComplete` | jedes Familienmitglied | **ein** INSERT mit `assigned_to` = ich, `completed_by` = ich, `completed_at` = jetzt |
+**Alle fünf Aktionen bekommen dieselbe Eingabe:** `{ taskId, slotId (nullish), date }` (Datum als Text `YYYY-MM-DD`). Es gibt keine `assignmentId` in der Eingabe. Eine Zuweisung ist durch Aufgabe, Slot und Tag eindeutig (Unique-Index aus Schritt 3), und diese drei Werte kennt jeder Slot in der Oberfläche, auch wenn noch niemand ihn übernommen hat. Sie entsprechen `SlotRef`.
 
-Jede Aktion prüft zuerst, dass die Zuweisung zur Familie des Nutzers gehört. `claimAndComplete` braucht keine Transaktion mehr, weil es nur noch ein Statement ist.
+| Aktion | Wer darf | Wirkung | `CONFLICT`, wenn … |
+|---|---|---|---|
+| `claim` | jedes Familienmitglied | legt eine Zuweisung an (`assigned_to` = ich) | für Aufgabe, Tag und Slot schon eine existiert, von wem auch immer |
+| `claimAndComplete` | jedes Familienmitglied | **ein** INSERT mit `assigned_to` = ich, `completed_by` = ich, `completed_at` = jetzt | wie `claim` |
+| `release` | nur der Übernehmende | löscht die Zuweisung | sie nicht mir gehört, schon erledigt ist oder nicht existiert |
+| `complete` | jedes Familienmitglied | setzt `completed_by` = ich und `completed_at` = jetzt, `assigned_to` bleibt | schon erledigt (der erste Erledigende bleibt) oder nicht existiert |
+| `reopen` | nur wer erledigt hat | leert `completed_by` und `completed_at`, die Übernahme bleibt | nicht erledigt, von jemand anderem erledigt oder nicht existiert |
+
+**Fehlercodes:**
+- `NOT_FOUND` nur bei `claim` und `claimAndComplete`: Aufgabe gehört nicht zur Familie, ist nicht aktiv, der Slot gehört nicht zur Aufgabe, oder `slotId` fehlt bei einer Aufgabe mit Slots (bzw. ist gesetzt bei einer ohne).
+- `CONFLICT` in allen anderen Fällen aus der Tabelle. Bei `release`, `complete` und `reopen` stehen Regel und Familienprüfung im `WHERE` **derselben** Datenbankänderung, kommt keine Zeile zurück, war eine Bedingung verletzt. Dort lässt sich nicht unterscheiden, **welche**, deshalb gibt es einen Code mit einer allgemeinen Meldung (verrät auch nicht, ob eine fremde ID existiert).
+
+**Technik:**
+- `claim` und `claimAndComplete`: `INSERT … ON CONFLICT DO NOTHING`. Verletzt er den Unique-Index, kommt eine leere Liste zurück statt eines Fehlers.
+- Familienprüfung bei `release`, `complete` und `reopen`: `task_id IN (SELECT id FROM task WHERE family_id = …)` im `WHERE`.
+- `claimAndComplete` braucht keine Transaktion, weil es nur ein Statement ist.
 
 ## 6. Datenbank-Änderungen
 
@@ -115,7 +124,8 @@ src/
       dashboard/page.tsx        setzt Hooks und Komponenten zusammen
     api/trpc/routers/
       plan.ts                   getDay                          (neu)
-      assignments.ts            claim, release, complete, reopen, claimAndComplete
+      assignmentsAction.ts      claim, release, complete, reopen, claimAndComplete
+                                (unter dem Namen `assignments`, bis Schritt 13 neben `legacyAssignments`)
       tasks.ts                  add
       family.ts                 create, join                    (neu)
   components/
@@ -207,10 +217,10 @@ Jeder Schritt: **Ziel**, **Konzept**, **Du tust**, **Check**. Die Reihenfolge is
 - Check: auf `dashboard/page.tsx` vorübergehend `trpc.plan.getDay.useQuery(...)` aufrufen und das Ergebnis als `<pre>{JSON.stringify(data, null, 2)}</pre>` ausgeben. Prüfen: offen, übernommen, erledigt von einem anderen.
 
 **Schritt 7: Die neuen Aktionen (neben den alten)**
-- Ziel: `claim`, `release`, `complete`, `reopen`, `claimAndComplete` im Router `assignments`, alle als `familyProcedure`.
-- Konzept: Siehe Abschnitt 5. Zuerst die Familienprüfung, dann die Besitzerregel, dann schreiben. `claim` fängt die Unique-Verletzung aus Schritt 3 ab und antwortet mit `CONFLICT`. Die alten Procedures `assign`, `unassign`, `complete`, `uncomplete` bleiben vorerst bestehen, damit die alte Oberfläche weiterläuft. Gleiche Namen wie `complete` sind kein Problem: lege die neuen in einem eigenen Router `assignmentsV2` an oder benenne die alten vorher um, entscheide, was dir übersichtlicher ist.
-- Du tust: eine Aktion nach der anderen in `db/queries/assignments.ts` und im Router.
-- Check: jede Aktion einzeln aus dem Browser aufrufen (z. B. über einen temporären Button), inklusive der Fehlerfälle: fremde Zuweisung freigeben, schon vergebenen Slot übernehmen.
+- Ziel: `claim`, `release`, `complete`, `reopen`, `claimAndComplete` im Router `assignments`, alle als `familyProcedure`, alle mit der Eingabe `{ taskId, slotId, date }` (Abschnitt 5).
+- Konzept: Regel und Änderung in **einem** Statement (Bedingung im `WHERE`, `.returning()`, leeres Ergebnis heißt `CONFLICT`). Doppeltes Übernehmen verhindert der Unique-Index per `ON CONFLICT DO NOTHING`. Die alten Procedures bleiben unter `legacyAssignments` bestehen, damit die alte Oberfläche weiterläuft (in `_app.ts` umbenannt, `useWeekPlan.ts` nutzt den neuen Namen).
+- Du tust: In `db/queries/assignments.ts` unter den alten Funktionen `slotBelongsToFamily`, `claimSlot` (mit `alsoComplete`), `releaseSlot`, `completeSlot`, `reopenSlot` anlegen (Hilfsbausteine `slotMatch` und `taskIdsOfFamily`). Router in `routers/assignmentsAction.ts` mit einem gemeinsamen `slotInput`, einem Helfer `orConflict` und einer gemeinsamen Funktion `claim`.
+- Check (erledigt): Die SQL-Semantik wurde gegen die Docker-Datenbank in einer zurückgerollten Transaktion geprüft: doppeltes Übernehmen durch einen anderen Nutzer (auch ohne Slot) ergibt 0 Zeilen, ein zweites `complete` 0 Zeilen und `reopen`/`release` durch den Falschen 0 Zeilen. Die von Drizzle erzeugten Statements stimmen mit den geprüften überein. Ein Aufruf über den Router (z. B. per `fetch` in der Browser-Konsole) steht noch aus, er braucht eine Anmeldung.
 
 ### Teil C: Browser
 
