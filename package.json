@@ -9,8 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:push": "dotenv -e .env.local -- drizzle-kit push",
-    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
+    "db:push:neon-dev": "dotenv -e .env.local -- drizzle-kit push",
+    "db:studio:neon-dev": "dotenv -e .env.local -- drizzle-kit studio",
+    "db:push:docker": "dotenv -e .env.docker-db -- drizzle-kit push",
+    "db:studio:docker": "dotenv -e .env.docker-db -- drizzle-kit studio"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",
@@ -40,5 +42,14 @@
     "formik": "^2.4.9",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "drizzle-kit@0.31.11": true,
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.27.7": true,
+    "bcrypt@6.0.0": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.11.1": true
   }
 }

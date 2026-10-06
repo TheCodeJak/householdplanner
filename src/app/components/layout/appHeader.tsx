@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
-import { NotificationIcon } from "../icons";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "../shared/userAvatar";
 
 export default function AppHeader() {
@@ -30,15 +29,11 @@ export default function AppHeader() {
         <div className="flex gap-4 items-center">
           <Image src="\icon.svg" width={32} height={32} alt="" priority />
           <h1 className="font-semibold text-xl text-gray-800">
-            Household Planner
+            Householdplanner
           </h1>
         </div>
 
         <div className="flex gap-4 items-center">
-          <NotificationIcon
-            size={18}
-            className="text-gray-400 hover:text-brand-600 transition-colors cursor-pointer"
-          />
           <div ref={userMenuRef} className="relative">
             <button
               type="button"

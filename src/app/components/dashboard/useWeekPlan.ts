@@ -1,7 +1,7 @@
-import { trpc } from "@/lib/trpc";
 import { colorFromUserId } from "@/lib/color";
 import { getMonday, toIsoDate } from "@/lib/dateUtils";
-import type { Row, AssignmentData } from "@/types/plan";
+import { trpc } from "@/lib/trpc";
+import type { AssignmentData, Row } from "@/types/plan";
 import { useSession } from "next-auth/react";
 
 export const FAMILY_ID = "65183ae8-fc81-4228-97c5-dd3dd99c6322";
@@ -20,25 +20,25 @@ export function useWeekPlan(weekOffset: number) {
   const { data: tasks } = trpc.tasks.getByFamily.useQuery({
     familyId: FAMILY_ID,
   });
-  const { data: assignments } = trpc.assignments.getForWeek.useQuery({
+  const { data: assignments } = trpc.legacyAssignments.getForWeek.useQuery({
     mondayDate: toIsoDate(monday),
     familyId: FAMILY_ID,
   });
 
   const utils = trpc.useUtils();
 
-  const assignMutation = trpc.assignments.assign.useMutation({
-    onSuccess: () => utils.assignments.getForWeek.invalidate(),
+  const assignMutation = trpc.legacyAssignments.assign.useMutation({
+    onSuccess: () => utils.legacyAssignments.getForWeek.invalidate(),
     onError: (err) => alert(err.message),
   });
-  const unassignMutation = trpc.assignments.unassign.useMutation({
-    onSuccess: () => utils.assignments.getForWeek.invalidate(),
+  const unassignMutation = trpc.legacyAssignments.unassign.useMutation({
+    onSuccess: () => utils.legacyAssignments.getForWeek.invalidate(),
   });
-  const completeMutation = trpc.assignments.complete.useMutation({
-    onSuccess: () => utils.assignments.getForWeek.invalidate(),
+  const completeMutation = trpc.legacyAssignments.complete.useMutation({
+    onSuccess: () => utils.legacyAssignments.getForWeek.invalidate(),
   });
-  const uncompleteMutation = trpc.assignments.uncomplete.useMutation({
-    onSuccess: () => utils.assignments.getForWeek.invalidate(),
+  const uncompleteMutation = trpc.legacyAssignments.uncomplete.useMutation({
+    onSuccess: () => utils.legacyAssignments.getForWeek.invalidate(),
   });
 
   // Key: "taskId_slotId_date"
@@ -85,7 +85,13 @@ export function useWeekPlan(weekOffset: number) {
     name: task.title,
     cells: weekDays.map((day) => {
       if (task.slots.length === 0) {
-        return [{ slotId: null, label: null, data: buildAssignment(task.id, null, day) }];
+        return [
+          {
+            slotId: null,
+            label: null,
+            data: buildAssignment(task.id, null, day),
+          },
+        ];
       }
       return task.slots.map((slot) => ({
         slotId: slot.id,

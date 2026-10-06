@@ -1,3 +1,42 @@
+const daysOfWeek: string[] = [
+  "Sonntag",
+  "Montag",
+  "Dienstag",
+  "Mittwoch",
+  "Donnerstag",
+  "Freitag",
+  "Samstag",
+];
+
+const months: string[] = [
+  "Januar",
+  "Februar",
+  "März",
+  "April",
+  "Mai",
+  "Juni",
+  "Juli",
+  "August",
+  "September",
+  "Oktober",
+  "November",
+  "Dezember",
+];
+
+export function getDay(dayIndex: number): string {
+  return daysOfWeek[dayIndex];
+}
+
+export function getMonth(monthIndex: number): string {
+  return months[monthIndex];
+}
+
+export function startOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
 export function getMonday(weekOffset: number): Date {
   const today = new Date();
   const monday = new Date(today);
@@ -28,4 +67,23 @@ export function getWeekNumber(d: Date): number {
         7,
     )
   );
+}
+
+export function addDays(date: Date, n: number) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + n);
+  return result;
+}
+
+export function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+export function fromIsoDate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
 }

@@ -28,3 +28,28 @@ export type Row = {
   name: string;
   cells: DayCell[];
 };
+
+//! New Types
+// ==========================================================================
+export type TaskStatus = "open" | "claimed" | "completed";
+
+export type Person = {
+  id: string;
+  name: string;
+  color: string;
+  isCurrentUser: boolean;
+};
+
+export type SlotView = {
+  slotId: string | null; // null = Aufgabe ohne Zeitslot
+  label: string | null; // "Morgens" ...
+  status: TaskStatus;
+  assignmentId: string | null;
+  assignee: Person | null;
+  completedBy: Person | null;
+  notes: string | null;
+};
+
+export type TaskView = { taskId: string; title: string; slots: SlotView[] };
+
+export type SlotRef = { taskId: string; slotId: string | null; date: string }; // ISO-Datum

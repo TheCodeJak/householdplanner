@@ -1,9 +1,9 @@
 "use client";
 
+import { FAMILY_ID } from "@/app/components/dashboard/useWeekPlan";
+import { trpc } from "@/lib/trpc";
 import { Button, Modal, TextField } from "jaklib/core";
 import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { FAMILY_ID } from "@/app/components/dashboard/useWeekPlan";
 
 type TaskModalProps = {
   open: boolean;
@@ -36,12 +36,7 @@ export default function TaskModal({ open, onClose }: TaskModalProps) {
   }
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      variant="sheet"
-      title="Neue Aufgabe"
-    >
+    <Modal open={open} onClose={onClose} variant="sheet" title="Neue Aufgabe">
       <p className="-mt-3 mb-5 text-sm text-slate-500">
         Aufgabe für den Haushaltsplan erstellen
       </p>
