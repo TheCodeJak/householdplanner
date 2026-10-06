@@ -135,3 +135,132 @@ export async function createAssignment(data: {
 export async function deleteAssignment(assignmentId: string) {
   await db.delete(taskAssignment).where(eq(taskAssignment.id, assignmentId));
 }
+
+// ================================================
+// ====================NEU=========================
+// ================================================
+
+// const queryCondition = (data: {
+//   taskId: string;
+//   slotId?: string | null;
+//   date: string;
+// }) => {
+
+// }
+
+export async function resolveAssignment(data: {
+  taskId: string;
+  slotId?: string | null;
+  assignedToId: string;
+  completedById?: string | null;
+  date: string;
+}) {
+  const [assignment] = await db.insert(taskAssignment).values(data).returning();
+  return assignment;
+}
+
+export async function completeAssignmentv2(data: {
+  taskId: string;
+  slotId?: string | null;
+  completedById: string;
+  date: string;
+}) {
+  const [assignment] = await db
+    .update(taskAssignment)
+    .set({
+      completedById: data.completedById,
+    })
+    .where(
+      and(
+        eq(taskAssignment.taskId, data.taskId),
+        eq(taskAssignment.date, data.date),
+        data.slotId
+          ? eq(taskAssignment.slotId, data.slotId)
+          : isNull(taskAssignment.slotId),
+      ),
+    )
+    .returning();
+  return assignment;
+}
+
+export async function deleteAssignmentv2(data: {
+  taskId: string;
+  slotId?: string | null;
+  date: string;
+}) {
+  await db
+    .delete(taskAssignment)
+    .where(
+      and(
+        eq(taskAssignment.taskId, data.taskId),
+        eq(taskAssignment.date, data.date),
+        data.slotId
+          ? eq(taskAssignment.slotId, data.slotId)
+          : isNull(taskAssignment.slotId),
+      ),
+    );
+}
+
+export async function uncompleteAssignmentv2(
+  taskId: string,
+  slotId: string | null,
+  date: string,
+) {
+  const [assignment] = await db
+    .update(taskAssignment)
+    .set({
+      completedById: null,
+      completedAt: null,
+    })
+    .where(
+      and(
+        eq(taskAssignment.taskId, taskId),
+        eq(taskAssignment.date, date),
+        slotId
+          ? eq(taskAssignment.slotId, slotId)
+          : isNull(taskAssignment.slotId),
+      ),
+    )
+    .returning();
+  return assignment;
+}
+
+export async function getCompletedUser(
+  taskId: string,
+  slotId: string | null,
+  date: string,
+) {
+  const [completer] = await db
+    .select()
+    .from(taskAssignment)
+    .where(
+      and(
+        eq(taskAssignment.taskId, taskId),
+        eq(taskAssignment.date, date),
+        slotId
+          ? eq(taskAssignment.slotId, slotId)
+          : isNull(taskAssignment.slotId),
+      ),
+    );
+  return completer?.completedById ?? null;
+}
+
+export async function isAssignmentCompleted(
+  taskId: string,
+  slotId: string | null,
+  date: string,
+) {
+  const [assignment] = await db
+    .select()
+    .from(taskAssignment)
+    .where(
+      and(
+        eq(taskAssignment.taskId, taskId),
+        eq(taskAssignment.date, date),
+        slotId
+          ? eq(taskAssignment.slotId, slotId)
+          : isNull(taskAssignment.slotId),
+      ),
+    );
+  return assignment?.completedAt !== null;
+}
