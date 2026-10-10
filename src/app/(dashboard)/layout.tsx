@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import BottomNav from "../components/layout/BottomNav";
+import { AppBackdrop } from "../components/ui/GlowBackground";
 
 export default async function DashboardLayout({
   children,
@@ -11,7 +12,8 @@ export default async function DashboardLayout({
   if (!session) redirect("/login");
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="relative isolate flex w-full flex-col">
+      <AppBackdrop />
       {/* <AppHeader /> */}
       <main className="mx-auto w-full flex-1 md:px-6 md:py-8">
         {/* bg-[#fdf2d4] */}

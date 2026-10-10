@@ -38,26 +38,138 @@
 }
 
 /*
- * Der Rest der App unterstützt aktuell keinen Dark Mode (feste weiß/slate
- * Farben). jaklib schaltet über prefers-color-scheme aber automatisch auf ein
- * dunkles Theme um. Damit neu eingebundene jaklib-Komponenten nicht aus dem
- * Rahmen fallen, bleiben sie hier bewusst auf den hellen Werten - bis der
- * Rest der App Dark Mode ebenfalls unterstützt.
+ * ─────────────────────────────────────────────
+ * Semantische Farben (Light + Dark Mode)
+ * ─────────────────────────────────────────────
+ * Komponenten nutzen NUR diese Namen statt fester Farben wie bg-white oder
+ * text-slate-500. Der Dark Mode folgt der Systemeinstellung und tauscht hier
+ * zentral die Werte – an den Komponenten muss dafür nichts passieren.
+ *
+ *   bg-page       Seitenhintergrund
+ *   bg-surface    Karten, Modals, Felder   (auch transparent: bg-surface/60)
+ *   bg-surface-2  leicht abgesetzte Flächen in Karten
+ *   text-fg       Haupttext / Überschriften
+ *   text-fg-2     normaler Fließtext
+ *   text-muted    Nebentext
+ *   text-subtle   Hinweise, Platzhalter, Erledigtes
+ *   border-line   Trennlinien und Ränder
+ *   border-glass  heller Rand von Milchglas-Flächen
  */
+@theme inline {
+  --color-page: var(--app-page);
+  --color-surface: var(--app-surface);
+  --color-surface-2: var(--app-surface-2);
+  --color-fg: var(--app-fg);
+  --color-fg-2: var(--app-fg-2);
+  --color-muted: var(--app-muted);
+  --color-subtle: var(--app-subtle);
+  --color-line: var(--app-line);
+  --color-glass: var(--app-glass-edge);
+}
+
+:root {
+  color-scheme: light;
+  --app-page: #faf7f3;
+  --app-surface: #ffffff;
+  --app-surface-2: #f6f5f3;
+  --app-fg: #0f172a;
+  --app-fg-2: #334155;
+  --app-muted: #64748b;
+  --app-subtle: #94a3b8;
+  --app-line: #e7e5e4;
+  --app-glass-edge: rgb(255 255 255 / 0.75);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: var(--ink-50);
-    --surface: var(--white);
-    --border: var(--ink-300);
-    --text: var(--ink-900);
-    --text-muted: var(--ink-600);
-    --input-bg: var(--white);
-    --input-border: var(--ink-300);
-    --input-label: var(--ink-400);
+    color-scheme: dark;
+    --app-page: #111214;
+    --app-surface: #1c1d21;
+    --app-surface-2: #25272c;
+    --app-fg: #f5f3ef;
+    --app-fg-2: #d6d3d1;
+    --app-muted: #a8a29e;
+    --app-subtle: #78716c;
+    --app-line: #2f3136;
+    --app-glass-edge: rgb(255 255 255 / 0.08);
+  }
+}
+
+/*
+ * jaklib-Komponenten (Card, Modal, TextField, …) an dieselben Farben hängen,
+ * damit sie in beiden Modi zum Rest der App passen.
+ */
+:root {
+  --background: var(--app-page);
+  --surface: var(--app-surface);
+  --border: var(--app-line);
+  --border-subtle: var(--app-line);
+  --text: var(--app-fg);
+  --text-muted: var(--app-muted);
+  --input-bg: var(--app-surface);
+  --input-border: var(--app-line);
+  --input-label: var(--app-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --input-bg: var(--app-surface-2);
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--app-page);
+  color: var(--app-fg);
+}
+
+/*
+ * Karten im Dark Mode als Milchglas: leicht transparente, minimal hellere
+ * Fläche über dem Hintergrund-Schimmer, statt Rahmen nur ein feiner Lichtrand
+ * oben. Im Light Mode bleibt jaklibs Card (weiß + feiner Rand) unverändert.
+ *   glass-card   äußere Karte
+ *   glass-inset  vertiefte Fläche innerhalb einer Karte (z.B. Slot-Liste)
+ */
+@utility glass-card {
+  @variant dark {
+    background-color: rgb(255 255 255 / 0.045);
+    border-color: transparent;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      0 10px 30px -14px rgb(0 0 0 / 0.7);
+    backdrop-filter: blur(20px);
+  }
+}
+
+@utility glass-inset {
+  @variant dark {
+    background-color: rgb(0 0 0 / 0.2);
+    border-color: transparent;
+    box-shadow: inset 0 1px 0 rgb(0 0 0 / 0.25);
+  }
+}
+
+/* Animationen für die „Kommt bald“-Seiten */
+@theme {
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-bar: bar 2.4s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--tilt, 0deg));
+    }
+    50% {
+      transform: translateY(-10px) rotate(var(--tilt, 0deg));
+    }
+  }
+
+  @keyframes bar {
+    0%,
+    100% {
+      transform: scaleY(0.35);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
 }

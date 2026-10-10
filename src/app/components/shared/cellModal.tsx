@@ -52,7 +52,7 @@ export default function CellModal({
 
   return (
     <Modal open={open} onClose={onClose} variant="sheet" title={taskName}>
-      <p className="-mt-3 mb-5 text-sm text-slate-500">{dayLabel}</p>
+      <p className="-mt-3 mb-5 text-sm text-muted">{dayLabel}</p>
 
       <Section label="Geplant von">
         {hasAssignee ? (
@@ -62,12 +62,12 @@ export default function CellModal({
               color={cell!.assigneeColor ?? "#94a3b8"}
               completed={false}
             />
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-sm font-medium text-fg-2">
               {isCurrentUser ? "Du" : cell!.assigneeName}
             </span>
           </div>
         ) : (
-          <p className="text-sm italic text-slate-400">
+          <p className="text-sm italic text-subtle">
             Noch niemand eingeteilt.
           </p>
         )}
@@ -81,12 +81,12 @@ export default function CellModal({
               color={cell?.completedByColor ?? cell?.assigneeColor ?? "#22c55e"}
               completed={true}
             />
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-sm font-medium text-fg-2">
               {isCompletedByCurrentUser
                 ? "Du"
                 : (completedByName ?? cell!.assigneeName)}
               {completerDiffers && (
-                <span className="ml-1 text-xs text-slate-400">
+                <span className="ml-1 text-xs text-subtle">
                   (statt {cell!.assigneeName})
                 </span>
               )}
@@ -109,7 +109,7 @@ export default function CellModal({
 
       {cell?.note && (
         <Section label="Notiz">
-          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-slate-700">
+          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-fg-2">
             {cell.note}
           </div>
         </Section>
@@ -167,7 +167,7 @@ function Section({
 }) {
   return (
     <div className="mb-5">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-subtle">
         {label}
       </p>
       {children}

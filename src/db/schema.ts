@@ -51,6 +51,7 @@ export const task = pgTable(
     title: text("title").notNull(),
     description: text("description"),
     category: text("category"),
+    icon: text("icon"), // Schlüssel aus TASK_ICON_NAMES, z.B. "kochen"
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },

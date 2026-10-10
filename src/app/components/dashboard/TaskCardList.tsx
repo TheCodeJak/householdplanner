@@ -10,14 +10,14 @@ export function TaskCardList({
 }) {
   if (tasks.length === 0) {
     return (
-      <p className="m-4 text-center text-sm text-slate-400">
+      <p className="m-2 text-center text-sm text-subtle">
         Keine Aufgaben vorhanden.
       </p>
     );
   }
 
   return (
-    <div className="m-4 flex flex-col gap-2">
+    <div className="m-2 flex flex-col gap-2">
       {tasks.map((task) => (
         <TaskCard
           key={task.taskId}

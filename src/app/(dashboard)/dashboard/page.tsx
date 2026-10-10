@@ -1,9 +1,10 @@
 "use client";
 
-import DayNavigator from "@/app/components/dashboard/DayNavigator";
 import { TaskCardList } from "@/app/components/dashboard/TaskCardList";
+import { WeekStripHeader } from "@/app/components/dashboard/WeekStripHeader";
 import TaskDetailModal from "@/app/components/shared/TaskDetailModal";
 import { useDayPlan } from "@/hooks/useDayPlan";
+import { useIsClient } from "@/hooks/useIsClient";
 import { useModalTarget } from "@/hooks/useModalTarget";
 import { useSelectedDay } from "@/hooks/useSelectedDay";
 import { toIsoDate } from "@/lib/dateUtils";
@@ -13,10 +14,14 @@ export default function DashboardPage() {
   const { date, isToday, shift, goToday } = useSelectedDay();
   const { tasks, isLoading, error } = useDayPlan(date);
   const detail = useModalTarget<SlotRef>();
+  // Das gewählte Datum stammt aus der lokalen Zeit – erst im Browser rendern
+  const isClient = useIsClient();
+
+  if (!isClient) return null;
 
   return (
     <>
-      <DayNavigator
+      <WeekStripHeader
         date={date}
         isToday={isToday}
         onShift={shift}
@@ -25,9 +30,9 @@ export default function DashboardPage() {
 
       <div className="flex flex-col m-4 gap-2">
         {isLoading ? (
-          <p className="m-4 text-sm text-slate-400">lädt …</p>
+          <p className="m-4 text-sm text-subtle">lädt …</p>
         ) : error ? (
-          <p className="m-4 text-sm text-red-600">{error.message}</p>
+          <p className="m-4 text-sm text-red-600 dark:text-red-400">{error.message}</p>
         ) : (
           <TaskCardList
             tasks={tasks}

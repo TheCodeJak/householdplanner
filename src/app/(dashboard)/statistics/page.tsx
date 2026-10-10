@@ -1,7 +1,11 @@
+import { BarsIllustration, ComingSoon } from "@/app/components/ui/ComingSoon";
+
 export default function StatisticsPage() {
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
-      <p className="text-lg text-slate-400">Statistik — kommt bald</p>
-    </div>
+    <ComingSoon
+      title="Statistik"
+      description="Bald siehst du hier, wer wie viel im Haushalt erledigt hat – pro Woche und pro Monat."
+      illustration={<BarsIllustration />}
+    />
   );
 }

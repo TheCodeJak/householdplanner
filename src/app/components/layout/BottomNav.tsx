@@ -13,7 +13,8 @@ const TABS: { key: Tab; label: string; href: string }[] = [
 ];
 
 function TabIcon({ tab, active }: { tab: Tab; active: boolean }) {
-  const color = active ? "currentColor" : "#94A3B8";
+  // Farbe kommt vom Link (aktiv: Orange, sonst text-subtle)
+  const color = "currentColor";
   const size = 22;
 
   switch (tab) {
@@ -86,7 +87,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-4 left-8 right-8 z-40 shadow-xl shadow-gray-200 rounded-4xl bg-[rgba(255,255,255,0.95)] md:hidden">
+    <nav className="fixed bottom-4 left-8 right-8 z-40 rounded-4xl border border-glass bg-surface/70 shadow-xl shadow-slate-900/10 backdrop-blur-xl dark:shadow-black/40 md:hidden">
       <div className="flex items-center justify-around h-14 px-4">
         {TABS.map(({ key, label, href }) => {
           const active = isActive(href);
@@ -95,7 +96,7 @@ export default function BottomNav() {
               key={key}
               href={href}
               className={`flex flex-col items-center gap-0.5 pt-1.5 pb-1 px-2 transition-colors ${
-                active ? "text-orange-500" : "text-slate-400"
+                active ? "text-orange-500" : "text-subtle"
               }`}
             >
               <TabIcon tab={key} active={active} />

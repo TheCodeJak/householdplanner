@@ -29,6 +29,8 @@ export type Row = {
   cells: DayCell[];
 };
 
+import type { TaskIconName } from "@/lib/taskIcons";
+
 //! New Types
 // ==========================================================================
 export type TaskStatus = "open" | "claimed" | "completed";
@@ -50,6 +52,11 @@ export type SlotView = {
   notes: string | null;
 };
 
-export type TaskView = { taskId: string; title: string; slots: SlotView[] };
+export type TaskView = {
+  taskId: string;
+  title: string;
+  icon: TaskIconName | null; // null = noch kein Icon gewählt
+  slots: SlotView[];
+};
 
 export type SlotRef = { taskId: string; slotId: string | null; date: string }; // ISO-Datum

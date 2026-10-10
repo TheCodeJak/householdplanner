@@ -6,6 +6,7 @@ export * from "./check";
 export * from "./checkCircle";
 export * from "./questionCircle";
 export * from "./plusCircle";
+export * from "./tasks";
 
 export type IconProps = {
   size?: number;

@@ -24,11 +24,11 @@ export default function AppHeader() {
   }, []);
 
   return (
-    <div className="border border-gray-200 border-t-0 p-5 shadow-sm z-10">
+    <div className="border border-line border-t-0 p-5 shadow-sm z-10">
       <div className="flex w-full items-center justify-between">
         <div className="flex gap-4 items-center">
           <Image src="\icon.svg" width={32} height={32} alt="" priority />
-          <h1 className="font-semibold text-xl text-gray-800">
+          <h1 className="font-semibold text-xl text-fg">
             Householdplanner
           </h1>
         </div>
@@ -38,9 +38,9 @@ export default function AppHeader() {
             <button
               type="button"
               onClick={() => setUserMenuOpen((o) => !o)}
-              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-surface-2 transition-colors"
             >
-              {/* <p className="text-gray-700">{session?.user?.name}</p> */}
+              {/* <p className="text-fg-2">{session?.user?.name}</p> */}
               <UserAvatar initial={session?.user?.name?.[0] ?? ""} />
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                 <path
@@ -54,7 +54,7 @@ export default function AppHeader() {
               </svg>
             </button>
             {userMenuOpen && (
-              <div className="absolute right-0 mt-1 w-40 rounded-xl border border-gray-100 bg-white py-1 shadow-lg z-50">
+              <div className="absolute right-0 mt-1 w-40 rounded-xl border border-line bg-surface py-1 shadow-lg z-50">
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl: "/login" })}

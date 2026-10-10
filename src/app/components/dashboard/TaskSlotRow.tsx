@@ -16,7 +16,13 @@ export function TaskSlotRow({
       className="flex w-full items-center gap-3 rounded-lg px-1 py-1 text-left"
     >
       <StatusIcon status={slot.status} />
-      <span className="line-clamp-2 min-w-0 flex-1 text-xs font-semibold text-slate-800">
+      <span
+        className={`line-clamp-2 min-w-0 flex-1 text-xs font-semibold ${
+          slot.status === "completed"
+            ? "text-subtle line-through"
+            : "text-fg"
+        }`}
+      >
         {slot.label}
       </span>
       <PersonPair assignee={slot.assignee} completedBy={slot.completedBy} />

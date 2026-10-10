@@ -3,13 +3,13 @@ import Image from "next/image";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-page px-6">
       <div className="flex flex-col items-center gap-6 text-center">
         <Image src="\icon.svg" width={64} height={64} alt="" priority />
-        <h1 className="text-3xl font-bold text-slate-900">
+        <h1 className="text-3xl font-bold text-fg">
           Household Planner
         </h1>
-        <p className="max-w-sm text-slate-500">
+        <p className="max-w-sm text-muted">
           Organisiere Haushaltsaufgaben gemeinsam mit deiner Familie — einfach,
           übersichtlich und fair aufgeteilt.
         </p>
@@ -22,7 +22,7 @@ export default function LandingPage() {
           </Link>
           <Link
             href="/register"
-            className="rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+            className="rounded-xl border border-line bg-surface px-6 py-2.5 text-sm font-semibold text-fg-2 shadow-sm hover:bg-surface-2 transition-colors"
           >
             Registrieren
           </Link>

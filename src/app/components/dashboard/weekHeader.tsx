@@ -22,12 +22,12 @@ export default function WeekHeader({
 }: WeekHeaderProps) {
   return (
     <div className="px-5 pb-1">
-      {/* <p className="text-sm font-semibold uppercase tracking-widest text-slate-600">
+      {/* <p className="text-sm font-semibold uppercase tracking-widest text-fg-2">
         Kalenderwoche {getWeekNumber(monday)}
       </p> */}
       <div className="flex items-center justify-center gap-8 mt-3 bg-amber-200">
         <NavButton onClick={onPrevWeek} dir="left" />
-        <span className="w-55 text-center text-xl font-semibold text-slate-800 bg-green-200">
+        <span className="w-55 text-center text-xl font-semibold text-fg bg-green-200">
           {formatDate(weekDays[0])} – {formatDate(weekDays[6])}
           {weekDays[6].getFullYear()}
         </span>

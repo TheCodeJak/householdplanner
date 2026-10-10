@@ -14,7 +14,7 @@ export function PersonPair({
       <PersonDot person={assignee} />
       {completedBy && completedBy.id !== assignee.id && (
         <>
-          <span className="text-xs font-bold text-slate-400">→</span>
+          <span className="text-xs font-bold text-subtle">→</span>
           <PersonDot person={completedBy} />
         </>
       )}

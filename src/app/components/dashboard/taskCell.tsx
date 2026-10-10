@@ -80,7 +80,7 @@ export default function TaskCell({ cell, onClick }: TaskCellProps) {
                 className="h-3 w-3 rounded-full"
                 style={{ backgroundColor: entry.data.assigneeColor }}
               />
-              <span className="text-[8px] text-slate-500 font-medium mt-0.5">{short}</span>
+              <span className="text-[8px] text-muted font-medium mt-0.5">{short}</span>
             </button>
           );
         }
@@ -90,10 +90,10 @@ export default function TaskCell({ cell, onClick }: TaskCellProps) {
             type="button"
             onClick={() => onClick(entry.slotId)}
             title={entry.label ?? ""}
-            className="flex flex-col items-center w-6 rounded hover:bg-slate-50 transition active:scale-95"
+            className="flex flex-col items-center w-6 rounded hover:bg-surface-2 transition active:scale-95"
           >
-            <span className="h-3 w-3 rounded-full border border-slate-300" />
-            <span className="text-[8px] text-slate-400 mt-0.5">{short}</span>
+            <span className="h-3 w-3 rounded-full border border-line" />
+            <span className="text-[8px] text-subtle mt-0.5">{short}</span>
           </button>
         );
       })}

@@ -9,7 +9,12 @@ export function useModalTarget<T>() {
     isOpen,
     openFor: (t: T) => {
       setTarget(t);
-      setIsOpen(true);
+      // Beim ersten Öffnen wird das Modal erst durch setTarget eingehängt.
+      // Würde es direkt geöffnet gerendert, gäbe es keinen Ausgangszustand für
+      // die Einblend-Animation. Daher erst ein Frame geschlossen malen lassen.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => setIsOpen(true)),
+      );
     },
     close: () => setIsOpen(false),
   };

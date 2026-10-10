@@ -17,25 +17,25 @@ export default function DesktopView({
   onCellClick,
 }: DesktopViewProps) {
   return (
-    <div className="hidden md:block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="hidden md:block overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
       <table className="w-full table-fixed">
         <colgroup>
           <col className="w-44" />
         </colgroup>
 
         <thead>
-          <tr className="border-b border-slate-200 bg-slate-50">
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <tr className="border-b border-line bg-surface-2">
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
               Aufgabe
             </th>
             {shortenWeekDays.map((day, i) => (
               <th key={i} className="py-3 text-center">
                 <span
-                  className={`block text-sm font-bold ${i >= 5 ? "text-slate-400" : "text-brand-600"}`}
+                  className={`block text-sm font-bold ${i >= 5 ? "text-subtle" : "text-brand-600"}`}
                 >
                   {day}
                 </span>
-                <span className="block text-xs text-slate-400">
+                <span className="block text-xs text-subtle">
                   {formatDate(weekDays[i])}
                 </span>
               </th>
@@ -48,7 +48,7 @@ export default function DesktopView({
             <tr>
               <td
                 colSpan={8}
-                className="px-4 py-8 text-center text-sm text-slate-400"
+                className="px-4 py-8 text-center text-sm text-subtle"
               >
                 Noch keine Aufgaben vorhanden.
               </td>
@@ -57,11 +57,11 @@ export default function DesktopView({
             rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-slate-100 last:border-b-0"
+                className="border-b border-line last:border-b-0"
               >
                 <td className="px-4 py-2.5">
                   <span
-                    className="text-sm font-medium text-slate-800 wrap-break-word block"
+                    className="text-sm font-medium text-fg wrap-break-word block"
                     style={{ lineHeight: "1.5" }}
                   >
                     {row.name}

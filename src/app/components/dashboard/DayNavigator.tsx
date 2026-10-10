@@ -21,7 +21,7 @@ export default function DayNavigator({
       <div className="flex items-center justify-center gap-2 mt-3">
         <NavButton onClick={() => onShift(-1)} dir="left" />
 
-        <span className="w-75 text-center text-lg font-semibold text-slate-800">
+        <span className="w-75 text-center text-lg font-semibold text-fg">
           {getDay(date.getDay())}
           {", "}
           {date.getDate()}

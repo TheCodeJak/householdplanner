@@ -17,7 +17,7 @@ export function AvatarDot({
   const dim = dimBySize[size];
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full font-bold text-white ring-1 ring-white ${dim}`}
+      className={`inline-flex items-center justify-center rounded-full font-bold text-white ring-1 ring-surface ${dim}`}
       style={{ backgroundColor: completed ? "#22c55e" : color }}
     >
       {name[0]}

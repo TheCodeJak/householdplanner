@@ -1,21 +1,54 @@
+import Link from "next/link";
+import { AuthShell } from "../AuthShell";
 import { LoginForm } from "./form";
+import {
+  LOGIN_VARIANTS,
+  LoginVariant,
+  LoginVariantView,
+  VariantSwitcher,
+} from "./variants";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ v?: string }>;
+}) {
+  // ⚠️ TEMPORÄR: Design-Varianten, siehe ./variants.tsx
+  const { v } = await searchParams;
+  const variant: LoginVariant =
+    v && Object.hasOwn(LOGIN_VARIANTS, v) ? (v as LoginVariant) : "current";
+
+  if (variant !== "current") {
+    return (
+      <VariantSwitcher active={variant}>
+        <LoginVariantView variant={variant} />
+      </VariantSwitcher>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
-        <h1 className="mb-6 text-2xl font-semibold text-slate-900">Anmelden</h1>
+    <VariantSwitcher active={variant}>
+      <AuthShell
+        title="Anmelden"
+        subtitle="Melde dich mit deiner E-Mail-Adresse und deinem Passwort an."
+        icons={[
+          "kochen", null, "waschen", "hund",
+          null, "einkaufen", "pflanzen", null,
+        ]}
+        footer={
+          <>
+            Noch kein Konto?{" "}
+            <Link
+              href="/register"
+              className="inline-block py-2 font-semibold text-brand-600 hover:text-brand-700"
+            >
+              Registrieren
+            </Link>
+          </>
+        }
+      >
         <LoginForm />
-        <p className="mt-4 text-center text-sm text-slate-500">
-          Noch kein Konto?{" "}
-          <a
-            href="/register"
-            className="font-semibold text-brand-600 hover:text-brand-700"
-          >
-            Registrieren
-          </a>
-        </p>
-      </div>
-    </div>
+      </AuthShell>
+    </VariantSwitcher>
   );
 }

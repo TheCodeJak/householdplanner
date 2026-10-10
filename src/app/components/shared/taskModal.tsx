@@ -37,7 +37,7 @@ export default function TaskModal({ open, onClose }: TaskModalProps) {
 
   return (
     <Modal open={open} onClose={onClose} variant="sheet" title="Neue Aufgabe">
-      <p className="-mt-3 mb-5 text-sm text-slate-500">
+      <p className="-mt-3 mb-5 text-sm text-muted">
         Aufgabe für den Haushaltsplan erstellen
       </p>
 
@@ -50,10 +50,10 @@ export default function TaskModal({ open, onClose }: TaskModalProps) {
         />
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-widest text-subtle">
             Zeitslots (optional)
           </span>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-subtle">
             Für Aufgaben die mehrmals am Tag anfallen
           </p>
 
@@ -95,7 +95,7 @@ export default function TaskModal({ open, onClose }: TaskModalProps) {
                 }
               }}
               placeholder="z.B. Morgens"
-              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+              className="flex-1 rounded-xl border border-line px-3 py-2 text-sm text-fg outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
             />
             <Button
               variant="ghost"

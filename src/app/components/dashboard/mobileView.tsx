@@ -110,23 +110,23 @@ export default function MobileView({
                 className="transition-all duration-500"
               />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-slate-800">
+            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-fg">
               {percent}%
             </span>
           </div>
 
           <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-xs font-semibold text-slate-600 mb-1">
+            <span className="text-xs font-semibold text-fg-2 mb-1">
               Wochenfortschritt
             </span>
-            <span className="text-xs text-slate-400 mb-2">
+            <span className="text-xs text-subtle mb-2">
               {completedCount} von {totalCount} Aufgaben erledigt
             </span>
             {[...userMap.entries()].map(
               ([name, { color, initial, completed, total }]) => (
                 <div key={name} className="flex items-center gap-2 mt-1">
                   <UserAvatar initial={initial} color={color} size={18} />
-                  <div className="h-1.5 flex-1 rounded-full bg-slate-200">
+                  <div className="h-1.5 flex-1 rounded-full bg-line">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
@@ -135,7 +135,7 @@ export default function MobileView({
                       }}
                     />
                   </div>
-                  <span className="text-xs text-slate-500 whitespace-nowrap">
+                  <span className="text-xs text-muted whitespace-nowrap">
                     {completed} erledigt
                   </span>
                 </div>
@@ -146,8 +146,8 @@ export default function MobileView({
       )} */}
 
       <div className="flex items-center justify-between">
-        <span className="text-base font-bold text-slate-800">Aufgaben</span>
-        <div className="flex rounded-full border border-slate-200 bg-white p-0.5">
+        <span className="text-base font-bold text-fg">Aufgaben</span>
+        <div className="flex rounded-full border border-line bg-surface p-0.5">
           {FILTERS.map(({ key, label }) => (
             <button
               key={key}
@@ -156,7 +156,7 @@ export default function MobileView({
               className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
                 filter === key
                   ? "bg-orange-500 text-white"
-                  : "text-slate-500 hover:text-slate-700"
+                  : "text-muted hover:text-fg-2"
               }`}
             >
               {label}
@@ -166,10 +166,10 @@ export default function MobileView({
       </div>
 
       {/* <Card className="flex-col">
-        <span className="flex w-full justify-center text-sm text-slate-600">
+        <span className="flex w-full justify-center text-sm text-fg-2">
           Keine Aufgabe vorhanden
         </span>
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-subtle">
           Über das + können Aufgaben hinzugefügt werden
         </span>
       </Card> */}
@@ -177,10 +177,10 @@ export default function MobileView({
       <div className="flex flex-col gap-2">
         {filteredRows.length === 0 ? (
           <Card className="flex-col">
-            <span className="flex w-full justify-center text-sm text-slate-600">
+            <span className="flex w-full justify-center text-sm text-fg-2">
               Keine Aufgabe vorhanden
             </span>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-subtle">
               Über das + können Aufgaben hinzugefügt werden
             </span>
           </Card>
@@ -262,7 +262,7 @@ function SimpleCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative flex items-center gap-3 rounded-2xl border border-gray-100 bg-white pl-5 pr-4 py-3 shadow-xs text-left active:scale-[.99] transition-transform"
+      className="relative flex items-center gap-3 rounded-2xl border border-line bg-surface pl-5 pr-4 py-3 shadow-xs text-left active:scale-[.99] transition-transform"
     >
       {accentColor && (
         <div
@@ -302,7 +302,7 @@ function SimpleCard({
       </div>
 
       <div className="flex-1 min-w-0">
-        <span className="block text-sm font-semibold text-slate-800 truncate">
+        <span className="block text-sm font-semibold text-fg truncate">
           {row.name}
         </span>
         <span className="block text-xs mt-px">
@@ -312,7 +312,7 @@ function SimpleCard({
               Erledigt
             </span>
           ) : hasAssignee ? (
-            <span className="inline-flex items-center gap-1 text-slate-500">
+            <span className="inline-flex items-center gap-1 text-muted">
               <span
                 className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
                 style={{ backgroundColor: entry.data!.assigneeColor }}
@@ -398,7 +398,7 @@ function SlottedCard({
     <div
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="relative flex items-center gap-3 rounded-2xl border border-gray-100 bg-white pl-5 pr-4 py-3 shadow-xs"
+      className="relative flex items-center gap-3 rounded-2xl border border-line bg-surface pl-5 pr-4 py-3 shadow-xs"
     >
       {accentColor && (
         <div
@@ -408,7 +408,7 @@ function SlottedCard({
       )}
 
       <div className="flex-1 min-w-0">
-        <span className="block text-sm font-semibold text-slate-800 truncate">
+        <span className="block text-sm font-semibold text-fg truncate">
           {row.name}
         </span>
       </div>
