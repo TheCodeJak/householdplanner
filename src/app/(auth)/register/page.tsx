@@ -1,23 +1,27 @@
+import Link from "next/link";
+import { AuthShell } from "@/components/layout/AuthShell";
 import { RegisterForm } from "./form";
 
 export default function RegisterPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-stone-50">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
-        <h1 className="mb-6 text-2xl font-semibold text-slate-900">
-          Registrieren
-        </h1>
-        <RegisterForm />
-        <p className="mt-4 text-center text-sm text-slate-500">
+    <AuthShell
+      title="Konto erstellen"
+      subtitle="Mit einem Konto planst und verteilst du Haushaltsaufgaben in deiner Familie."
+      // Eine Reihe weniger als beim Login – das Formular hat ein Feld mehr
+      icons={["putzen", "kalender", null, "katze"]}
+      footer={
+        <>
           Bereits ein Konto?{" "}
-          <a
+          <Link
             href="/login"
-            className="font-semibold text-brand-600 hover:text-brand-700"
+            className="inline-block py-2 font-semibold text-brand-600 hover:text-brand-700"
           >
             Anmelden
-          </a>
-        </p>
-      </div>
-    </div>
+          </Link>
+        </>
+      }
+    >
+      <RegisterForm />
+    </AuthShell>
   );
 }

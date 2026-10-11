@@ -14,7 +14,10 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if ((pathname === "/" || pathname === "/login" || pathname === "/register") && isLoggedIn) {
+  if (
+    (pathname === "/" || pathname === "/login" || pathname === "/register") &&
+    isLoggedIn
+  ) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 });

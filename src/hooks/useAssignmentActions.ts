@@ -2,8 +2,15 @@ import { SlotActionKey } from "@/lib/getSlotActions";
 import { trpc } from "@/lib/trpc";
 import { SlotRef } from "@/types/plan";
 
+/**
+ * Die fünf Aktionen auf einem Slot (übernehmen, erledigen …) als Mutationen.
+ * `run(key, slot, onSuccess)` führt die passende aus; die Buttons dafür
+ * liefert getSlotActions().
+ */
 export function useAssignmentActions() {
   const utils = trpc.useUtils();
+  // Nach jeder Aktion (Erfolg oder Fehler) den Tagesplan als veraltet markieren:
+  // React Query lädt ihn neu, und alle Karten zeigen den neuen Stand
   const options = { onSettled: () => utils.plan.getDay.invalidate() };
 
   const mutations = {
@@ -22,7 +29,8 @@ export function useAssignmentActions() {
   return {
     run,
     isPending: all.some((m) => m.isPending),
-    error: all.find((m) => m.error)?.error?.message ?? null,
+    // Der ganze Fehler (nicht nur der Text), damit describeError() ihn einordnen kann
+    error: all.find((m) => m.error)?.error ?? null,
     reset: () => all.forEach((m) => m.reset()),
   };
 }

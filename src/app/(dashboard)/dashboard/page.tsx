@@ -1,40 +1,76 @@
 "use client";
 
-import DayNavigator from "@/app/components/dashboard/DayNavigator";
-import { TaskCardList } from "@/app/components/dashboard/TaskCardList";
-import TaskDetailModal from "@/app/components/shared/TaskDetailModal";
+import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
+import { TaskCardList } from "@/components/dashboard/TaskCardList";
+import { TaskListSkeleton } from "@/components/dashboard/TaskListSkeleton";
+import { WeekStripHeader } from "@/components/dashboard/WeekStripHeader";
+import TaskDetailModal from "@/components/modals/TaskDetailModal";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { InlineAlert } from "@/components/ui/InlineAlert";
 import { useDayPlan } from "@/hooks/useDayPlan";
+import { useIsClient } from "@/hooks/useIsClient";
 import { useModalTarget } from "@/hooks/useModalTarget";
 import { useSelectedDay } from "@/hooks/useSelectedDay";
 import { toIsoDate } from "@/lib/dateUtils";
-import { SlotRef } from "@/types/plan";
+import type { SlotRef } from "@/types/plan";
 
+// Die Seite setzt nur Hooks (Daten) und Komponenten (Darstellung) zusammen.
 export default function DashboardPage() {
   const { date, isToday, shift, goToday } = useSelectedDay();
-  const { tasks, isLoading, error } = useDayPlan(date);
+  const { tasks, isLoading, isPlaceholderData, hasData, error, refetch } =
+    useDayPlan(date);
   const detail = useModalTarget<SlotRef>();
+  // "Heute", die Begrüßung usw. hängen von der lokalen Uhrzeit ab. Der Server
+  // (Docker = UTC) kennt die Zeitzone des Browsers nicht – deshalb rendern wir
+  // erst im Browser, sonst passt das Server-HTML nicht zum Browser (Hydration-Fehler).
+  const isClient = useIsClient();
+  if (!isClient) return null;
 
   return (
     <>
-      <DayNavigator
+      <DashboardGreeting tasks={tasks} />
+      <WeekStripHeader
         date={date}
         isToday={isToday}
         onShift={shift}
         goToday={goToday}
       />
 
-      <div className="flex flex-col m-4 gap-2">
+      <div className="m-4 flex flex-col gap-2">
         {isLoading ? (
-          <p className="m-4 text-sm text-slate-400">lädt …</p>
-        ) : error ? (
-          <p className="m-4 text-sm text-red-600">{error.message}</p>
+          // Allererstes Laden: Platzhalter-Karten statt Text
+          <TaskListSkeleton />
+        ) : error && !hasData ? (
+          // Fehler und noch nichts anzuzeigen: ganzseitige Meldung
+          <ErrorState error={error} onRetry={() => refetch()} />
         ) : (
-          <TaskCardList
-            tasks={tasks}
-            onSelect={(taskId, slotId) =>
-              detail.openFor({ taskId, slotId, date: toIsoDate(date) })
-            }
-          />
+          <>
+            {/* Fehler beim Nachladen im Hintergrund: der letzte Stand bleibt
+                sichtbar, oben nur ein kleiner Hinweis */}
+            {error && (
+              <div className="mx-2">
+                <InlineAlert
+                  text="Verbindung unterbrochen – du siehst den letzten Stand."
+                  actionLabel="Erneut versuchen"
+                  onAction={() => refetch()}
+                />
+              </div>
+            )}
+            {/* Beim Tageswechsel stehen kurz noch die Karten des vorigen Tages
+                da (keepPreviousData) – blasser, damit klar ist: es lädt */}
+            <div
+              className={`transition-opacity duration-200 ${
+                isPlaceholderData ? "opacity-50" : ""
+              }`}
+            >
+              <TaskCardList
+                tasks={tasks}
+                onSelect={(taskId, slotId) =>
+                  detail.openFor({ taskId, slotId, date: toIsoDate(date) })
+                }
+              />
+            </div>
+          </>
         )}
       </div>
 

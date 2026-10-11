@@ -17,6 +17,7 @@ export async function getDayPlanRows({
     .select({
       taskId: task.id,
       title: task.title,
+      icon: task.icon,
       slotId: taskSlot.id,
       slotLabel: taskSlot.label,
       assignmentId: taskAssignment.id,

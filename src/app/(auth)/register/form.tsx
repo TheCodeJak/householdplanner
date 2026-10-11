@@ -42,7 +42,12 @@ export function RegisterForm() {
           {state.error}
         </p>
       )}
-      <Button type="submit" size="lg" className="mt-2 w-full" disabled={pending}>
+      <Button
+        type="submit"
+        size="lg"
+        className="mt-2 w-full"
+        disabled={pending}
+      >
         Konto erstellen
       </Button>
     </form>

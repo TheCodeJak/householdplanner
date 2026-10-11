@@ -28,7 +28,8 @@ export const familyProcedure = t.procedure.use(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
-  const familyId = await getUserFamily(userId);
+  // Tokens von vor dem Update haben noch keine familyId -> einmal aus der DB holen
+  const familyId = ctx.session?.user?.familyId ?? (await getUserFamily(userId));
   if (!familyId) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }

@@ -9,6 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:push:neon-dev": "dotenv -e .env.local -- drizzle-kit push",
     "db:studio:neon-dev": "dotenv -e .env.local -- drizzle-kit studio",
     "db:push:docker": "dotenv -e .env.docker-db -- drizzle-kit push",
@@ -40,6 +42,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "formik": "^2.4.9",
+    "prettier": "3.9.10",
+    "prettier-plugin-tailwindcss": "0.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

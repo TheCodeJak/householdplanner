@@ -1,7 +1,12 @@
+import { ComingSoon } from "@/components/ui/ComingSoon";
+import { FloatingTiles } from "@/components/ui/FloatingTiles";
+
 export default function CalendarPage() {
   return (
-    <div className="flex">
-      <p className="text-lg text-slate-400">Kalender — under development</p>
-    </div>
+    <ComingSoon
+      title="Kalender"
+      description="Bald siehst du hier die ganze Woche auf einen Blick: wer wann welche Aufgabe übernimmt."
+      illustration={<FloatingTiles icons={["kalender", "wecker", "planung"]} />}
+    />
   );
 }

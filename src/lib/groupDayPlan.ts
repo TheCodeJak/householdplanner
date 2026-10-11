@@ -1,9 +1,11 @@
 import { Person, SlotView, TaskView } from "@/types/plan";
 import { colorFromUserId } from "./color";
+import { isTaskIconName } from "./taskIcons";
 
 type DayPlanRows = {
   taskId: string;
   title: string;
+  icon: string | null;
   slotId: string | null;
   slotLabel: string | null;
   assignmentId: string | null;
@@ -65,6 +67,7 @@ export function groupDayPlan({
       tasks.set(row.taskId, {
         taskId: row.taskId,
         title: row.title,
+        icon: row.icon && isTaskIconName(row.icon) ? row.icon : null,
         slots: slot,
       });
     }

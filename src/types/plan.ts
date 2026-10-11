@@ -1,36 +1,9 @@
-export type AssignmentData = {
-  assignmentId: string;
-  assigneeName: string;
-  assigneeColor: string;
-  assignedToId: string;
-  isCompleted: boolean;
-  isCurrentUser: boolean;
-  completedByName: string | null;
-  completedByColor: string | null;
-  isCompletedByCurrentUser: boolean;
-  completerDiffers: boolean;
-  note: string | null;
-};
+import type { TaskIconName } from "@/lib/taskIcons";
 
-export type SlotEntry = {
-  slotId: string | null;
-  label: string | null;
-  data: AssignmentData | null;
-};
+// Der Vertrag zwischen Server und Browser: plan.getDay liefert TaskView[],
+// die Oberfläche rendert nur noch diese fertigen Objekte.
 
-// Each day cell is an array of slot entries.
-// Tasks without slots: [{ slotId: null, label: null, data: ... }]
-// Tasks with slots: [{ slotId, label, data }, ...]
-export type DayCell = SlotEntry[];
-
-export type Row = {
-  id: string;
-  name: string;
-  cells: DayCell[];
-};
-
-//! New Types
-// ==========================================================================
+// open = keine Zuweisung, claimed = übernommen, completed = erledigt
 export type TaskStatus = "open" | "claimed" | "completed";
 
 export type Person = {
@@ -50,6 +23,11 @@ export type SlotView = {
   notes: string | null;
 };
 
-export type TaskView = { taskId: string; title: string; slots: SlotView[] };
+export type TaskView = {
+  taskId: string;
+  title: string;
+  icon: TaskIconName | null; // null = noch kein Icon gewählt
+  slots: SlotView[];
+};
 
 export type SlotRef = { taskId: string; slotId: string | null; date: string }; // ISO-Datum

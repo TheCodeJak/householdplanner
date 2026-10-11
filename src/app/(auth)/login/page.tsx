@@ -1,21 +1,27 @@
+import { AuthShell } from "@/components/layout/AuthShell";
+import Link from "next/link";
 import { LoginForm } from "./form";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
-        <h1 className="mb-6 text-2xl font-semibold text-slate-900">Anmelden</h1>
-        <LoginForm />
-        <p className="mt-4 text-center text-sm text-slate-500">
+    <AuthShell
+      title="Anmelden"
+      subtitle="Melde dich mit deiner E-Mail-Adresse und deinem Passwort an."
+      icons={["kochen", null, "waschen", "hund"]}
+      footer={
+        <>
           Noch kein Konto?{" "}
-          <a
+          {/* inline-block py-2: größere Tippfläche, ohne die Zeile höher zu machen */}
+          <Link
             href="/register"
-            className="font-semibold text-brand-600 hover:text-brand-700"
+            className="inline-block py-2 font-semibold text-brand-600 hover:text-brand-700"
           >
             Registrieren
-          </a>
-        </p>
-      </div>
-    </div>
+          </Link>
+        </>
+      }
+    >
+      <LoginForm />
+    </AuthShell>
   );
 }
