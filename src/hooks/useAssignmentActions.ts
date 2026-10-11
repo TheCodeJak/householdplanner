@@ -29,7 +29,8 @@ export function useAssignmentActions() {
   return {
     run,
     isPending: all.some((m) => m.isPending),
-    error: all.find((m) => m.error)?.error?.message ?? null,
+    // Der ganze Fehler (nicht nur der Text), damit describeError() ihn einordnen kann
+    error: all.find((m) => m.error)?.error ?? null,
     reset: () => all.forEach((m) => m.reset()),
   };
 }

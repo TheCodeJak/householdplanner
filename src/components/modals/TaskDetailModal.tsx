@@ -1,12 +1,14 @@
 "use client";
 
 import { IconButton } from "@/components/ui/IconButton";
+import { InlineAlert } from "@/components/ui/InlineAlert";
 import { PersonChip } from "@/components/ui/PersonChip";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { TaskTile } from "@/components/ui/TaskTile";
 import { useAssignmentActions } from "@/hooks/useAssignmentActions";
 import { useDayPlan } from "@/hooks/useDayPlan";
 import { formatDayLabel, fromIsoDate } from "@/lib/dateUtils";
+import { describeError } from "@/lib/describeError";
 import { fitsSideBySide, getSlotActions } from "@/lib/getSlotActions";
 import { TASK_ICON_GLOWS, taskIconTones } from "@/lib/taskIcons";
 import type { SlotRef, SlotView } from "@/types/plan";
@@ -120,7 +122,9 @@ export default function TaskDetailModal({
           ))}
         </div>
         {error && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="mt-3">
+            <InlineAlert text={describeError(error).text} />
+          </div>
         )}
       </div>
     </Modal>
