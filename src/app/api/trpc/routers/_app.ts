@@ -1,5 +1,6 @@
 import { router } from "../init";
 import { assignmentActionsRouter } from "./assignmentsAction";
+import { familyRouter } from "./family";
 import { planRouter } from "./plan";
 import { tasksRouter } from "./tasks";
 
@@ -9,6 +10,7 @@ export const appRouter = router({
   assignments: assignmentActionsRouter,
   plan: planRouter,
   tasks: tasksRouter,
+  family: familyRouter,
 });
 
 export type AppRouter = typeof appRouter;

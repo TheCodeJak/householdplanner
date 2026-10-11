@@ -9,3 +9,11 @@ export async function getUserFamily(userId: string): Promise<string | null> {
     .where(eq(user.id, userId));
   return row?.familyId ?? null;
 }
+
+export async function getMembers(familyId: string): Promise<string[]> {
+  const rows = await db
+    .select({ name: user.name })
+    .from(user)
+    .where(eq(user.familyId, familyId));
+  return rows.map((row) => row.name);
+}

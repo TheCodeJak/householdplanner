@@ -20,7 +20,8 @@
  *   2. jaklib an die Markenfarben anpassen
  *   3. Semantische Farben (hell + dunkel)
  *   4. jaklib an die semantischen Farben hängen
- *   5. Eigene Klassen: Milchglas (glass-card, glass-inset, glass-pill)
+ *   5. Eigene Klassen: Milchglas (glass-card, glass-inset, glass-pill),
+ *      dezente Flächen (.surface-soft)
  *   6. Animationen
  *   7. Detail-Sheet (.task-sheet)
  *   8. Hintergrund der Hauptapp (.app-backdrop-*)
@@ -204,6 +205,20 @@ body {
     border-color: rgb(255 255 255 / 0.06);
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
   }
+}
+
+/*
+ * surface-soft: dezentere Variante für einen ganzen Bereich (z.B. die
+ * Profilseite). Darin werden glass-card und glass-pill zu deckenden Flächen
+ * ohne Rand und ohne Blur, nur mit einem Hauch Schatten.
+ * Bewusst ohne @layer: ungelayertes CSS gewinnt gegen die Utilities oben.
+ * Soll die ganze App so aussehen, die Werte direkt in die Utilities ziehen.
+ */
+.surface-soft :is(.glass-card, .glass-pill) {
+  background-color: var(--app-surface);
+  border-color: transparent;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
+  backdrop-filter: none;
 }
 
 /* ── 6. Animationen ──────────────────────────────────────────────────────── */
