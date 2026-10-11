@@ -1,4 +1,5 @@
-import { BarsIllustration, ComingSoon } from "@/app/components/ui/ComingSoon";
+import { BarsIllustration } from "@/components/ui/BarsIllustration";
+import { ComingSoon } from "@/components/ui/ComingSoon";
 
 export default function StatisticsPage() {
   return (

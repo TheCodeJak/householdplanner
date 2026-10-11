@@ -1,8 +1,38 @@
+/*
+ * Globale Styles der App (Tailwind CSS v4).
+ *
+ * Kurz zu den Tailwind-Besonderheiten in dieser Datei:
+ * - @theme { --color-x: … }   legt Design-Tokens an. Aus --color-brand-600 macht
+ *                             Tailwind automatisch Klassen wie bg-brand-600,
+ *                             text-brand-600, border-brand-600 …
+ * - @theme inline { … }       wie @theme, aber der Wert ist eine Variable, die
+ *                             erst im Browser aufgelöst wird. Nötig, damit
+ *                             Klassen beim Wechsel in den Dark Mode mitziehen.
+ * - @utility name { … }       eigene Klasse, die sich wie eine Tailwind-Klasse
+ *                             verhält (im Layer "utilities", mit md:/dark: usw.).
+ * - @variant dark { … }       Regeln, die nur im Dark Mode gelten. Tailwinds
+ *                             `dark:` folgt hier der Systemeinstellung des Geräts
+ *                             (prefers-color-scheme).
+ * - Deckkraft-Kürzel          bg-surface/60 = Farbe "surface" mit 60 % Deckkraft.
+ *
+ * Gliederung:
+ *   1. Markenfarben
+ *   2. jaklib an die Markenfarben anpassen
+ *   3. Semantische Farben (hell + dunkel)
+ *   4. jaklib an die semantischen Farben hängen
+ *   5. Eigene Klassen: Milchglas (glass-card, glass-inset, glass-pill)
+ *   6. Animationen
+ *   7. Detail-Sheet (.task-sheet)
+ *   8. Hintergrund der Hauptapp (.app-backdrop-*)
+ */
+
 @import "tailwindcss";
 
+/* ── 1. Markenfarben ─────────────────────────────────────────────────────── */
+
 @theme {
-  /* Brand – Orange */
-  --color-brand-50:  #fff7ed;
+  /* Orange in 10 Stufen: 50 = sehr hell … 900 = sehr dunkel */
+  --color-brand-50: #fff7ed;
   --color-brand-100: #ffedd5;
   --color-brand-200: #fed7aa;
   --color-brand-300: #fdba74;
@@ -13,20 +43,17 @@
   --color-brand-800: #9a3412;
   --color-brand-900: #7c2d12;
 
-  /* Semantic */
   --color-success-600: #16a34a;
-  --color-success-700: #15803d;
-  --color-warning-500: #f59e0b;
-  --color-warning-600: #d97706;
-  --color-error-600:   #dc2626;
-  --color-error-700:   #b91c1c;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
 }
 
+/* ── 2. jaklib an die Markenfarben anpassen ──────────────────────────────── */
+
 /*
- * jaklib importiert vor dieser Datei (siehe layout.tsx) eigene Tokens mit
- * einer eigenen Orange-Marke. Die rohen Tokens hier auf unsere bestehende
- * Palette ummappen, damit alle jaklib-Komponenten automatisch das gleiche
- * Branding wie der Rest der App bekommen.
+ * jaklib wird vor dieser Datei geladen (siehe app/layout.tsx) und bringt eigene
+ * Farb-Variablen mit. Hier zeigen sie auf unsere Palette, damit Buttons,
+ * Fokus-Ringe usw. automatisch im selben Orange erscheinen.
  */
 :root {
   --brand: var(--color-brand-600);
@@ -37,23 +64,25 @@
   --sage: var(--color-success-600);
 }
 
+/* ── 3. Semantische Farben (hell + dunkel) ───────────────────────────────── */
+
 /*
- * ─────────────────────────────────────────────
- * Semantische Farben (Light + Dark Mode)
- * ─────────────────────────────────────────────
  * Komponenten nutzen NUR diese Namen statt fester Farben wie bg-white oder
- * text-slate-500. Der Dark Mode folgt der Systemeinstellung und tauscht hier
- * zentral die Werte – an den Komponenten muss dafür nichts passieren.
+ * text-slate-500. Für den Dark Mode werden unten zentral die Werte getauscht –
+ * an den Komponenten muss dafür nichts passieren.
  *
  *   bg-page       Seitenhintergrund
  *   bg-surface    Karten, Modals, Felder   (auch transparent: bg-surface/60)
  *   bg-surface-2  leicht abgesetzte Flächen in Karten
- *   text-fg       Haupttext / Überschriften
+ *   text-fg       Haupttext, Überschriften
  *   text-fg-2     normaler Fließtext
  *   text-muted    Nebentext
  *   text-subtle   Hinweise, Platzhalter, Erledigtes
  *   border-line   Trennlinien und Ränder
- *   border-glass  heller Rand von Milchglas-Flächen
+ *   border-glass  heller Lichtrand von Milchglas-Flächen
+ *
+ * Nur farbige Flächen (Pastell-Kacheln, Status-Farben) brauchen noch ein
+ * eigenes dark:…, z.B. "bg-sky-100 dark:bg-sky-400/15".
  */
 @theme inline {
   --color-page: var(--app-page);
@@ -68,6 +97,7 @@
 }
 
 :root {
+  /* color-scheme: Browser färbt Scrollbalken, Formular-Elemente usw. passend */
   color-scheme: light;
   --app-page: #faf7f3;
   --app-surface: #ffffff;
@@ -95,9 +125,11 @@
   }
 }
 
+/* ── 4. jaklib an die semantischen Farben hängen ─────────────────────────── */
+
 /*
- * jaklib-Komponenten (Card, Modal, TextField, …) an dieselben Farben hängen,
- * damit sie in beiden Modi zum Rest der App passen.
+ * jaklib-Komponenten (Card, Modal, TextField …) lesen diese Variablen. Zeigen
+ * sie auf unsere Farben, passen sie in beiden Modi automatisch zum Rest.
  */
 :root {
   --background: var(--app-page);
@@ -122,12 +154,13 @@ body {
   color: var(--app-fg);
 }
 
+/* ── 5. Eigene Klassen: Milchglas ────────────────────────────────────────── */
+
 /*
- * Karten im Dark Mode als Milchglas: leicht transparente, minimal hellere
- * Fläche über dem Hintergrund-Schimmer, statt Rahmen nur ein feiner Lichtrand
- * oben. Im Light Mode bleibt jaklibs Card (weiß + feiner Rand) unverändert.
- *   glass-card   äußere Karte
- *   glass-inset  vertiefte Fläche innerhalb einer Karte (z.B. Slot-Liste)
+ * glass-card: äußere Karte (TaskCard). Hell bleibt jaklibs Card unverändert
+ * (weiß + feiner Rand); dunkel wird sie zu Milchglas: leicht transparente,
+ * minimal hellere Fläche über dem Hintergrund-Schimmer, statt Rahmen nur eine
+ * feine Lichtkante oben (inset-Schatten).
  */
 @utility glass-card {
   @variant dark {
@@ -140,18 +173,50 @@ body {
   }
 }
 
+/*
+ * glass-inset: vertiefte Fläche innerhalb einer Karte (Slot-Liste).
+ * Hell eine warme, leicht abgesetzte Fläche, dunkel etwas dunkler als die Karte.
+ */
 @utility glass-inset {
+  background-color: var(--app-surface-2);
+  border-color: transparent;
+  box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.05);
+
   @variant dark {
     background-color: rgb(0 0 0 / 0.2);
-    border-color: transparent;
     box-shadow: inset 0 1px 0 rgb(0 0 0 / 0.25);
   }
 }
 
-/* Animationen für die „Kommt bald“-Seiten */
+/*
+ * glass-pill: kleine Bedienflächen (Tages-Kacheln, Pfeile, "3/6 erledigt").
+ * Hell deckend mit feinem Rand + Schatten – bleibt so auch auf dem weißen
+ * Kopf beim Scrollen sichtbar. Dunkel wie glass-card, aber ohne blur(): sieben
+ * weichgezeichnete Kacheln im klebenden Kopf würden das Scrollen ruckeln lassen.
+ */
+@utility glass-pill {
+  background-color: var(--app-surface);
+  border: 1px solid rgb(15 23 42 / 0.07);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+
+  @variant dark {
+    background-color: rgb(255 255 255 / 0.06);
+    border-color: rgb(255 255 255 / 0.06);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+  }
+}
+
+/* ── 6. Animationen ──────────────────────────────────────────────────────── */
+
+/*
+ * --animate-float erzeugt die Klasse animate-float (FloatingTiles).
+ * Die Drehung kommt aus der Variable --tilt, die jede Kachel selbst setzt –
+ * sonst würde das transform der Animation die Drehung überschreiben.
+ * Im Code immer als motion-safe:animate-float verwenden: dann steht die
+ * Animation still, wenn auf dem Gerät "Bewegung reduzieren" aktiv ist.
+ */
 @theme {
   --animate-float: float 5s ease-in-out infinite;
-  --animate-bar: bar 2.4s ease-in-out infinite;
 
   @keyframes float {
     0%,
@@ -162,14 +227,139 @@ body {
       transform: translateY(-10px) rotate(var(--tilt, 0deg));
     }
   }
+}
 
-  @keyframes bar {
-    0%,
-    100% {
-      transform: scaleY(0.35);
-    }
-    50% {
-      transform: scaleY(1);
-    }
+/* ── 7. Detail-Sheet (.task-sheet) ───────────────────────────────────────── */
+
+/*
+ * Das Detail-Sheet (TaskDetailModal) ist jaklibs Modal mit dieser Klasse:
+ * schwebend, rundum abgerundet und ohne jaklibs eigenen Kopf (Titel, X,
+ * Trennlinie) – den bauen wir farbig selbst.
+ *
+ * Bewusst normales CSS statt Tailwind-Klassen wie [&_.Modal_header]:hidden:
+ * Tailwind liest in solchen Selektoren den Unterstrich als Leerzeichen, aus
+ * ".Modal_header" würde ".Modal header" und es träfe nichts.
+ * Ohne @layer, damit es jaklibs Regeln (Layer "components") sicher überschreibt.
+ */
+.task-sheet {
+  margin: 0 0.75rem max(0.75rem, env(safe-area-inset-bottom));
+  /* vw statt %: jaklib legt das Sheet in ein Grid, dessen Spalte mit dem
+     Inhalt wächst – % würde sich darauf beziehen und mit langen Titeln mitwachsen */
+  width: min(calc(100vw - 1.5rem), 32rem);
+}
+
+.task-sheet > .Card_base {
+  position: relative;
+  /* Flex-Kind: ohne min-width 0 könnte breiter Inhalt das Sheet aus dem Screen drücken */
+  min-width: 0;
+  border-radius: 1.5rem;
+  border: 1px solid var(--app-line);
+  padding-bottom: 0;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+.task-sheet .Modal_header,
+.task-sheet .Divider_divider {
+  display: none;
+}
+
+/* Den Zieh-Griff über den farbigen Kopf legen, statt eine eigene Zeile zu belegen */
+.task-sheet .Modal_handle {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 10;
+}
+
+.task-sheet .Modal_body {
+  padding: 0;
+}
+
+/* ── 8. Hintergrund der Hauptapp (.app-backdrop-*) ───────────────────────── */
+
+/*
+ * Für AppBackdrop: radiale Verläufe statt weichgezeichneter Kreise. Sieht fast
+ * gleich aus, braucht aber keinen blur()-Filter – der müsste beim Scrollen
+ * unter dem Milchglas-Kopf bei jedem Bild neu berechnet werden.
+ *
+ * radial-gradient(Breite Höhe at X Y, Farbe, transparent 70%):
+ * ein Farbfleck um den Punkt X/Y, der bis 70 % seiner Größe ausblendet.
+ */
+.app-backdrop-fixed {
+  background-color: var(--app-page);
+  background-image:
+    radial-gradient(
+      26rem 26rem at 105% 35%,
+      rgb(186 230 253 / 0.38),
+      transparent 70%
+    ),
+    radial-gradient(
+      26rem 26rem at -10% 92%,
+      rgb(221 214 254 / 0.38),
+      transparent 70%
+    ),
+    radial-gradient(
+      22rem 22rem at 95% 105%,
+      rgb(209 250 229 / 0.55),
+      transparent 70%
+    );
+}
+
+.app-backdrop-top {
+  background-image:
+    radial-gradient(
+      24rem 24rem at 0% 0%,
+      rgb(254 215 170 / 0.6),
+      transparent 70%
+    ),
+    radial-gradient(
+      22rem 22rem at 105% 12%,
+      rgb(251 207 232 / 0.5),
+      transparent 70%
+    ),
+    radial-gradient(
+      20rem 16rem at 45% 55%,
+      rgb(254 243 199 / 0.55),
+      transparent 70%
+    );
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-backdrop-fixed {
+    background-image:
+      radial-gradient(
+        26rem 26rem at 105% 35%,
+        rgb(14 165 233 / 0.09),
+        transparent 70%
+      ),
+      radial-gradient(
+        26rem 26rem at -10% 92%,
+        rgb(139 92 246 / 0.09),
+        transparent 70%
+      ),
+      radial-gradient(
+        22rem 22rem at 95% 105%,
+        rgb(16 185 129 / 0.07),
+        transparent 70%
+      );
+  }
+
+  .app-backdrop-top {
+    background-image:
+      radial-gradient(
+        24rem 24rem at 0% 0%,
+        rgb(249 115 22 / 0.16),
+        transparent 70%
+      ),
+      radial-gradient(
+        22rem 22rem at 105% 12%,
+        rgb(236 72 153 / 0.11),
+        transparent 70%
+      ),
+      radial-gradient(
+        20rem 16rem at 45% 55%,
+        rgb(245 158 11 / 0.08),
+        transparent 70%
+      );
   }
 }

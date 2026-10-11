@@ -1,38 +1,9 @@
-export type AssignmentData = {
-  assignmentId: string;
-  assigneeName: string;
-  assigneeColor: string;
-  assignedToId: string;
-  isCompleted: boolean;
-  isCurrentUser: boolean;
-  completedByName: string | null;
-  completedByColor: string | null;
-  isCompletedByCurrentUser: boolean;
-  completerDiffers: boolean;
-  note: string | null;
-};
-
-export type SlotEntry = {
-  slotId: string | null;
-  label: string | null;
-  data: AssignmentData | null;
-};
-
-// Each day cell is an array of slot entries.
-// Tasks without slots: [{ slotId: null, label: null, data: ... }]
-// Tasks with slots: [{ slotId, label, data }, ...]
-export type DayCell = SlotEntry[];
-
-export type Row = {
-  id: string;
-  name: string;
-  cells: DayCell[];
-};
-
 import type { TaskIconName } from "@/lib/taskIcons";
 
-//! New Types
-// ==========================================================================
+// Der Vertrag zwischen Server und Browser: plan.getDay liefert TaskView[],
+// die Oberfläche rendert nur noch diese fertigen Objekte.
+
+// open = keine Zuweisung, claimed = übernommen, completed = erledigt
 export type TaskStatus = "open" | "claimed" | "completed";
 
 export type Person = {

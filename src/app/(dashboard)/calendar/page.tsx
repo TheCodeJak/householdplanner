@@ -1,11 +1,12 @@
-import { ComingSoon } from "@/app/components/ui/ComingSoon";
+import { ComingSoon } from "@/components/ui/ComingSoon";
+import { FloatingTiles } from "@/components/ui/FloatingTiles";
 
 export default function CalendarPage() {
   return (
     <ComingSoon
       title="Kalender"
       description="Bald siehst du hier die ganze Woche auf einen Blick: wer wann welche Aufgabe übernimmt."
-      icons={["kalender", "wecker", "planung"]}
+      illustration={<FloatingTiles icons={["kalender", "wecker", "planung"]} />}
     />
   );
 }

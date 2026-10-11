@@ -1,3 +1,6 @@
+// Reine Datums-Helfer. Alle arbeiten in der LOKALEN Zeitzone des Browsers und
+// ignorieren die Uhrzeit – ein "Tag" ist immer Mitternacht dieses Tages.
+
 const daysOfWeek: string[] = [
   "Sonntag",
   "Montag",
@@ -7,6 +10,9 @@ const daysOfWeek: string[] = [
   "Freitag",
   "Samstag",
 ];
+
+// Index wie Date.getDay(): 0 = Sonntag
+const shortDaysOfWeek: string[] = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 
 const months: string[] = [
   "Januar",
@@ -23,12 +29,26 @@ const months: string[] = [
   "Dezember",
 ];
 
+const DAY_MS = 86_400_000;
+
+/** "Sonntag" – dayIndex wie Date.getDay() (0 = Sonntag) */
 export function getDay(dayIndex: number): string {
   return daysOfWeek[dayIndex];
 }
 
+/** "So" – dayIndex wie Date.getDay() (0 = Sonntag) */
+export function getShortDay(dayIndex: number): string {
+  return shortDaysOfWeek[dayIndex];
+}
+
+/** "Oktober" – monthIndex wie Date.getMonth() (0 = Januar) */
 export function getMonth(monthIndex: number): string {
   return months[monthIndex];
+}
+
+/** "Sonntag, 11.10." */
+export function formatDayLabel(d: Date): string {
+  return `${getDay(d.getDay())}, ${d.getDate()}.${d.getMonth() + 1}.`;
 }
 
 export function startOfToday(): Date {
@@ -37,36 +57,32 @@ export function startOfToday(): Date {
   return today;
 }
 
-export function getMonday(weekOffset: number): Date {
-  const today = new Date();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7) + weekOffset * 7);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
+/** Montag der Woche, in der `date` liegt (Wochen beginnen montags) */
+export function mondayOf(date: Date): Date {
+  // getDay(): So=0 … Sa=6  →  (getDay() + 6) % 7: Mo=0 … So=6
+  return addDays(date, -((date.getDay() + 6) % 7));
 }
 
+/** Die 7 Tage ab `monday` */
+export function weekDays(monday: Date): Date[] {
+  return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+}
+
+/** Ganze Tage von `from` bis `to` (negativ, wenn `to` davor liegt) */
+export function daysBetween(from: Date, to: Date): number {
+  // Math.round fängt die 23/25-Stunden-Tage bei der Zeitumstellung ab
+  return Math.round((to.getTime() - from.getTime()) / DAY_MS);
+}
+
+/** Date → "2026-10-11" (so erwartet es der Server) */
 export function toIsoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export function formatDate(d: Date): string {
-  return `${d.getDate()}.${d.getMonth() + 1}.`;
-}
-
-export function getWeekNumber(d: Date): number {
-  const date = new Date(d);
-  date.setHours(0, 0, 0, 0);
-  date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
-  const week1 = new Date(date.getFullYear(), 0, 4);
-  return (
-    1 +
-    Math.round(
-      ((date.getTime() - week1.getTime()) / 86400000 -
-        3 +
-        ((week1.getDay() + 6) % 7)) /
-        7,
-    )
-  );
+/** "2026-10-11" → Date (lokale Mitternacht, nicht UTC wie new Date("2026-10-11")) */
+export function fromIsoDate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
 }
 
 export function addDays(date: Date, n: number) {
@@ -81,9 +97,4 @@ export function isSameDay(a: Date, b: Date) {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
   );
-}
-
-export function fromIsoDate(iso: string): Date {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d);
 }

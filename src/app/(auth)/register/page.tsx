@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AuthShell } from "../AuthShell";
+import { AuthShell } from "@/components/layout/AuthShell";
 import { RegisterForm } from "./form";
 
 export default function RegisterPage() {
