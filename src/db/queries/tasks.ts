@@ -1,6 +1,7 @@
+import type { TaskIconName } from "@/lib/taskIcons";
+import { eq } from "drizzle-orm";
 import { db } from "..";
 import { task, taskSlot } from "../schema";
-import type { TaskIconName } from "@/lib/taskIcons";
 
 export async function createTask(data: {
   familyId: string;
@@ -25,4 +26,8 @@ export async function createTask(data: {
   }
 
   return newTask;
+}
+
+export async function getTasks({ familyId }: { familyId: string }) {
+  return await db.select().from(task).where(eq(task.familyId, familyId));
 }

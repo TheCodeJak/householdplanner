@@ -1,7 +1,6 @@
 "use client";
 
 import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
-import { TaskCardList } from "@/components/dashboard/TaskCardList";
 import { TaskListSkeleton } from "@/components/dashboard/TaskListSkeleton";
 import { WeekStripHeader } from "@/components/dashboard/WeekStripHeader";
 import TaskDetailModal from "@/components/modals/TaskDetailModal";
@@ -13,6 +12,8 @@ import { useModalTarget } from "@/hooks/useModalTarget";
 import { useSelectedDay } from "@/hooks/useSelectedDay";
 import { toIsoDate } from "@/lib/dateUtils";
 import type { SlotRef } from "@/types/plan";
+// ⚠️ TEMPORÄR: Gruppierungs-Varianten, siehe ./_variants
+import { DashboardVariants } from "./_variants/DashboardVariants";
 
 // Die Seite setzt nur Hooks (Daten) und Komponenten (Darstellung) zusammen.
 export default function DashboardPage() {
@@ -63,7 +64,7 @@ export default function DashboardPage() {
                 isPlaceholderData ? "opacity-50" : ""
               }`}
             >
-              <TaskCardList
+              <DashboardVariants
                 tasks={tasks}
                 onSelect={(taskId, slotId) =>
                   detail.openFor({ taskId, slotId, date: toIsoDate(date) })

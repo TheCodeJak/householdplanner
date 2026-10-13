@@ -1,7 +1,7 @@
+import { createTask, getTasks } from "@/db/queries/tasks";
+import { TASK_ICON_NAMES } from "@/lib/taskIcons";
 import { z } from "zod";
 import { protectedProcedure, router } from "../init";
-import { createTask } from "@/db/queries/tasks";
-import { TASK_ICON_NAMES } from "@/lib/taskIcons";
 
 export const tasksRouter = router({
   add: protectedProcedure
@@ -18,4 +18,7 @@ export const tasksRouter = router({
     .mutation(({ input, ctx }) =>
       createTask({ ...input, createdById: ctx.userId }),
     ),
+  getAll: protectedProcedure
+    .input(z.object({ familyId: z.string() }))
+    .query(({ input }) => getTasks({ familyId: input.familyId })),
 });
