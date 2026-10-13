@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Householdplanner
 
-## Getting Started
+Next.js + tRPC + Drizzle + Auth.js. Deployment auf Vercel, Datenbank auf Neon.
 
-First, run the development server:
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # Werte eintragen
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variable                | Zweck                                                |
+| ----------------------- | ---------------------------------------------------- |
+| `DATABASE_URL`          | Postgres-Verbindung (Neon-Branch `development`)      |
+| `DATABASE_URL_UNPOOLED` | Direkte Neon-Verbindung, z. B. für Schema-Änderungen |
+| `DATABASE_PASSWORD`     | Nur für die lokale Docker-Datenbank                  |
+| `AUTH_SECRET`           | Auth.js-Secret                                       |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Lokal entwickeln
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev          # Dev-Server gegen die Neon-DB aus .env.local
+npm run docker:dev   # Dev-Server + lokale Postgres-DB in Docker
+```
 
-## Learn More
+In Docker überschreibt `compose.yaml` `DATABASE_URL` mit der lokalen DB. Schema dort anlegen:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker compose exec web npx drizzle-kit push
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Datenbank
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Es gibt zwei Entwicklungsdatenbanken. Das Ziel steht im Skriptnamen, damit nicht versehentlich die falsche getroffen wird:
 
-## Deploy on Vercel
+| Skript                                    | Datenbank                                        | Gehört zu            |
+| ----------------------------------------- | ------------------------------------------------ | -------------------- |
+| `db:push:neon-dev` / `db:studio:neon-dev` | Neon-Branch `development` (aus `.env.local`)     | `npm run dev`        |
+| `db:push:docker` / `db:studio:docker`     | lokales Postgres im Container (`.env.docker-db`) | `npm run docker:dev` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`.env.docker-db` enthält nur `DATABASE_URL=postgresql://postgres:<Passwort der Docker-DB>@127.0.0.1:5432/householdplaner` und wird nicht eingecheckt (`.env*` ist in `.gitignore`). `127.0.0.1` statt `localhost`, weil der Port nur auf IPv4 freigegeben ist.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Für die Produktion gibt es bewusst kein Skript.
+
+## Deployment
+
+```bash
+npm run deploy:dev   # Preview
+npm run deploy:prod  # Production
+```

@@ -1,13 +1,8 @@
+import "@fontsource-variable/inter";
+import "jaklib/styles.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-sans", // wichtig für Tailwind
-});
 
 export const metadata: Metadata = {
   title: "Householdplanner",
@@ -20,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className={`${inter.variable}`}>
+    <html lang="de">
       <body className="flex flex-col">
         <Providers>{children}</Providers>
       </body>

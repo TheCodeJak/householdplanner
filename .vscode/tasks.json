@@ -1,0 +1,68 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Docker Desktop",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-Command",
+        "Start-Process 'C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe'"
+      ],
+      "isBackground": true,
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "npm update jaklib",
+      "type": "shell",
+      "command": "npm update jaklib",
+      "isBackground": true,
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "close": true
+      }
+    },
+    {
+      "label": "docker compose build",
+      "type": "shell",
+      "command": "docker compose build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "dependsOn": ["npm update jaklib", "docker compose down"],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "docker compose up --watch",
+      "type": "shell",
+      "command": "docker compose up --watch",
+      "isBackground": true,
+      "problemMatcher": [],
+      "dependsOn": ["docker compose build"],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}

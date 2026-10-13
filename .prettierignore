@@ -1,0 +1,4 @@
+# Prettier liest zusätzlich .gitignore (node_modules, .next, .env* …).
+# Hier nur, was im Repo liegt, aber nicht formatiert werden soll:
+package-lock.json
+drizzle/

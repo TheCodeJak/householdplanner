@@ -1,7 +1,12 @@
+import { ComingSoon } from "@/components/ui/ComingSoon";
+import { FloatingTiles } from "@/components/ui/FloatingTiles";
+
 export default function ProfilePage() {
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
-      <p className="text-lg text-slate-400">Profil — kommt bald</p>
-    </div>
+    <ComingSoon
+      title="Profil"
+      description="Bald verwaltest du hier dein Konto, deine Familie und Einladungen."
+      illustration={<FloatingTiles icons={["zuhause", "schluessel", "post"]} />}
+    />
   );
 }

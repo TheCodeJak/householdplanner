@@ -3,24 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 --experimental-https --experimental-https-key ./localhost+2-key.pem --experimental-https-cert ./localhost+2.pem",
+    "dev": "next dev",
     "docker:dev": "docker compose --env-file .env.local up --build",
-    "deploy:dev": "npx vercel deploy",
-    "deploy:prod": "npx vercel deploy --prod",
+    "deploy": "npx vercel deploy",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:push": "dotenv -e .env.local -- drizzle-kit push",
-    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:push:neon-dev": "dotenv -e .env.local -- drizzle-kit push",
+    "db:studio:neon-dev": "dotenv -e .env.local -- drizzle-kit studio",
+    "db:push:docker": "dotenv -e .env.docker-db -- drizzle-kit push",
+    "db:studio:docker": "dotenv -e .env.docker-db -- drizzle-kit studio"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
     "@tanstack/react-query": "^5.100.10",
     "@trpc/client": "^11.17.0",
     "@trpc/react-query": "^11.17.0",
     "@trpc/server": "^11.17.0",
     "bcrypt": "^6.0.0",
     "drizzle-orm": "^0.45.2",
-    "next": "16.4.0",
+    "jaklib": "github:TheCodeJak/jaklib#main",
+    "next": "^16.4.0",
     "next-auth": "^5.0.0-beta.32",
     "postgres": "^3.4.9",
     "react": "19.2.4",
@@ -36,8 +41,21 @@
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "^16.4.0",
+    "formik": "^2.4.9",
+    "prettier": "3.9.10",
+    "prettier-plugin-tailwindcss": "0.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
+  "allowScripts": {
+    "drizzle-kit@0.31.11": true,
+    "esbuild@0.28.2": true,
+    "bcrypt@6.0.0": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.11.1": true
   }
 }

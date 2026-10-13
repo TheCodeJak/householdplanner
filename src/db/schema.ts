@@ -1,16 +1,14 @@
 import {
+  boolean,
+  date,
+  index,
+  integer,
   pgTable,
-  uuid,
   text,
   timestamp,
-  date,
-  boolean,
-  integer,
   unique,
-  index,
-  uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 // ─────────────────────────────────────────────
 // FAMILIES
@@ -53,6 +51,7 @@ export const task = pgTable(
     title: text("title").notNull(),
     description: text("description"),
     category: text("category"),
+    icon: text("icon"), // Schlüssel aus TASK_ICON_NAMES, z.B. "kochen"
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
@@ -98,19 +97,9 @@ export const taskAssignment = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => ({
-    // Tasks MIT Slot: Kombination muss eindeutig sein
-    uniqueWithSlot: unique("unique_with_slot").on(
-      t.taskId,
-      t.assignedToId,
-      t.date,
-      t.slotId,
-    ),
-
-    // Tasks OHNE Slot: Partial Index verhindert Duplikate wenn slotId = null
-    // (SQL NULL != NULL — der unique constraint oben greift für null-Werte nicht)
-    uniqueWithoutSlot: uniqueIndex("unique_without_slot")
-      .on(t.taskId, t.assignedToId, t.date)
-      .where(sql`slot_id IS NULL`),
+    uniqueSlotPerDay: unique("unique_slot_per_day")
+      .on(t.taskId, t.date, t.slotId)
+      .nullsNotDistinct(),
 
     dateIdx: index("assignments_date_idx").on(t.date),
     assignedToIdx: index("assignments_user_idx").on(t.assignedToId),

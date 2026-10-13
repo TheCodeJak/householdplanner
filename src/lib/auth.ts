@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import { eq } from "drizzle-orm";
-import bcrypt from "bcrypt";
 import { db } from "@/db";
 import { user as userTable } from "@/db/schema";
+import bcrypt from "bcrypt";
+import { eq } from "drizzle-orm";
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -41,19 +41,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
         if (!valid) return null;
 
-        return { id: user.id, name: user.name, email: user.email };
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          familyId: user.familyId,
+        };
       },
     }),
   ],
   pages: { signIn: "/login" },
   callbacks: {
     jwt: ({ token, user }) => {
-      if (user) token.sub = user.id;
+      if (user) {
+        token.sub = user.id;
+        token.familyId = user.familyId;
+      }
       return token;
     },
     session: ({ session, token }) => ({
       ...session,
-      user: { ...session.user, id: token.sub! },
+      user: { ...session.user, id: token.sub!, familyId: token.familyId },
     }),
   },
 });
