@@ -22,19 +22,27 @@ const glassFieldTokens = {
 } as CSSProperties;
 
 /**
- * Gemeinsamer Rahmen für Login und Registrierung: Farbflächen im Hintergrund,
- * Icon-Mosaik, Überschrift und das Formular (`children`) in einer Milchglas-Karte.
+ * Gemeinsamer Rahmen für Login, Registrierung und Onboarding: Farbflächen im
+ * Hintergrund, Icon-Mosaik (oder eine eigene `illustration`), Überschrift und
+ * der Inhalt (`children`) in einer Milchglas-Karte.
+ *
+ * `transitionKey`: Ändert er sich (z.B. beim nächsten Schritt im Onboarding),
+ * blendet der Inhalt weich neu ein; der Hintergrund bleibt stehen.
  */
 export function AuthShell({
   title,
   subtitle,
   icons,
+  illustration,
+  transitionKey,
   footer,
   children,
 }: {
   title: string;
-  subtitle: string;
-  icons: (TaskIconName | null)[];
+  subtitle?: string;
+  icons?: (TaskIconName | null)[];
+  illustration?: ReactNode;
+  transitionKey?: string;
   footer: ReactNode;
   children: ReactNode;
 }) {
@@ -47,8 +55,13 @@ export function AuthShell({
 
       {/* my-auto zentriert vertikal, schneidet aber – anders als
           justify-center – nichts ab, wenn der Inhalt höher als der Screen ist */}
-      <div className="relative mx-auto my-auto w-full max-w-sm py-6">
-        <IconMosaic icons={icons} />
+      <div
+        key={transitionKey}
+        className={`relative mx-auto my-auto w-full max-w-sm py-6 ${
+          transitionKey ? "motion-safe:animate-step-in" : ""
+        }`}
+      >
+        {illustration ?? (icons && <IconMosaic icons={icons} />)}
 
         <h1 className="mt-8 text-[2rem] leading-[1.1] font-bold tracking-tight text-fg">
           {title}

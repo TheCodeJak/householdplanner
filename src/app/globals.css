@@ -244,6 +244,26 @@ body {
   }
 }
 
+/*
+ * --animate-step-in erzeugt die Klasse animate-step-in (AuthShell): Der Inhalt
+ * gleitet beim Wechsel eines Schritts ein kleines Stück von unten herein und
+ * wird dabei sichtbar. Wie beim Schweben immer als motion-safe: verwenden.
+ */
+@theme {
+  --animate-step-in: step-in 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+
+  @keyframes step-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
 /* ── 7. Detail-Sheet (.task-sheet) ───────────────────────────────────────── */
 
 /*
