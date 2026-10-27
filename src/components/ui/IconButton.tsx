@@ -12,27 +12,33 @@ export function IconButton({
   label,
   onClick,
   variant = "glass",
+  size = "md",
 }: {
   icon: keyof typeof PATHS;
   label: string;
   onClick: () => void;
   /** glass = mit Fläche (glass-pill, siehe globals.css), plain = nur Symbol */
   variant?: "glass" | "plain";
+  /** md = 36 px (Standard), sm = 28 px für dichte Leisten */
+  size?: "md" | "sm";
 }) {
+  const small = size === "sm";
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
+      className={`flex shrink-0 items-center justify-center rounded-full transition-colors ${
+        small ? "h-7 w-7" : "h-9 w-9"
+      } ${
         variant === "glass"
           ? "glass-pill text-muted hover:text-fg-2"
           : "text-subtle hover:bg-surface/70 hover:text-fg-2"
       }`}
     >
       <svg
-        width="15"
-        height="15"
+        width={small ? 13 : 15}
+        height={small ? 13 : 15}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

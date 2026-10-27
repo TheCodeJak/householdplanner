@@ -72,8 +72,8 @@ export function StatusMessage({
           <path d={look.path} />
         </svg>
       </span>
-      <h2 className="text-lg font-bold text-fg">{title}</h2>
-      <p className="mt-1.5 max-w-xs text-sm leading-relaxed text-muted">
+      <h2 className="text-title font-bold text-fg">{title}</h2>
+      <p className="mt-1.5 max-w-xs text-secondary leading-relaxed text-muted">
         {text}
       </p>
       {action && <div className="mt-6">{action}</div>}

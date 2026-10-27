@@ -5,7 +5,7 @@ const TITLE_WIDTHS = ["w-28", "w-36", "w-24", "w-32", "w-20"];
 
 /**
  * Platzhalter beim ersten Laden: angedeutete Karten in der Form der echten
- * TaskCards. Das Layout springt so nicht, wenn die Daten kommen, und man sieht
+ * Aufgaben. Das Layout springt so nicht, wenn die Daten kommen, und man sieht
  * schon, was gleich erscheint.
  *
  * motion-safe:animate-pulse: Tailwinds Puls-Animation (Deckkraft auf und ab),

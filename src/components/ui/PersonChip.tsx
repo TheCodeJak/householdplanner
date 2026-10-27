@@ -15,8 +15,8 @@ export function PersonChip({
     <div className="flex min-w-0 items-center gap-2 rounded-2xl bg-surface-2 py-1.5 pr-3 pl-1.5">
       <PersonDot person={person} />
       <div className="min-w-0 leading-tight">
-        <p className="text-[10px] font-medium text-subtle">{label}</p>
-        <p className="truncate text-sm font-semibold text-fg">
+        <p className="text-caption font-medium text-subtle">{label}</p>
+        <p className="truncate text-secondary font-semibold text-fg">
           {person.isCurrentUser ? "Du" : person.name}
         </p>
       </div>

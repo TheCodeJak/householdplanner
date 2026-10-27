@@ -42,7 +42,7 @@ export function getSlotActions(slot: SlotView): SlotAction[] {
   return [];
 }
 
-// Bis zu so vielen Zeichen passt eine Beschriftung (text-sm) in eine halbe
+// Bis zu so vielen Zeichen passt eine Beschriftung (text-secondary) in eine halbe
 // Sheet-Breite auf einem 375-px-Handy
 const MAX_LABEL_SIDE_BY_SIDE = 16;
 

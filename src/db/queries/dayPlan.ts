@@ -6,18 +6,23 @@ import { task, taskAssignment, taskSlot, user } from "../schema";
 const assignedUser = alias(user, "assignedUser");
 const completedUser = alias(user, "completedUser");
 
-export async function getDayPlanRows({
-  familyId,
-  date,
-}: {
-  familyId: string;
-  date: string;
-}) {
-  return db
+export async function getDayPlanRows(
+  {
+    familyId,
+    date,
+  }: {
+    familyId: string;
+    date: string;
+  },
+  // Nur für Tests in einer Transaktion; im Betrieb immer die normale Verbindung
+  executor: Pick<typeof db, "select"> = db,
+) {
+  return executor
     .select({
       taskId: task.id,
       title: task.title,
       icon: task.icon,
+      category: task.category,
       slotId: taskSlot.id,
       slotLabel: taskSlot.label,
       assignmentId: taskAssignment.id,

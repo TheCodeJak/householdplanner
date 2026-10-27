@@ -11,10 +11,11 @@ npm install
 cp .env.example .env.local   # Werte eintragen
 ```
 
-| Variable       | Zweck                                           |
-| -------------- | ----------------------------------------------- |
-| `DATABASE_URL` | Postgres-Verbindung (Neon-Branch `development`) |
-| `AUTH_SECRET`  | Auth.js-Secret                                  |
+| Variable            | Zweck                                                                |
+| ------------------- | -------------------------------------------------------------------- |
+| `DATABASE_URL`      | Postgres-Verbindung (Neon-Branch `development`)                      |
+| `AUTH_SECRET`       | Auth.js-Secret                                                       |
+| `REGISTRATION_CODE` | Beta-Code für die Registrierung; fehlt er, ist Registrieren gesperrt |
 
 ## Umgebungen
 
@@ -25,6 +26,10 @@ cp .env.example .env.local   # Werte eintragen
 | Vercel Production                                | Neon `production`  | Vercel Dashboard (Production) |
 
 Die Production-Zugangsdaten liegen nie in einer Datei auf dem Rechner.
+
+## Konten und Familien
+
+Registrieren braucht den `REGISTRATION_CODE`. Nach dem Login landet jeder ohne Familie im Onboarding (`/onboarding`): mit einem Einladungscode beitreten oder eine Familie gründen. Wer gründet, ist Admin und kann im Profil unter „Einladen“ einen neuen Code erzeugen. Wer wohin darf, regelt `src/lib/routeGuard.ts` (aufgerufen von `src/proxy.ts`).
 
 ## Lokal entwickeln
 

@@ -27,6 +27,7 @@ export type TaskView = {
   taskId: string;
   title: string;
   icon: TaskIconName | null; // null = noch kein Icon gewählt
+  category: string; // Gruppe im Dashboard; ohne Angabe "Sonstiges"
   slots: SlotView[];
 };
 

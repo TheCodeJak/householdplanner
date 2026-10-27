@@ -101,11 +101,11 @@ export default function BottomNav() {
               key={key}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-2 pt-1.5 pb-1 transition-colors ${
-                active ? "text-orange-500" : "text-subtle"
+                active ? "text-accent" : "text-subtle"
               }`}
             >
               <TabIcon tab={key} active={active} />
-              <span className="text-[10px] font-semibold">{label}</span>
+              <span className="text-caption font-semibold">{label}</span>
             </Link>
           );
         })}

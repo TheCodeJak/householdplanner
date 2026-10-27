@@ -20,10 +20,16 @@
  *   2. jaklib an die Markenfarben anpassen
  *   3. Semantische Farben (hell + dunkel)
  *   4. jaklib an die semantischen Farben hängen
- *   5. Eigene Klassen: Milchglas (glass-card, glass-inset, glass-pill)
- *   6. Animationen
- *   7. Detail-Sheet (.task-sheet)
- *   8. Hintergrund der Hauptapp (.app-backdrop-*)
+ *   5. Schriftskala (text-caption … text-headline) + jaklib daran hängen
+ *   6. Eigene Klassen: Milchglas (glass-card, glass-inset, glass-pill),
+ *      dezente Flächen (.surface-soft)
+ *   7. Animationen
+ *   8. Detail-Sheet (.task-sheet)
+ *   9. Hintergrund der Hauptapp (.app-backdrop)
+ *
+ * Kontrast: Alle Textfarben erreichen auf page, surface und surface-2 (hell
+ * und dunkel) mindestens 4,5:1 (WCAG AA). Bei neuen Farben nachrechnen, z.B.
+ * mit https://webaim.org/resources/contrastchecker/
  */
 
 @import "tailwindcss";
@@ -53,13 +59,14 @@
 /*
  * jaklib wird vor dieser Datei geladen (siehe app/layout.tsx) und bringt eigene
  * Farb-Variablen mit. Hier zeigen sie auf unsere Palette, damit Buttons,
- * Fokus-Ringe usw. automatisch im selben Orange erscheinen.
+ * Fokus-Ringe usw. automatisch im selben Orange erscheinen (--app-primary aus
+ * Abschnitt 3).
  */
 :root {
-  --brand: var(--color-brand-600);
-  --brand-deep: var(--color-brand-700);
+  --brand: var(--app-primary);
+  --brand-deep: var(--app-primary-hover);
   --brand-light: var(--color-brand-400);
-  --danger: var(--color-error-600);
+  --primary-fg: var(--app-on-primary);
   --danger-deep: var(--color-error-700);
   --sage: var(--color-success-600);
 }
@@ -78,6 +85,10 @@
  *   text-fg-2     normaler Fließtext
  *   text-muted    Nebentext
  *   text-subtle   Hinweise, Platzhalter, Erledigtes
+ *   bg-primary    Flächen in Markenfarbe (Buttons, gewählter Tag) …
+ *   text-on-primary  … und die Schrift darauf
+ *   text-accent   Text in Markenfarbe (Links, Text-Buttons)
+ *   text-danger   Fehlermeldungen, "Löschen"
  *   border-line   Trennlinien und Ränder
  *   border-glass  heller Lichtrand von Milchglas-Flächen
  *
@@ -92,6 +103,11 @@
   --color-fg-2: var(--app-fg-2);
   --color-muted: var(--app-muted);
   --color-subtle: var(--app-subtle);
+  --color-primary: var(--app-primary);
+  --color-primary-hover: var(--app-primary-hover);
+  --color-on-primary: var(--app-on-primary);
+  --color-accent: var(--app-accent);
+  --color-danger: var(--app-danger);
   --color-line: var(--app-line);
   --color-glass: var(--app-glass-edge);
 }
@@ -104,8 +120,20 @@
   --app-surface-2: #f6f5f3;
   --app-fg: #0f172a;
   --app-fg-2: #334155;
-  --app-muted: #64748b;
-  --app-subtle: #94a3b8;
+  --app-muted: #475569;
+  --app-subtle: #5f6b7e;
+  /*
+   * Primärfarbe: kräftiges Orange, so hell wie möglich, solange Weiß darauf
+   * (5,0:1) und die Farbe selbst als Text (≥ 4,6:1 auf page/surface-2) reicht.
+   * Weiß auf brand-600 (#ea580c) hätte nur 3,6:1.
+   * Akzent = Primär: Links, Text-Buttons und der aktive Tab haben dieselbe
+   * Farbe wie die Buttons.
+   */
+  --app-primary: #cc3a00;
+  --app-primary-hover: #b83400;
+  --app-on-primary: #ffffff;
+  --app-accent: var(--app-primary);
+  --app-danger: var(--color-error-700);
   --app-line: #e7e5e4;
   --app-glass-edge: rgb(255 255 255 / 0.75);
 }
@@ -119,7 +147,11 @@
     --app-fg: #f5f3ef;
     --app-fg-2: #d6d3d1;
     --app-muted: #a8a29e;
-    --app-subtle: #78716c;
+    --app-subtle: #948d88;
+    /* Gleicher Farbton wie die Primärfarbe, aber hell: das dunkle Orange
+       hätte als Text auf dunklem Grund nur 3,5:1 */
+    --app-accent: #ff6d33;
+    --app-danger: #f87171;
     --app-line: #2f3136;
     --app-glass-edge: rgb(255 255 255 / 0.08);
   }
@@ -141,20 +173,75 @@
   --input-bg: var(--app-surface);
   --input-border: var(--app-line);
   --input-label: var(--app-muted);
+  --danger: var(--app-danger);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --input-bg: var(--app-surface-2);
+    /* Die Primärfarbe hebt sich als Fokus-Rand zu wenig vom dunklen Feld ab (< 3:1) */
+    --input-focus: var(--color-brand-500);
   }
 }
 
 body {
   background: var(--app-page);
   color: var(--app-fg);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
 }
 
-/* ── 5. Eigene Klassen: Milchglas ────────────────────────────────────────── */
+/* ── 5. Schriftskala ─────────────────────────────────────────────────────── */
+
+/*
+ * Nur diese fünf Größen gibt es. --text-*: initial entfernt Tailwinds
+ * Standardgrößen (text-xs, text-sm …), damit sich keine sechste einschleicht.
+ * Feste Werte wie text-[11px] gehen weiterhin – bitte nicht verwenden.
+ * Angelehnt an Apples Textstile (Body 17 pt, kleinste Schrift 11 pt).
+ *
+ *   text-caption    13 px  Pills, Abschnittsüberschriften, Tab-Beschriftung,
+ *                          Zähler, Hinweise unter Gruppen
+ *   text-secondary  15 px  Unterzeilen, Nebentext, kleine Buttons
+ *   text-body       17 px  Aufgabentitel, Fließtext, Buttons, Eingabefelder,
+ *                          Titel von Sheets und Modals (fett)
+ *   text-title      22 px  Monat, Statusmeldungen, Kennzahlen im Profil
+ *   text-headline   28 px  Seitentitel, Begrüßung, Einladungscode
+ *
+ * Jede Größe bringt ihre Zeilenhöhe mit (--text-…--line-height).
+ * rem statt px: wächst mit, wenn jemand im Browser größere Schrift einstellt.
+ */
+@theme {
+  --text-*: initial;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.125rem;
+  --text-secondary: 0.9375rem;
+  --text-secondary--line-height: 1.25rem;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.5rem;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.75rem;
+  --text-headline: 1.75rem;
+  --text-headline--line-height: 2.125rem;
+}
+
+/*
+ * jaklib setzt eigene --text-xs … --text-3xl OHNE @layer in :root – das
+ * gewinnt immer gegen Tailwinds Werte in @layer theme. Deshalb heißen unsere
+ * Größen anders, und hier zeigen jaklibs Namen auf unsere Skala (ebenfalls
+ * ohne @layer; diese Datei wird nach jaklib geladen, also gewinnt sie).
+ * --text-base muss ≥ 16 px bleiben: darunter zoomt Safari auf dem iPhone
+ * beim Antippen eines Eingabefelds hinein.
+ * --text-lg nutzt jaklib für Button size="lg" und Modal-Titel: body statt
+ * title, damit Buttons und Sheet-Titel einheitlich 17 px haben.
+ */
+:root {
+  --text-xs: var(--text-caption);
+  --text-sm: var(--text-secondary);
+  --text-base: var(--text-body);
+  --text-lg: var(--text-body);
+}
+
+/* ── 6. Eigene Klassen: Milchglas ────────────────────────────────────────── */
 
 /*
  * glass-card: äußere Karte (TaskCard). Hell bleibt jaklibs Card unverändert
@@ -206,7 +293,21 @@ body {
   }
 }
 
-/* ── 6. Animationen ──────────────────────────────────────────────────────── */
+/*
+ * surface-soft: dezentere Variante für einen ganzen Bereich (z.B. die
+ * Profilseite). Darin werden glass-card und glass-pill zu deckenden Flächen
+ * ohne Rand und ohne Blur, nur mit einem Hauch Schatten.
+ * Bewusst ohne @layer: ungelayertes CSS gewinnt gegen die Utilities oben.
+ * Soll die ganze App so aussehen, die Werte direkt in die Utilities ziehen.
+ */
+.surface-soft :is(.glass-card, .glass-pill) {
+  background-color: var(--app-surface);
+  border-color: transparent;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
+  backdrop-filter: none;
+}
+
+/* ── 7. Animationen ──────────────────────────────────────────────────────── */
 
 /*
  * --animate-float erzeugt die Klasse animate-float (FloatingTiles).
@@ -229,7 +330,48 @@ body {
   }
 }
 
-/* ── 7. Detail-Sheet (.task-sheet) ───────────────────────────────────────── */
+/*
+ * --animate-step-in erzeugt die Klasse animate-step-in (AuthShell): Der Inhalt
+ * gleitet beim Wechsel eines Schritts ein kleines Stück von unten herein und
+ * wird dabei sichtbar. Wie beim Schweben immer als motion-safe: verwenden.
+ */
+@theme {
+  --animate-step-in: step-in 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+
+  @keyframes step-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/*
+ * --animate-page-in erzeugt die Klasse animate-page-in ((dashboard)/template.tsx):
+ * Beim Wechsel über die Bottom-Navigation blendet die neue Seite kurz ein und
+ * rutscht dabei 6 px nach oben. Kürzer und dezenter als step-in, weil sie bei
+ * jedem Tab-Wechsel läuft. Ebenfalls nur als motion-safe: verwenden.
+ */
+@theme {
+  --animate-page-in: page-in 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* ── 8. Detail-Sheet (.task-sheet) ───────────────────────────────────────── */
 
 /*
  * Das Detail-Sheet (TaskDetailModal) ist jaklibs Modal mit dieser Klasse:
@@ -275,91 +417,31 @@ body {
   padding: 0;
 }
 
-/* ── 8. Hintergrund der Hauptapp (.app-backdrop-*) ───────────────────────── */
+/* ── 9. Hintergrund der Hauptapp (.app-backdrop) ────────────────────────── */
 
 /*
- * Für AppBackdrop: radiale Verläufe statt weichgezeichneter Kreise. Sieht fast
- * gleich aus, braucht aber keinen blur()-Filter – der müsste beim Scrollen
- * unter dem Milchglas-Kopf bei jedem Bild neu berechnet werden.
+ * Für AppBackdrop: schlicht die warme Seitenfarbe (body), dazu oben ein
+ * einziger, sehr leichter Schimmer in Markenfarbe. Ein radialer Verlauf statt
+ * eines weichgezeichneten Kreises: blur() müsste beim Scrollen unter dem
+ * Milchglas-Kopf bei jedem Bild neu berechnet werden.
  *
  * radial-gradient(Breite Höhe at X Y, Farbe, transparent 70%):
  * ein Farbfleck um den Punkt X/Y, der bis 70 % seiner Größe ausblendet.
  */
-.app-backdrop-fixed {
-  background-color: var(--app-page);
-  background-image:
-    radial-gradient(
-      26rem 26rem at 105% 35%,
-      rgb(186 230 253 / 0.38),
-      transparent 70%
-    ),
-    radial-gradient(
-      26rem 26rem at -10% 92%,
-      rgb(221 214 254 / 0.38),
-      transparent 70%
-    ),
-    radial-gradient(
-      22rem 22rem at 95% 105%,
-      rgb(209 250 229 / 0.55),
-      transparent 70%
-    );
-}
-
-.app-backdrop-top {
-  background-image:
-    radial-gradient(
-      24rem 24rem at 0% 0%,
-      rgb(254 215 170 / 0.6),
-      transparent 70%
-    ),
-    radial-gradient(
-      22rem 22rem at 105% 12%,
-      rgb(251 207 232 / 0.5),
-      transparent 70%
-    ),
-    radial-gradient(
-      20rem 16rem at 45% 55%,
-      rgb(254 243 199 / 0.55),
-      transparent 70%
-    );
+.app-backdrop {
+  background-image: radial-gradient(
+    40rem 22rem at 50% -20%,
+    rgb(251 146 60 / 0.16),
+    transparent 70%
+  );
 }
 
 @media (prefers-color-scheme: dark) {
-  .app-backdrop-fixed {
-    background-image:
-      radial-gradient(
-        26rem 26rem at 105% 35%,
-        rgb(14 165 233 / 0.09),
-        transparent 70%
-      ),
-      radial-gradient(
-        26rem 26rem at -10% 92%,
-        rgb(139 92 246 / 0.09),
-        transparent 70%
-      ),
-      radial-gradient(
-        22rem 22rem at 95% 105%,
-        rgb(16 185 129 / 0.07),
-        transparent 70%
-      );
-  }
-
-  .app-backdrop-top {
-    background-image:
-      radial-gradient(
-        24rem 24rem at 0% 0%,
-        rgb(249 115 22 / 0.16),
-        transparent 70%
-      ),
-      radial-gradient(
-        22rem 22rem at 105% 12%,
-        rgb(236 72 153 / 0.11),
-        transparent 70%
-      ),
-      radial-gradient(
-        20rem 16rem at 45% 55%,
-        rgb(245 158 11 / 0.08),
-        transparent 70%
-      );
+  .app-backdrop {
+    background-image: radial-gradient(
+      40rem 22rem at 50% -20%,
+      rgb(249 115 22 / 0.1),
+      transparent 70%
+    );
   }
 }

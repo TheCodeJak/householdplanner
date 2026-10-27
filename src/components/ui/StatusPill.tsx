@@ -16,7 +16,7 @@ const PILLS: Record<TaskStatus, { label: string; className: string }> = {
   completed: {
     label: "Erledigt",
     className:
-      "bg-green-100 text-green-700 dark:bg-green-400/15 dark:text-green-300",
+      "bg-green-100 text-green-800 dark:bg-green-400/15 dark:text-green-300",
   },
 };
 
@@ -25,7 +25,7 @@ export function StatusPill({ status }: { status: TaskStatus }) {
   const pill = PILLS[status];
   return (
     <span
-      className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${pill.className}`}
+      className={`shrink-0 rounded-full px-2.5 py-1 text-caption font-semibold ${pill.className}`}
     >
       {pill.label}
     </span>

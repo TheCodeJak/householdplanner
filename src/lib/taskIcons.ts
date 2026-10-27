@@ -117,3 +117,23 @@ export const taskIconTones: Record<TaskIconName, TaskIconTone> = {
   finanzen: "lime",
   apotheke: "rose",
 };
+
+// Die Töne als Hex-Werte für Flächen, deren Farbe erst zur Laufzeit feststeht
+// (z.B. CategoryGroup: Farbe = erstes Icon der Kategorie). Die Werte werden
+// als CSS-Variablen gesetzt, die Klassen lesen nur diese – so reicht ein
+// Klassen-String für alle Töne. Werte = Tailwind-Palette 50 / 100 / 600.
+export const TASK_TONE_HEX: Record<
+  TaskIconTone,
+  { 50: string; 100: string; 600: string }
+> = {
+  sky: { 50: "#f0f9ff", 100: "#e0f2fe", 600: "#0284c7" },
+  amber: { 50: "#fffbeb", 100: "#fef3c7", 600: "#d97706" },
+  violet: { 50: "#f5f3ff", 100: "#ede9fe", 600: "#7c3aed" },
+  pink: { 50: "#fdf2f8", 100: "#fce7f3", 600: "#db2777" },
+  emerald: { 50: "#ecfdf5", 100: "#d1fae5", 600: "#059669" },
+  teal: { 50: "#f0fdfa", 100: "#ccfbf1", 600: "#0d9488" },
+  indigo: { 50: "#eef2ff", 100: "#e0e7ff", 600: "#4f46e5" },
+  lime: { 50: "#f7fee7", 100: "#ecfccb", 600: "#65a30d" },
+  rose: { 50: "#fff1f2", 100: "#ffe4e6", 600: "#e11d48" },
+  slate: { 50: "#f8fafc", 100: "#f1f5f9", 600: "#475569" },
+};

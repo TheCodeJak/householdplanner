@@ -49,7 +49,7 @@ async function claim(
   return created;
 }
 
-export const assignmentActionsRouter = router({
+export const assignmentsRouter = router({
   claim: familyProcedure
     .input(slotInput)
     .mutation(({ input, ctx }) =>

@@ -1,25 +1,17 @@
 import { auth } from "@/lib/auth";
+import { guardRedirect } from "@/lib/routeGuard";
 import { NextResponse } from "next/server";
 
+// Die Regeln, wer wohin darf (Login, Onboarding, Dashboard), stehen in
+// lib/routeGuard.ts.
 export default auth((req) => {
-  const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+  const target = guardRedirect({
+    pathname: req.nextUrl.pathname,
+    isLoggedIn: !!req.auth,
+    hasFamily: !!req.auth?.user?.familyId,
+  });
 
-  const protectedPaths = ["/dashboard", "/calendar", "/statistics", "/profile"];
-  const isProtected = protectedPaths.some(
-    (p) => pathname === p || pathname.startsWith(p + "/"),
-  );
-
-  if (isProtected && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  if (
-    (pathname === "/" || pathname === "/login" || pathname === "/register") &&
-    isLoggedIn
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
+  if (target) return NextResponse.redirect(new URL(target, req.url));
 });
 
 export const config = {
@@ -27,6 +19,8 @@ export const config = {
     "/",
     "/login",
     "/register",
+    "/onboarding",
+    "/onboarding/:path*",
     "/dashboard/:path*",
     "/calendar/:path*",
     "/statistics/:path*",
