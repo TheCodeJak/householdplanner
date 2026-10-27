@@ -5,7 +5,7 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-page px-6">
       <div className="flex flex-col items-center gap-6 text-center">
-        <Image src="\icon.svg" width={64} height={64} alt="" priority />
+        <Image src="/icon.svg" width={64} height={64} alt="" priority />
         <h1 className="text-3xl font-bold text-fg">Household Planner</h1>
         <p className="max-w-sm text-muted">
           Organisiere Haushaltsaufgaben gemeinsam mit deiner Familie — einfach,
