@@ -28,8 +28,9 @@ export const familyProcedure = t.procedure.use(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
-  // Tokens von vor dem Update haben noch keine familyId -> einmal aus der DB holen
-  const familyId = ctx.session?.user?.familyId ?? (await getUserFamily(userId));
+  // Immer aus der DB: Die familyId im JWT bleibt bis zu 7 Tage gültig und wäre
+  // veraltet, wenn jemand die Familie verlässt oder das Konto gelöscht wird.
+  const familyId = await getUserFamily(userId);
   if (!familyId) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }

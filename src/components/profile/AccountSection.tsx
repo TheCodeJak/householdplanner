@@ -1,3 +1,4 @@
+import { logOut } from "@/app/(auth)/actions";
 import { Glyph, type GlyphName } from "@/components/icons";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import type { FamilyMember } from "@/types/profile";
@@ -8,11 +9,15 @@ function AccountRow({
   label,
   value,
   danger = false,
+  disabled,
+  onClick,
 }: {
   icon: GlyphName;
   label: string;
   value?: string;
   danger?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <button
@@ -20,6 +25,8 @@ function AccountRow({
       className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm ${
         danger ? "text-error-600" : "text-fg"
       }`}
+      disabled={disabled}
+      onClick={onClick}
     >
       <Glyph name={icon} size={18} className={danger ? "" : "text-muted"} />
       <span className="flex-1 font-medium">{label}</span>
@@ -48,8 +55,13 @@ export function AccountSection({ person }: { person: FamilyMember }) {
       </Card>
 
       <Card variant="panel" className={`mt-3 ${group}`}>
-        <AccountRow icon="logout" label="Abmelden" danger />
-        <AccountRow icon="users" label="Familie verlassen" danger />
+        <AccountRow
+          icon="logout"
+          label="Abmelden"
+          danger
+          onClick={() => logOut()}
+        />
+        <AccountRow icon="users" label="Familie verlassen" danger disabled />
       </Card>
       <p className="mt-1.5 px-4 text-[11px] leading-snug text-subtle">
         Beim Verlassen werden deine offenen Übernahmen freigegeben. Erledigtes

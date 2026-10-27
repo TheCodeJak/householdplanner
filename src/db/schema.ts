@@ -36,6 +36,15 @@ export const user = pgTable("user", {
 });
 
 // ─────────────────────────────────────────────
+// RATE LIMIT  (Zähler pro Schlüssel und Zeitfenster, siehe lib/rateLimit.ts)
+// ─────────────────────────────────────────────
+export const rateLimit = pgTable("rate_limit", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
+});
+
+// ─────────────────────────────────────────────
 // TASKS  (Aufgaben-Vorlagen)
 // ─────────────────────────────────────────────
 export const task = pgTable(

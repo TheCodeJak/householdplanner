@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
 import { Button, TextField } from "jaklib/core";
+import { useActionState } from "react";
 import { registerAction, type AuthFormState } from "../actions";
 
 const initialState: AuthFormState = {};
@@ -36,6 +36,12 @@ export function RegisterForm() {
         type="password"
         required
         autoComplete="new-password"
+      />
+      <TextField
+        label="Registrierungscode"
+        name="registrationCode"
+        type="text"
+        required
       />
       {state.error && (
         <p role="alert" className="text-sm text-error-600">
