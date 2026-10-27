@@ -2,9 +2,10 @@
 
 import { Glyph } from "@/components/icons";
 import { IconGrid } from "@/components/ui/IconGrid";
+import { InlineAlert } from "@/components/ui/InlineAlert";
 import { TaskTile } from "@/components/ui/TaskTile";
 import type { TaskIconName } from "@/lib/taskIcons";
-import type { TaskTemplate } from "@/types/profile";
+import type { TaskDraft, TaskTemplate } from "@/types/profile";
 import { Modal } from "jaklib/core";
 import { useState } from "react";
 
@@ -14,7 +15,8 @@ function useTaskDraft(task: TaskTemplate | null, defaultCategory: string) {
   const [icon, setIcon] = useState<TaskIconName | null>(task?.icon ?? null);
   const [category, setCategory] = useState(task?.category ?? defaultCategory);
   const [description, setDescription] = useState(task?.description ?? "");
-  const [slots, setSlots] = useState<string[]>(task?.slots ?? []);
+  // Bestehende Zeitfenster behalten ihre id, neue haben keine (siehe TaskDraft)
+  const [slots, setSlots] = useState<TaskDraft["slots"]>(task?.slots ?? []);
   return {
     title,
     setTitle,
@@ -35,16 +37,18 @@ function useTaskDraft(task: TaskTemplate | null, defaultCategory: string) {
  * (gruppierte Zeilen wie in den iOS-Einstellungen). Icon und Kategorie öffnen
  * eine Unteransicht im selben Sheet.
  *
- * Bisher nur Optik: Anlegen/Sichern und Archivieren schließen das Sheet.
- * Beim Anbinden: Slots beim Speichern NICHT komplett löschen und neu anlegen,
- * sondern nach ID abgleichen – sonst verlieren bestehende Zuweisungen ihren
- * Slot (task_assignment.slot_id ist "on delete set null").
+ * Das Sheet kennt nur das Formular. Speichern und Archivieren übernimmt die
+ * Seite (onSave, onArchive), das Sheet zeigt nur "speichert …" und Fehler.
  */
 export function TaskEditModal({
   open,
   onClose,
   task,
   categories,
+  onSave,
+  onArchive,
+  isPending,
+  errorText,
 }: {
   open: boolean;
   onClose: () => void;
@@ -52,9 +56,31 @@ export function TaskEditModal({
   task: TaskTemplate | null;
   /** Vorhandene Kategorien der Familie zur Auswahl */
   categories: string[];
+  onSave: (draft: TaskDraft) => void;
+  onArchive: () => void;
+  /** Eine Anfrage läuft: Knöpfe sperren */
+  isPending: boolean;
+  /** Fehlertext der letzten Anfrage (oder null) */
+  errorText: string | null;
 }) {
   const draft = useTaskDraft(task, categories[0] ?? "");
   const [view, setView] = useState<"main" | "icon" | "category">("main");
+  const [newCategory, setNewCategory] = useState("");
+
+  const hasBlankSlot = draft.slots.some((s) => !s.label.trim());
+  const canSave = !!draft.title.trim() && !hasBlankSlot && !isPending;
+  // Auch eine eben neu getippte Kategorie bleibt in der Liste auswählbar
+  const categoryChoices = [...new Set([...categories, draft.category])].filter(
+    Boolean,
+  );
+
+  function applyNewCategory() {
+    const name = newCategory.trim();
+    if (!name) return;
+    draft.setCategory(name);
+    setNewCategory("");
+    setView("main");
+  }
 
   const group = "overflow-hidden rounded-2xl bg-surface-2 dark:bg-white/5";
   const row =
@@ -100,11 +126,19 @@ export function TaskEditModal({
           {view === "main" ? (
             <button
               type="button"
-              onClick={onClose}
-              disabled={!draft.title.trim()}
+              onClick={() =>
+                onSave({
+                  title: draft.title,
+                  icon: draft.icon,
+                  category: draft.category,
+                  description: draft.description,
+                  slots: draft.slots,
+                })
+              }
+              disabled={!canSave}
               className="justify-self-end text-sm font-bold text-brand-600 disabled:text-subtle"
             >
-              {draft.isNew ? "Anlegen" : "Sichern"}
+              {isPending ? "Speichert …" : draft.isNew ? "Anlegen" : "Sichern"}
             </button>
           ) : (
             <span />
@@ -126,7 +160,7 @@ export function TaskEditModal({
         {view === "category" && (
           <div className="p-4">
             <div className={`${group} divide-y divide-line`}>
-              {categories.map((c) => (
+              {categoryChoices.map((c) => (
                 <button
                   key={c}
                   type="button"
@@ -142,21 +176,44 @@ export function TaskEditModal({
                   )}
                 </button>
               ))}
-              <button type="button" className={`${row} text-brand-600`}>
-                <Glyph name="plus" size={16} /> Neue Kategorie
-              </button>
+              {/* Neue Kategorie: einfach hineintippen und übernehmen */}
+              <div className={row}>
+                <Glyph name="plus" size={16} className="text-brand-600" />
+                <input
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") applyNewCategory();
+                  }}
+                  maxLength={50}
+                  placeholder="Neue Kategorie"
+                  className="min-w-0 flex-1 bg-transparent text-fg outline-none placeholder:font-medium placeholder:text-brand-600"
+                />
+                {newCategory.trim() && (
+                  <button
+                    type="button"
+                    onClick={applyNewCategory}
+                    className="text-sm font-bold text-brand-600"
+                  >
+                    Übernehmen
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {view === "main" && (
           <div className="flex flex-col gap-5 p-4">
+            {errorText && <InlineAlert text={errorText} />}
+
             <div className={`${group} divide-y divide-line`}>
               <div className={`${row} py-3`}>
                 <TaskTile icon={draft.icon} title={draft.title} size={44} />
                 <input
                   value={draft.title}
                   onChange={(e) => draft.setTitle(e.target.value)}
+                  maxLength={100}
                   placeholder="Titel"
                   className="min-w-0 flex-1 bg-transparent text-base font-semibold text-fg outline-none placeholder:text-subtle"
                 />
@@ -191,21 +248,22 @@ export function TaskEditModal({
               </p>
               <div className={`${group} divide-y divide-line`}>
                 {draft.slots.map((s, i) => (
-                  <div key={s + i} className={row}>
+                  <div key={s.id ?? `neu-${i}`} className={row}>
                     <Glyph
                       name="grip"
                       size={16}
                       className="cursor-grab text-subtle"
                     />
                     <input
-                      value={s}
+                      value={s.label}
                       onChange={(e) =>
                         draft.setSlots(
                           draft.slots.map((x, j) =>
-                            j === i ? e.target.value : x,
+                            j === i ? { ...x, label: e.target.value } : x,
                           ),
                         )
                       }
+                      maxLength={50}
                       className="min-w-0 flex-1 bg-transparent text-fg outline-none"
                     />
                     <button
@@ -224,7 +282,10 @@ export function TaskEditModal({
                   type="button"
                   className={`${row} font-medium text-brand-600`}
                   onClick={() =>
-                    draft.setSlots([...draft.slots, "Neues Zeitfenster"])
+                    draft.setSlots([
+                      ...draft.slots,
+                      { label: "Neues Zeitfenster" },
+                    ])
                   }
                 >
                   <Glyph name="plus" size={16} /> Zeitfenster hinzufügen
@@ -234,6 +295,11 @@ export function TaskEditModal({
                 Ohne Zeitfenster gibt es die Aufgabe einmal am Tag. Reihenfolge
                 per Ziehen ändern.
               </p>
+              {hasBlankSlot && (
+                <p className="mt-1 px-4 text-[11px] leading-snug text-error-600">
+                  Zeitfenster dürfen nicht leer sein.
+                </p>
+              )}
             </div>
 
             <div>
@@ -245,6 +311,7 @@ export function TaskEditModal({
                   rows={2}
                   value={draft.description}
                   onChange={(e) => draft.setDescription(e.target.value)}
+                  maxLength={500}
                   placeholder="Optional"
                   className="block w-full resize-none bg-transparent px-4 py-3 text-sm text-fg outline-none placeholder:text-subtle"
                 />
@@ -256,8 +323,9 @@ export function TaskEditModal({
                 <div className={group}>
                   <button
                     type="button"
-                    onClick={onClose}
-                    className={`${row} justify-center font-semibold text-error-600`}
+                    onClick={onArchive}
+                    disabled={isPending}
+                    className={`${row} justify-center font-semibold text-error-600 disabled:text-subtle`}
                   >
                     Aufgabe archivieren
                   </button>

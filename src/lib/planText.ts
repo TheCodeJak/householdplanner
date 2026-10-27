@@ -35,8 +35,3 @@ export function slotStatusText({ status, assignee, completedBy }: SlotView) {
   }
   return "Noch frei";
 }
-
-/** Zeitfenster einer Aufgaben-Vorlage als Text, z.B. "Morgens · Abends" */
-export function slotSummary(slots: string[]): string {
-  return slots.length === 0 ? "Einmal am Tag" : slots.join(" · ");
-}

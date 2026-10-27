@@ -9,19 +9,9 @@ export type Context = {
 const t = initTRPC.context<Context>().create();
 
 export const router = t.router;
-export const publicProcedure = t.procedure;
 
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  const userId = ctx.session?.user?.id;
-  if (!userId) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-
-  return next({
-    ctx: { ...ctx, userId: userId },
-  });
-});
-
+// Alle Endpunkte brauchen einen angemeldeten Nutzer MIT Familie. Wer noch keine
+// hat, gründet oder tritt über die Server Actions im Onboarding bei.
 export const familyProcedure = t.procedure.use(async ({ ctx, next }) => {
   const userId = ctx.session?.user?.id;
   if (!userId) {

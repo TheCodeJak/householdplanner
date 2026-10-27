@@ -47,6 +47,12 @@ export function ProfileTasks({
         Aufgaben · {tasks.length}
       </SectionLabel>
 
+      {groups.length === 0 && (
+        <p className="rounded-2xl bg-surface px-4 py-6 text-center text-sm text-subtle">
+          Noch keine Aufgaben. Lege die erste mit „Neu“ an.
+        </p>
+      )}
+
       <div className="flex flex-col gap-2">
         {groups.map(({ category, items }) => (
           <CategoryGroup
