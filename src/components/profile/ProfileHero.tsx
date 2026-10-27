@@ -37,11 +37,11 @@ export function ProfileHero({
             <Glyph name="pencil" size={14} />
           </button>
         </div>
-        <p className="mt-3 text-2xl font-bold tracking-tight text-fg">
+        <p className="mt-3 text-headline font-bold tracking-tight text-fg">
           {person.name}
         </p>
-        <p className="text-xs text-muted">{person.email}</p>
-        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full glass-pill px-3 py-1 text-xs font-semibold text-fg-2">
+        <p className="text-secondary text-muted">{person.email}</p>
+        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full glass-pill px-3 py-1 text-caption font-semibold text-fg-2">
           <Glyph name="users" size={13} /> {familyName}
         </span>
       </div>
@@ -49,10 +49,8 @@ export function ProfileHero({
       <div className="mt-4 flex divide-x divide-line rounded-2xl glass-pill py-1.5">
         {stats.map((s) => (
           <div key={s.label} className="flex-1 text-center">
-            <p className="text-base leading-tight font-bold text-fg">
-              {s.value}
-            </p>
-            <p className="text-[10px] text-muted">{s.label}</p>
+            <p className="text-title font-bold text-fg">{s.value}</p>
+            <p className="text-caption text-muted">{s.label}</p>
           </div>
         ))}
       </div>

@@ -13,7 +13,7 @@ export default function RegisterPage() {
           Bereits ein Konto?{" "}
           <Link
             href="/login"
-            className="inline-block py-2 font-semibold text-brand-600 hover:text-brand-700"
+            className="inline-block py-2 font-semibold text-accent hover:text-primary-hover dark:hover:text-brand-300"
           >
             Anmelden
           </Link>

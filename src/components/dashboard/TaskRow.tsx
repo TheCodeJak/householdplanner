@@ -47,12 +47,12 @@ export function TaskRow({
         <span className="min-w-0 flex-1">
           {/* line-clamp-2: höchstens zwei Zeilen, danach "…" */}
           <span
-            className={`line-clamp-2 block text-xs font-semibold ${titleClass}`}
+            className={`line-clamp-2 block text-body font-semibold ${titleClass}`}
           >
             {title}
           </span>
           <span
-            className={`mt-0.5 block truncate text-[11px] ${
+            className={`mt-0.5 block truncate text-secondary ${
               slot.status === "claimed" ? "text-muted" : "text-subtle"
             }`}
           >
@@ -74,10 +74,10 @@ export function TaskRow({
       >
         <TaskTile icon={icon} title={title} completed={isDone} />
         <span className="min-w-0 flex-1">
-          <span className={`block text-xs font-semibold ${titleClass}`}>
+          <span className={`block text-body font-semibold ${titleClass}`}>
             {title}
           </span>
-          <span className="mt-0.5 block truncate text-[11px] text-subtle">
+          <span className="mt-0.5 block truncate text-secondary text-subtle">
             {doneCount} von {slots.length} erledigt
           </span>
         </span>
@@ -121,7 +121,7 @@ export function TaskRow({
 // Farbe des Status-Worts rechts in der Zeile
 const STATUS_TONE: Record<TaskStatus, string> = {
   open: "text-subtle",
-  claimed: "text-orange-600 dark:text-orange-300",
+  claimed: "text-orange-700 dark:text-orange-300",
   completed: "text-green-700 dark:text-green-300",
 };
 
@@ -212,11 +212,11 @@ function SlotTimeline({
             <span aria-hidden className={`bottom-0 ${line}`} />
           )}
           <TimelineNode status={slot.status} />
-          <span className="min-w-0 flex-1 truncate text-xs font-semibold text-fg">
+          <span className="min-w-0 flex-1 truncate text-secondary font-semibold text-fg">
             {slot.label}
           </span>
           <span
-            className={`w-20 shrink-0 truncate text-xs font-semibold ${STATUS_TONE[slot.status]}`}
+            className={`w-24 shrink-0 truncate text-secondary font-semibold ${STATUS_TONE[slot.status]}`}
           >
             {shortStatus(slot)}
           </span>

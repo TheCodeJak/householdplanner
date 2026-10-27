@@ -42,7 +42,7 @@ export function CreateFamilyForm({
         required
       />
       {error && (
-        <p role="alert" className="text-sm text-error-600">
+        <p role="alert" className="text-secondary text-danger">
           {error}
         </p>
       )}

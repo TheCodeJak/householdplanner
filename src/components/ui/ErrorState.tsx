@@ -18,11 +18,11 @@ export function ErrorState({
 
   const action =
     info.kind === "session" ? (
-      <Link href="/login" className="font-semibold text-brand-600">
+      <Link href="/login" className="font-semibold text-accent">
         Zur Anmeldung
       </Link>
     ) : info.kind === "family" ? (
-      <Link href="/onboarding" className="font-semibold text-brand-600">
+      <Link href="/onboarding" className="font-semibold text-accent">
         Familie einrichten
       </Link>
     ) : (

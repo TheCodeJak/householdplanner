@@ -21,7 +21,7 @@ export function DashboardGreeting({ tasks }: { tasks: TaskView[] }) {
 
   return (
     <div className="px-5 pt-[max(1.75rem,env(safe-area-inset-top))]">
-      <p className="text-2xl font-bold tracking-tight text-fg">
+      <p className="text-headline font-bold tracking-tight text-fg">
         {greetingFor(new Date())}
         {firstName && `, ${firstName}`}
       </p>
@@ -29,19 +29,19 @@ export function DashboardGreeting({ tasks }: { tasks: TaskView[] }) {
       {total > 0 && (
         <div className="mt-3">
           <div className="mb-1.5 flex items-baseline justify-between">
-            <p className="text-xs text-muted">
+            <p className="text-secondary text-muted">
               {allDone ? (
                 "Alles erledigt"
               ) : (
                 <>
-                  <span className="text-sm font-bold text-fg tabular-nums">
+                  <span className="text-body font-bold text-fg tabular-nums">
                     {done}
                   </span>{" "}
                   von {total} erledigt
                 </>
               )}
             </p>
-            <span className="text-xs font-semibold text-muted tabular-nums">
+            <span className="text-secondary font-semibold text-muted tabular-nums">
               {Math.round((done / total) * 100)} %
             </span>
           </div>
@@ -53,7 +53,7 @@ export function DashboardGreeting({ tasks }: { tasks: TaskView[] }) {
           >
             <div
               className={`h-full rounded-full transition-[width] duration-500 ${
-                allDone ? "bg-success-600" : "bg-brand-600"
+                allDone ? "bg-success-600" : "bg-primary"
               }`}
               style={{ width: `${(done / total) * 100}%` }}
             />

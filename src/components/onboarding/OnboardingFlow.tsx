@@ -61,7 +61,7 @@ export function OnboardingFlow() {
       <button
         type="button"
         onClick={() => logOut()}
-        className="inline-block py-2 font-semibold text-brand-600 hover:text-brand-700"
+        className="inline-block py-2 font-semibold text-accent hover:text-primary-hover dark:hover:text-brand-300"
       >
         Abmelden
       </button>
@@ -137,7 +137,7 @@ export function OnboardingFlow() {
       footer={logOutFooter}
     >
       <div className="flex flex-col gap-4">
-        <p className="text-sm font-semibold text-fg">
+        <p className="text-body font-semibold text-fg">
           Hast du einen Einladungscode?
         </p>
         <JoinFamilyForm
@@ -146,7 +146,7 @@ export function OnboardingFlow() {
           pending={pending}
           error={error}
         />
-        <div className="flex items-center gap-3 text-xs text-subtle">
+        <div className="flex items-center gap-3 text-caption text-subtle">
           <span className="h-px flex-1 bg-line" />
           oder
           <span className="h-px flex-1 bg-line" />

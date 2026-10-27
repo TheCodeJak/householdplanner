@@ -38,7 +38,7 @@ export function ProfileTasks({
           <button
             type="button"
             onClick={() => onEdit(null)}
-            className="inline-flex items-center gap-1 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white shadow-sm shadow-brand-600/30"
+            className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-secondary font-semibold text-on-primary shadow-sm shadow-primary/30"
           >
             <Glyph name="plus" size={13} /> Neu
           </button>
@@ -48,7 +48,7 @@ export function ProfileTasks({
       </SectionLabel>
 
       {groups.length === 0 && (
-        <p className="rounded-2xl bg-surface px-4 py-6 text-center text-sm text-subtle">
+        <p className="rounded-2xl bg-surface px-4 py-6 text-center text-secondary text-subtle">
           Noch keine Aufgaben. Lege die erste mit „Neu“ an.
         </p>
       )}

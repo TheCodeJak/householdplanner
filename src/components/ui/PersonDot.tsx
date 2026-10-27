@@ -4,7 +4,7 @@ import type { Person } from "@/types/plan";
 export function PersonDot({ person }: { person: Person }) {
   return (
     <span
-      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-caption font-semibold text-white"
       // Farbe ist ein Laufzeitwert pro Person → inline statt Tailwind-Klasse.
       // Tailwind kennt nur Klassen, die beim Build vollständig im Code stehen.
       style={{ backgroundColor: person.color }}

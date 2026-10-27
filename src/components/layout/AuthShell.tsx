@@ -63,7 +63,7 @@ export function AuthShell({
       >
         {illustration ?? (icons && <IconMosaic icons={icons} />)}
 
-        <h1 className="mt-8 text-[2rem] leading-[1.1] font-bold tracking-tight text-fg">
+        <h1 className="mt-8 text-headline font-bold tracking-tight text-fg">
           {title}
         </h1>
         <p className="mt-2 mb-6 text-fg-2">{subtitle}</p>
@@ -78,7 +78,7 @@ export function AuthShell({
         </div>
       </div>
 
-      <p className="relative text-center text-sm text-fg-2">{footer}</p>
+      <p className="relative text-center text-secondary text-fg-2">{footer}</p>
     </main>
   );
 }

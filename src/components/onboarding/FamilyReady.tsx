@@ -45,7 +45,7 @@ function MemberRow({ members }: { members: Person[] }) {
       {members.map((m) => (
         <div key={m.id} className="flex w-14 flex-col items-center gap-1.5">
           <PersonAvatar person={m} size={48} className="ring-2 ring-surface" />
-          <span className="w-full truncate text-center text-[11px] font-medium text-fg-2">
+          <span className="w-full truncate text-center text-caption font-medium text-fg-2">
             {m.isCurrentUser ? "Du" : m.name}
           </span>
         </div>

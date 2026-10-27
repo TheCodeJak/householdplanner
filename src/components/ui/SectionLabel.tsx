@@ -10,7 +10,7 @@ export function SectionLabel({
 }) {
   return (
     <div className="mt-6 mb-2 flex items-center justify-between px-2">
-      <h2 className="text-[11px] font-semibold tracking-wider text-subtle uppercase">
+      <h2 className="text-caption font-semibold tracking-wider text-subtle uppercase">
         {children}
       </h2>
       {action}

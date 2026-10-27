@@ -22,7 +22,7 @@ export function ArchivedTasks({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 px-1 py-2 text-xs font-semibold text-subtle"
+        className="flex w-full items-center gap-2 px-1 py-2 text-secondary font-semibold text-subtle"
       >
         <Glyph
           name="chevron"
@@ -41,13 +41,13 @@ export function ArchivedTasks({
               <span className="opacity-50">
                 <TaskTile icon={t.icon} title={t.title} size={30} />
               </span>
-              <span className="flex-1 text-xs font-semibold text-subtle line-through">
+              <span className="flex-1 text-body font-semibold text-subtle line-through">
                 {t.title}
               </span>
               <button
                 type="button"
                 onClick={() => onRestore(t)}
-                className="flex items-center gap-1 text-xs font-semibold text-brand-600"
+                className="flex items-center gap-1 text-secondary font-semibold text-accent"
               >
                 <Glyph name="restore" size={13} /> Zurückholen
               </button>

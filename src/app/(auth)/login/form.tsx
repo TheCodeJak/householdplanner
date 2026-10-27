@@ -44,7 +44,7 @@ export function LoginForm() {
           autoComplete="current-password"
         />
         {state.error && (
-          <p role="alert" className="text-sm text-error-600">
+          <p role="alert" className="text-secondary text-danger">
             {state.error}
           </p>
         )}

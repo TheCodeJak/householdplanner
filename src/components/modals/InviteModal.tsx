@@ -55,8 +55,8 @@ export function InviteModal({
           <Glyph name="mail" size={20} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-base font-bold text-fg">Jemanden einladen</p>
-          <p className="text-xs text-muted">
+          <p className="text-body font-bold text-fg">Jemanden einladen</p>
+          <p className="text-secondary text-muted">
             Mit diesem Code tritt man {familyName} bei.
           </p>
         </div>
@@ -78,7 +78,7 @@ export function InviteModal({
         {inviteCode ? (
           <InviteCodeCard code={inviteCode} familyName={familyName} />
         ) : (
-          <div className="rounded-2xl glass-inset px-4 py-5 text-center text-sm text-fg-2">
+          <div className="rounded-2xl glass-inset px-4 py-5 text-center text-secondary text-fg-2">
             {canRegenerate
               ? "Diese Familie hat noch keinen Einladungscode."
               : "Diese Familie hat noch keinen Einladungscode. Bitte einen Admin, einen zu erzeugen."}
@@ -97,20 +97,20 @@ export function InviteModal({
             </Button>
           ) : confirming ? (
             <div className="mt-3 rounded-2xl bg-surface-2/70 p-3 dark:bg-black/20">
-              <p className="text-xs leading-snug text-fg-2">
+              <p className="text-secondary leading-snug text-fg-2">
                 Der bisherige Code funktioniert danach nicht mehr. Wer ihn schon
                 hat, kann dann nicht mehr beitreten.
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Button
                   variant="secondary"
-                  className="w-full text-sm"
+                  className="w-full text-secondary"
                   onClick={() => setConfirming(false)}
                 >
                   Abbrechen
                 </Button>
                 <Button
-                  className="w-full text-sm"
+                  className="w-full text-secondary"
                   loading={isPending}
                   disabled={isPending}
                   onClick={() => {
@@ -126,7 +126,7 @@ export function InviteModal({
             <button
               type="button"
               onClick={() => setConfirming(true)}
-              className="mx-auto mt-3 flex items-center gap-1.5 text-xs font-medium text-subtle hover:text-muted"
+              className="mx-auto mt-3 flex items-center gap-1.5 text-secondary font-medium text-subtle hover:text-muted"
             >
               <Glyph name="refresh" size={13} /> Neuen Code erzeugen
             </button>

@@ -25,11 +25,11 @@ export function TaskTemplateList({
         >
           <TaskTile icon={t.icon} title={t.title} />
           <span className="min-w-0 flex-1">
-            <span className="block text-xs font-semibold text-fg">
+            <span className="block text-body font-semibold text-fg">
               {t.title}
             </span>
             {t.slots.length > 0 && (
-              <span className="block text-[11px] text-subtle">
+              <span className="block text-secondary text-subtle">
                 {t.slots.map((s) => s.label).join(" · ")}
               </span>
             )}

@@ -11,8 +11,8 @@ import { TaskTile } from "./TaskTile";
 
 export type CategoryInfo = {
   name: string;
-  /** Für Zähler, Farbe (erstes Icon) und Vorschau im zugeklappten Zustand */
-  items: { icon: TaskIconName | null; title: string }[];
+  /** Für Zähler und Farbe (erstes Icon) */
+  items: { icon: TaskIconName | null }[];
 };
 
 /**
@@ -23,9 +23,10 @@ export type CategoryInfo = {
  * Bewusst generisch – kennt keine Aufgaben-Typen, nur Name + Einträge. So
  * passt sie auch ins Dashboard (dort stecken dann die TaskRows darin).
  *
- * Farbe = Ton des ersten Eintrags mit Icon in der Kategorie:
- * - hell:   diagonaler Verlauf 100 → 50, feiner Rand in 100
- * - dunkel: 600er-Ton mit der Kartenfarbe gemischt (32 % → 12 %). Der tiefe
+ * Farbe = Ton des ersten Eintrags mit Icon in der Kategorie, als Fläche mit
+ * leichtem Verlauf nach rechts:
+ * - hell:   100er-Ton → etwas heller (zur Hälfte Richtung 50er), Rand in 100
+ * - dunkel: 600er-Ton mit der Kartenfarbe gemischt (32 % → 24 %). Der tiefe
  *           Ton wirkt satter als der helle 400er, ohne zu leuchten.
  * Die Liste liegt hell auf Weiß bzw. dunkel auf neutralem Grau – so setzt sie
  * sich vom farbigen Kopf ab.
@@ -52,7 +53,7 @@ export function CategoryGroup({
   return (
     <section
       style={toneVars(tone)}
-      className="overflow-hidden rounded-3xl bg-linear-to-br from-(--tone-100) to-(--tone-50) ring-1 ring-(color:--tone-100) dark:from-[color-mix(in_oklab,var(--tone-600)_32%,var(--app-surface))] dark:to-[color-mix(in_oklab,var(--tone-600)_12%,var(--app-surface))] dark:ring-white/5"
+      className="overflow-hidden rounded-3xl bg-linear-to-r from-(--tone-100) to-[color-mix(in_oklab,var(--tone-100)_55%,var(--tone-50))] ring-1 ring-(color:--tone-100) dark:from-[color-mix(in_oklab,var(--tone-600)_32%,var(--app-surface))] dark:to-[color-mix(in_oklab,var(--tone-600)_24%,var(--app-surface))] dark:ring-white/5"
     >
       <button
         type="button"
@@ -61,26 +62,12 @@ export function CategoryGroup({
         className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
       >
         <TaskTile icon={first?.icon ?? null} title={info.name} size={34} />
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold text-fg">{info.name}</span>
-          {/* Zugeklappt: die Titel als Vorschau. Klappt gegenläufig zum
-              Inhalt mit (gleiche Technik wie Collapse), statt beim Öffnen
-              schlagartig zu verschwinden und den Kopf springen zu lassen.
-              Als <span>s, weil in einem <button> keine <div>s stehen dürfen. */}
-          <span
-            className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
-              open ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100"
-            }`}
-          >
-            <span className="min-h-0 overflow-hidden">
-              <span className="block truncate text-[11px] text-muted">
-                {info.items.map((i) => i.title).join(", ")}
-              </span>
-            </span>
-          </span>
+        <span className="min-w-0 flex-1 truncate text-body font-bold text-fg">
+          {info.name}
         </span>
         {meta ?? (
-          <span className="rounded-full bg-surface/70 px-2 py-0.5 text-[11px] font-bold text-muted dark:bg-white/8">
+          // fg-2 statt muted: auf dem getönten Kopf reicht muted dunkel nicht für 4,5:1
+          <span className="rounded-full bg-surface/70 px-2 py-0.5 text-caption font-bold text-fg-2 dark:bg-white/8">
             {info.items.length}
           </span>
         )}

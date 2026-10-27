@@ -31,14 +31,14 @@ export function InviteCodeInput({
         autoComplete="off"
         autoCorrect="off"
         spellCheck={false}
-        className={`h-16 w-full rounded-2xl bg-surface px-4 text-center font-mono text-2xl font-bold tracking-[0.2em] text-fg ring-1 transition outline-none placeholder:font-medium placeholder:text-subtle/70 focus:ring-2 disabled:opacity-60 ${
+        className={`h-16 w-full rounded-2xl bg-surface px-4 text-center font-mono text-headline font-bold tracking-[0.2em] text-fg ring-1 transition outline-none placeholder:font-medium placeholder:text-subtle focus:ring-2 disabled:opacity-60 ${
           error
             ? "ring-error-600 focus:ring-error-600"
             : "ring-line focus:ring-brand-500"
         }`}
       />
       {error && (
-        <p role="alert" className="mt-2 text-center text-sm text-error-600">
+        <p role="alert" className="mt-2 text-center text-secondary text-danger">
           {error}
         </p>
       )}

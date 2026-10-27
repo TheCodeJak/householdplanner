@@ -55,12 +55,16 @@ export function InviteCodeCard({
         className="w-full rounded-2xl glass-inset py-5 text-center"
         aria-label={`Einladungscode ${text}, antippen zum Kopieren`}
       >
-        <p className="font-mono text-3xl font-bold tracking-[0.2em] text-fg">
+        <p className="font-mono text-headline font-bold tracking-[0.2em] text-fg">
           {text}
         </p>
       </button>
       <div className={`mt-3 grid gap-2 ${canShare ? "grid-cols-2" : ""}`}>
-        <Button variant="secondary" className="w-full text-sm" onClick={copy}>
+        <Button
+          variant="secondary"
+          className="w-full text-secondary"
+          onClick={copy}
+        >
           <ButtonLabel icon={copied ? "check" : "copy"}>
             {copied ? "Kopiert" : "Kopieren"}
           </ButtonLabel>
@@ -68,7 +72,7 @@ export function InviteCodeCard({
         {canShare && (
           <Button
             variant="secondary"
-            className="w-full text-sm"
+            className="w-full text-secondary"
             onClick={share}
           >
             <ButtonLabel icon="share">Teilen</ButtonLabel>
@@ -76,7 +80,7 @@ export function InviteCodeCard({
         )}
       </div>
       {showHint && (
-        <p className="mt-3 flex items-start gap-1.5 text-xs leading-snug text-muted">
+        <p className="mt-3 flex items-start gap-1.5 text-caption leading-snug text-muted">
           <Glyph name="mail" size={14} className="mt-px shrink-0" />
           Du findest den Code später jederzeit im Profil unter „Einladen“.
         </p>

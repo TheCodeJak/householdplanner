@@ -84,7 +84,7 @@ export function TaskEditModal({
 
   const group = "overflow-hidden rounded-2xl bg-surface-2 dark:bg-white/5";
   const row =
-    "flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left text-sm";
+    "flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left text-body";
 
   return (
     <Modal
@@ -101,7 +101,7 @@ export function TaskEditModal({
             <button
               type="button"
               onClick={onClose}
-              className="justify-self-start text-sm text-muted"
+              className="justify-self-start text-body text-muted"
             >
               Abbrechen
             </button>
@@ -109,12 +109,12 @@ export function TaskEditModal({
             <button
               type="button"
               onClick={() => setView("main")}
-              className="flex items-center gap-1 justify-self-start text-sm font-medium text-brand-600"
+              className="flex items-center gap-1 justify-self-start text-body font-medium text-accent"
             >
               <Glyph name="back" size={16} /> Zurück
             </button>
           )}
-          <p className="text-sm font-bold text-fg">
+          <p className="text-body font-bold text-fg">
             {view === "icon"
               ? "Icon"
               : view === "category"
@@ -136,7 +136,7 @@ export function TaskEditModal({
                 })
               }
               disabled={!canSave}
-              className="justify-self-end text-sm font-bold text-brand-600 disabled:text-subtle"
+              className="justify-self-end text-body font-bold text-accent disabled:text-subtle"
             >
               {isPending ? "Speichert …" : draft.isNew ? "Anlegen" : "Sichern"}
             </button>
@@ -172,13 +172,13 @@ export function TaskEditModal({
                 >
                   <span className="flex-1 text-fg">{c}</span>
                   {c === draft.category && (
-                    <Glyph name="check" size={18} className="text-brand-600" />
+                    <Glyph name="check" size={18} className="text-accent" />
                   )}
                 </button>
               ))}
               {/* Neue Kategorie: einfach hineintippen und übernehmen */}
               <div className={row}>
-                <Glyph name="plus" size={16} className="text-brand-600" />
+                <Glyph name="plus" size={16} className="text-accent" />
                 <input
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
@@ -187,13 +187,13 @@ export function TaskEditModal({
                   }}
                   maxLength={50}
                   placeholder="Neue Kategorie"
-                  className="min-w-0 flex-1 bg-transparent text-fg outline-none placeholder:font-medium placeholder:text-brand-600"
+                  className="min-w-0 flex-1 bg-transparent text-fg outline-none placeholder:font-medium placeholder:text-accent"
                 />
                 {newCategory.trim() && (
                   <button
                     type="button"
                     onClick={applyNewCategory}
-                    className="text-sm font-bold text-brand-600"
+                    className="text-body font-bold text-accent"
                   >
                     Übernehmen
                   </button>
@@ -215,7 +215,7 @@ export function TaskEditModal({
                   onChange={(e) => draft.setTitle(e.target.value)}
                   maxLength={100}
                   placeholder="Titel"
-                  className="min-w-0 flex-1 bg-transparent text-base font-semibold text-fg outline-none placeholder:text-subtle"
+                  className="min-w-0 flex-1 bg-transparent text-body font-semibold text-fg outline-none placeholder:text-subtle"
                 />
               </div>
               <button
@@ -243,7 +243,7 @@ export function TaskEditModal({
             </div>
 
             <div>
-              <p className="mb-1.5 px-4 text-[11px] font-semibold tracking-wider text-subtle uppercase">
+              <p className="mb-1.5 px-4 text-caption font-semibold tracking-wider text-subtle uppercase">
                 Zeitfenster
               </p>
               <div className={`${group} divide-y divide-line`}>
@@ -280,7 +280,7 @@ export function TaskEditModal({
                 ))}
                 <button
                   type="button"
-                  className={`${row} font-medium text-brand-600`}
+                  className={`${row} font-medium text-accent`}
                   onClick={() =>
                     draft.setSlots([
                       ...draft.slots,
@@ -291,19 +291,19 @@ export function TaskEditModal({
                   <Glyph name="plus" size={16} /> Zeitfenster hinzufügen
                 </button>
               </div>
-              <p className="mt-1.5 px-4 text-[11px] leading-snug text-subtle">
+              <p className="mt-1.5 px-4 text-caption leading-snug text-subtle">
                 Ohne Zeitfenster gibt es die Aufgabe einmal am Tag. Reihenfolge
                 per Ziehen ändern.
               </p>
               {hasBlankSlot && (
-                <p className="mt-1 px-4 text-[11px] leading-snug text-error-600">
+                <p className="mt-1 px-4 text-caption leading-snug text-danger">
                   Zeitfenster dürfen nicht leer sein.
                 </p>
               )}
             </div>
 
             <div>
-              <p className="mb-1.5 px-4 text-[11px] font-semibold tracking-wider text-subtle uppercase">
+              <p className="mb-1.5 px-4 text-caption font-semibold tracking-wider text-subtle uppercase">
                 Notiz
               </p>
               <div className={group}>
@@ -313,7 +313,7 @@ export function TaskEditModal({
                   onChange={(e) => draft.setDescription(e.target.value)}
                   maxLength={500}
                   placeholder="Optional"
-                  className="block w-full resize-none bg-transparent px-4 py-3 text-sm text-fg outline-none placeholder:text-subtle"
+                  className="block w-full resize-none bg-transparent px-4 py-3 text-body text-fg outline-none placeholder:text-subtle"
                 />
               </div>
             </div>
@@ -325,12 +325,12 @@ export function TaskEditModal({
                     type="button"
                     onClick={onArchive}
                     disabled={isPending}
-                    className={`${row} justify-center font-semibold text-error-600 disabled:text-subtle`}
+                    className={`${row} justify-center font-semibold text-danger disabled:text-subtle`}
                   >
                     Aufgabe archivieren
                   </button>
                 </div>
-                <p className="mt-1.5 px-4 text-[11px] leading-snug text-subtle">
+                <p className="mt-1.5 px-4 text-caption leading-snug text-subtle">
                   Archivierte Aufgaben verschwinden aus dem Plan, der Verlauf
                   bleibt erhalten.
                 </p>

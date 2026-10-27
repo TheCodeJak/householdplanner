@@ -14,7 +14,7 @@ function iconSizeFor(size: number) {
  * - erledigt: Häkchen statt Icon, in derselben Farbe
  * - ohne Icon: Anfangsbuchstabe des Titels auf neutralem Grund
  * Die Farben (Fläche + Icon, hell und dunkel) kommen aus TASK_ICON_TONES.
- * Radius und Schrift wachsen mit `size` (bei 40: rounded-xl, text-sm).
+ * Radius und Schrift wachsen mit `size` (bei 40: rounded-xl, 14 px).
  * Rein dekorativ (aria-hidden): Der Titel steht immer als Text daneben.
  */
 export function TaskTile({

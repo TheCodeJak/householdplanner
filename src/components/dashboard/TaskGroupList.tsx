@@ -27,7 +27,7 @@ export function TaskGroupList({
 
   if (tasks.length === 0) {
     return (
-      <p className="m-2 text-center text-sm text-subtle">
+      <p className="m-2 text-center text-secondary text-subtle">
         Keine Aufgaben vorhanden.
       </p>
     );
@@ -75,7 +75,8 @@ function GroupProgress({ done, total }: { done: number; total: number }) {
           style={{ width: `${total ? (done / total) * 100 : 0}%` }}
         />
       </span>
-      <span className="text-[10px] font-semibold text-muted tabular-nums">
+      {/* fg-2 statt muted: auf dem getönten Gruppenkopf reicht muted dunkel nicht für 4,5:1 */}
+      <span className="text-caption font-semibold text-fg-2 tabular-nums">
         {done}/{total}
       </span>
     </span>

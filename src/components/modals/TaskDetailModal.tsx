@@ -71,10 +71,10 @@ export default function TaskDetailModal({
           completed={slot.status === "completed"}
         />
         <div className="min-w-0 flex-1">
-          <h2 className="line-clamp-2 text-base leading-snug font-bold text-fg">
+          <h2 className="line-clamp-2 text-body leading-snug font-bold text-fg">
             {task.title}
           </h2>
-          <p className="text-xs text-muted">
+          <p className="text-secondary text-muted">
             {formatDayLabel(day)}
             {slot.label && ` · ${slot.label}`}
           </p>
@@ -95,7 +95,7 @@ export default function TaskDetailModal({
         <SlotPeople slot={slot} />
 
         {slot.notes && (
-          <div className="mb-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm leading-relaxed text-fg-2 dark:border-amber-500/20 dark:bg-amber-500/10">
+          <div className="mb-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-body leading-relaxed text-fg-2 dark:border-amber-500/20 dark:bg-amber-500/10">
             {slot.notes}
           </div>
         )}
@@ -113,7 +113,7 @@ export default function TaskDetailModal({
               variant={action.variant}
               // min-w-0 + whitespace-nowrap: Text bleibt einzeilig, der Button
               // darf aber in seiner Grid-Spalte schmaler werden als der Text
-              className="w-full min-w-0 px-3 text-sm whitespace-nowrap"
+              className="w-full min-w-0 px-3 text-secondary whitespace-nowrap"
               disabled={isPending}
               onClick={() => run(action.key, target, close)}
             >
@@ -135,7 +135,11 @@ export default function TaskDetailModal({
 function SlotPeople({ slot }: { slot: SlotView }) {
   const { assignee, completedBy } = slot;
   if (!assignee) {
-    return <p className="mb-3 text-sm text-subtle">Noch niemand eingeteilt.</p>;
+    return (
+      <p className="mb-3 text-secondary text-subtle">
+        Noch niemand eingeteilt.
+      </p>
+    );
   }
 
   const samePerson = completedBy?.id === assignee.id;

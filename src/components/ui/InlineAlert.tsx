@@ -16,7 +16,7 @@ export function InlineAlert({
     // role="alert": Screenreader lesen den Hinweis vor, sobald er erscheint
     <div
       role="alert"
-      className="flex items-center gap-2.5 rounded-2xl bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:bg-rose-400/10 dark:text-rose-200"
+      className="flex items-center gap-2.5 rounded-2xl bg-rose-50 px-3 py-2 text-secondary text-rose-800 dark:bg-rose-400/10 dark:text-rose-200"
     >
       {/* Ausrufezeichen im Kreis */}
       <svg
@@ -38,7 +38,7 @@ export function InlineAlert({
         <button
           type="button"
           onClick={onAction}
-          className="shrink-0 py-1 text-xs font-semibold underline underline-offset-2"
+          className="shrink-0 py-1 text-secondary font-semibold underline underline-offset-2"
         >
           {actionLabel}
         </button>

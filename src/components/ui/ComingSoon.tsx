@@ -22,7 +22,7 @@ export function ComingSoon({
         {illustration}
       </div>
 
-      <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-glass bg-surface/60 px-3 py-1 text-xs font-semibold text-muted shadow-sm backdrop-blur">
+      <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-glass bg-surface/60 px-3 py-1 text-caption font-semibold text-muted shadow-sm backdrop-blur">
         {/* Pulsierender Punkt: animate-ping vergrößert und blendet den äußeren
             Kreis immer wieder aus, der innere bleibt stehen */}
         <span className="relative flex h-2 w-2">
@@ -32,8 +32,10 @@ export function ComingSoon({
         In Arbeit
       </span>
 
-      <h1 className="text-2xl font-bold tracking-tight text-fg">{title}</h1>
-      <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
+      <h1 className="text-headline font-bold tracking-tight text-fg">
+        {title}
+      </h1>
+      <p className="mt-2 max-w-xs text-secondary leading-relaxed text-muted">
         {description}
       </p>
     </div>

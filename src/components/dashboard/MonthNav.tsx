@@ -23,7 +23,7 @@ export function MonthNav({
     // h-8: feste Höhe, damit die Zeile nie wächst oder schrumpft
     <div className="mb-2.5 flex h-8 items-center gap-2 px-5">
       {/* truncate + whitespace-nowrap: auch "September 2026" bricht nie um */}
-      <h1 className="min-w-0 truncate text-lg font-bold tracking-tight whitespace-nowrap text-fg">
+      <h1 className="min-w-0 truncate text-title font-bold tracking-tight whitespace-nowrap text-fg">
         {getMonth(date.getMonth())}{" "}
         <span className="font-medium text-subtle">{date.getFullYear()}</span>
       </h1>
@@ -39,7 +39,7 @@ export function MonthNav({
         onClick={onToday}
         inert={isToday}
         aria-hidden={isToday}
-        className={`rounded-full bg-brand-600/10 px-2.5 py-1 text-[11px] font-semibold text-brand-700 transition-opacity duration-200 motion-reduce:transition-none dark:bg-brand-400/15 dark:text-brand-300 ${
+        className={`rounded-full bg-primary/10 px-2.5 py-1 text-caption font-semibold text-primary-hover transition-opacity duration-200 motion-reduce:transition-none dark:bg-brand-400/15 dark:text-brand-300 ${
           isToday ? "opacity-0" : "opacity-100"
         }`}
       >

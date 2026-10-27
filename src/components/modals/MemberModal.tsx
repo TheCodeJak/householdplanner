@@ -18,8 +18,8 @@ function Action({
   return (
     <button
       type="button"
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-surface-2 ${
-        danger ? "text-error-600" : "text-fg"
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-body font-medium hover:bg-surface-2 ${
+        danger ? "text-danger" : "text-fg"
       }`}
     >
       <Glyph name={icon} size={18} className={danger ? "" : "text-muted"} />
@@ -59,13 +59,13 @@ export function MemberModal({
       >
         <PersonAvatar person={member} size={48} />
         <div className="min-w-0 flex-1">
-          <p className="text-base font-bold text-fg">
+          <p className="text-body font-bold text-fg">
             {member.name}
             {member.isCurrentUser && (
               <span className="font-normal text-muted"> (du)</span>
             )}
           </p>
-          <p className="truncate text-xs text-muted">
+          <p className="truncate text-secondary text-muted">
             {member.isAdmin ? "Admin · " : ""}
             {member.email}
           </p>
@@ -94,7 +94,7 @@ export function MemberModal({
             <Action icon="close" label="Aus Familie entfernen" danger />
           </>
         )}
-        <p className="px-3 pt-1 text-[11px] leading-snug text-subtle">
+        <p className="px-3 pt-1 text-caption leading-snug text-subtle">
           {member.isCurrentUser
             ? "Als letzter Admin musst du vorher jemand anderen zum Admin machen."
             : `Offene Übernahmen von ${member.name} werden freigegeben, Erledigtes bleibt erhalten.`}

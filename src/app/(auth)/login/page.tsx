@@ -14,7 +14,7 @@ export default function LoginPage() {
           {/* inline-block py-2: größere Tippfläche, ohne die Zeile höher zu machen */}
           <Link
             href="/register"
-            className="inline-block py-2 font-semibold text-brand-600 hover:text-brand-700"
+            className="inline-block py-2 font-semibold text-accent hover:text-primary-hover dark:hover:text-brand-300"
           >
             Registrieren
           </Link>

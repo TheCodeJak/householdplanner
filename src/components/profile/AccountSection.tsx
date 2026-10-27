@@ -22,8 +22,8 @@ function AccountRow({
   return (
     <button
       type="button"
-      className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm ${
-        danger ? "text-error-600" : "text-fg"
+      className={`flex w-full items-center gap-3 px-4 py-3 text-left text-body ${
+        danger ? "text-danger" : "text-fg"
       }`}
       disabled={disabled}
       onClick={onClick}
@@ -31,7 +31,9 @@ function AccountRow({
       <Glyph name={icon} size={18} className={danger ? "" : "text-muted"} />
       <span className="flex-1 font-medium">{label}</span>
       {value && (
-        <span className="max-w-[45%] truncate text-xs text-muted">{value}</span>
+        <span className="max-w-[45%] truncate text-secondary text-muted">
+          {value}
+        </span>
       )}
       {!danger && <Glyph name="chevron" size={14} className="text-subtle" />}
     </button>
@@ -63,7 +65,7 @@ export function AccountSection({ person }: { person: FamilyMember }) {
         />
         <AccountRow icon="users" label="Familie verlassen" danger disabled />
       </Card>
-      <p className="mt-1.5 px-4 text-[11px] leading-snug text-subtle">
+      <p className="mt-1.5 px-4 text-caption leading-snug text-subtle">
         Beim Verlassen werden deine offenen Übernahmen freigegeben. Erledigtes
         bleibt in der Statistik.
       </p>
