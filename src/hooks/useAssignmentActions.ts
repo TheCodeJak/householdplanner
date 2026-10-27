@@ -10,8 +10,14 @@ import { SlotRef } from "@/types/plan";
 export function useAssignmentActions() {
   const utils = trpc.useUtils();
   // Nach jeder Aktion (Erfolg oder Fehler) den Tagesplan als veraltet markieren:
-  // React Query lädt ihn neu, und alle Karten zeigen den neuen Stand
-  const options = { onSettled: () => utils.plan.getDay.invalidate() };
+  // React Query lädt ihn neu, und alle Karten zeigen den neuen Stand.
+  // Das Promise bewusst NICHT zurückgeben: React Query würde sonst auf das
+  // Neuladen warten, bevor die Mutation als fertig gilt (isPending, onSuccess).
+  const options = {
+    onSettled: () => {
+      void utils.plan.getDay.invalidate();
+    },
+  };
 
   const mutations = {
     claim: trpc.assignments.claim.useMutation(options),
