@@ -21,9 +21,9 @@ export type CategoryInfo = {
  * beliebiger Inhalt (children), bündig bis an den Rand.
  *
  * Bewusst generisch – kennt keine Aufgaben-Typen, nur Name + Einträge. So
- * passt sie auch ins Dashboard (dort steckt dann die TaskCardList darin).
+ * passt sie auch ins Dashboard (dort stecken dann die TaskRows darin).
  *
- * Farbe = Ton des ersten Icons der Kategorie:
+ * Farbe = Ton des ersten Eintrags mit Icon in der Kategorie:
  * - hell:   diagonaler Verlauf 100 → 50, feiner Rand in 100
  * - dunkel: 600er-Ton mit der Kartenfarbe gemischt (32 % → 12 %). Der tiefe
  *           Ton wirkt satter als der helle 400er, ohne zu leuchten.
@@ -44,7 +44,9 @@ export function CategoryGroup({
   meta?: ReactNode;
   children: ReactNode;
 }) {
-  const first = info.items[0];
+  // Der erste Eintrag mit Icon gibt Farbe und Kopf-Icon vor; Aufgaben ohne Icon
+  // sollen eine Gruppe nicht grau machen, nur weil sie alphabetisch vorn stehen
+  const first = info.items.find((item) => item.icon) ?? info.items[0];
   const tone: TaskIconTone = first?.icon ? taskIconTones[first.icon] : "slate";
 
   return (

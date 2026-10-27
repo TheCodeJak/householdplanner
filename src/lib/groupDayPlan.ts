@@ -1,4 +1,5 @@
 import { Person, SlotView, TaskView } from "@/types/plan";
+import { normalizeCategory } from "./categories";
 import { colorFromUserId } from "./color";
 import { isTaskIconName } from "./taskIcons";
 
@@ -6,6 +7,7 @@ type DayPlanRows = {
   taskId: string;
   title: string;
   icon: string | null;
+  category: string | null;
   slotId: string | null;
   slotLabel: string | null;
   assignmentId: string | null;
@@ -68,6 +70,7 @@ export function groupDayPlan({
         taskId: row.taskId,
         title: row.title,
         icon: row.icon && isTaskIconName(row.icon) ? row.icon : null,
+        category: normalizeCategory(row.category),
         slots: slot,
       });
     }

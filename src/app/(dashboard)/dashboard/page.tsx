@@ -1,7 +1,8 @@
 "use client";
 
 import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
-import { TaskListSkeleton } from "@/components/dashboard/TaskListSkeleton";
+import { TaskGroupList } from "@/components/dashboard/TaskGroupList";
+import { TaskListSkeleton } from "@/components/ui/TaskListSkeleton";
 import { WeekStripHeader } from "@/components/dashboard/WeekStripHeader";
 import TaskDetailModal from "@/components/modals/TaskDetailModal";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -12,8 +13,6 @@ import { useModalTarget } from "@/hooks/useModalTarget";
 import { useSelectedDay } from "@/hooks/useSelectedDay";
 import { toIsoDate } from "@/lib/dateUtils";
 import type { SlotRef } from "@/types/plan";
-// ⚠️ TEMPORÄR: Gruppierungs-Varianten, siehe ./_variants
-import { DashboardVariants } from "./_variants/DashboardVariants";
 
 // Die Seite setzt nur Hooks (Daten) und Komponenten (Darstellung) zusammen.
 export default function DashboardPage() {
@@ -22,7 +21,7 @@ export default function DashboardPage() {
     useDayPlan(date);
   const detail = useModalTarget<SlotRef>();
   // "Heute", die Begrüßung usw. hängen von der lokalen Uhrzeit ab. Der Server
-  // (Docker = UTC) kennt die Zeitzone des Browsers nicht – deshalb rendern wir
+  // (läuft in UTC) kennt die Zeitzone des Browsers nicht – deshalb rendern wir
   // erst im Browser, sonst passt das Server-HTML nicht zum Browser (Hydration-Fehler).
   const isClient = useIsClient();
   if (!isClient) return null;
@@ -64,7 +63,7 @@ export default function DashboardPage() {
                 isPlaceholderData ? "opacity-50" : ""
               }`}
             >
-              <DashboardVariants
+              <TaskGroupList
                 tasks={tasks}
                 onSelect={(taskId, slotId) =>
                   detail.openFor({ taskId, slotId, date: toIsoDate(date) })
