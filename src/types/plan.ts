@@ -1,4 +1,4 @@
-import type { TaskIconName } from "@/lib/taskIcons";
+import type { TaskIconName, TaskIconTone } from "@/lib/taskIcons";
 
 // Der Vertrag zwischen Server und Browser: plan.getDay liefert TaskView[],
 // die Oberfläche rendert nur noch diese fertigen Objekte.
@@ -23,11 +23,24 @@ export type SlotView = {
   notes: string | null;
 };
 
+/**
+ * Kategorie einer Aufgabe (Tabelle `category`). `id` ist null bei der
+ * Sammelgruppe "Sonstiges" (Aufgaben ohne Kategorie): Sie ist keine Zeile in
+ * der Datenbank und hat eine feste neutrale Farbe.
+ */
+export type CategoryView = {
+  id: string | null;
+  name: string;
+  tone: TaskIconTone;
+  /** Eigenes Icon der Kategorie; null = das der ersten Aufgabe zeigen */
+  icon: TaskIconName | null;
+};
+
 export type TaskView = {
   taskId: string;
   title: string;
   icon: TaskIconName | null; // null = noch kein Icon gewählt
-  category: string; // Gruppe im Dashboard; ohne Angabe "Sonstiges"
+  category: CategoryView; // Gruppe im Dashboard samt Farbe
   slots: SlotView[];
 };
 

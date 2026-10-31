@@ -37,7 +37,7 @@ export function WeekCarousel({
       //   ragen links und rechts ins Bild
       // [scrollbar-width:none] + [&::-webkit-scrollbar]:hidden: Scrollbalken
       //   ausblenden (Firefox bzw. Chrome/Safari)
-      className="flex snap-x snap-mandatory [scrollbar-width:none] gap-1.5 overflow-x-auto overscroll-x-contain px-6 [&::-webkit-scrollbar]:hidden"
+      className="flex snap-x snap-mandatory scrollbar-none gap-1.5 overflow-x-auto overscroll-x-contain px-6 py-3 [&::-webkit-scrollbar]:hidden"
     >
       {weeks.map((week, w) => {
         const isCurrentWeek = w === 1;
@@ -45,7 +45,7 @@ export function WeekCarousel({
           <div
             key={week[0].toISOString()}
             aria-hidden={!isCurrentWeek}
-            className={`grid w-full shrink-0 snap-center grid-cols-7 gap-1.5 ${
+            className={`grid w-full shrink-0 snap-center grid-cols-7 gap-1.5${
               isCurrentWeek ? "" : "opacity-45"
             }`}
           >

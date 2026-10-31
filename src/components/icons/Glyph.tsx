@@ -19,6 +19,7 @@ const GLYPHS = {
   users:
     "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M2 21a7 7 0 0 1 14 0 M16 3.5a4 4 0 0 1 0 7.5 M22 21a7 7 0 0 0-4-6.3",
   restore: "M4 12a8 8 0 1 0 2.3-5.7 M4 4v5h5",
+  clock: "M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M12 7v5l3 2",
 } as const;
 
 export type GlyphName = keyof typeof GLYPHS;

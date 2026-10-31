@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -7,6 +8,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -32,6 +34,9 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   isAdmin: boolean("is_admin").default(false).notNull(),
+  // Farbe der Person (Avatar, Marker). Wird einmal beim Beitritt zu einer Familie
+  // vergeben (lib/color.ts, freeColor) und ändert sich danach nicht mehr.
+  color: text("color"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -60,12 +65,42 @@ export const task = pgTable(
     title: text("title").notNull(),
     description: text("description"),
     category: text("category"),
+    categoryId: uuid("category_id").references(() => category.id, {
+      onDelete: "set null",
+    }),
     icon: text("icon"), // Schlüssel aus TASK_ICON_NAMES, z.B. "kochen"
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => ({
     familyIdx: index("task_family_idx").on(t.familyId),
+    categoryIdx: index("task_category_idx").on(t.categoryId),
+  }),
+);
+
+// ─────────────────────────────────────────────
+// CATEGORIES (Kategorien der tasks)
+// ─────────────────────────────────────────────
+export const category = pgTable(
+  "category",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => family.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    tone: text("tone").notNull().default("slate"),
+    // Eigenes Icon der Kategorie (Schlüssel aus TASK_ICON_NAMES); leer = das der ersten Aufgabe
+    icon: text("icon"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (c) => ({
+    // Name pro Familie eindeutig, egal ob groß oder klein geschrieben
+    uniqueName: uniqueIndex("category_family_name_idx").on(
+      c.familyId,
+      sql`lower(${c.name})`,
+    ),
   }),
 );
 

@@ -1,13 +1,16 @@
 import { Person, SlotView, TaskView } from "@/types/plan";
-import { normalizeCategory } from "./categories";
-import { colorFromUserId } from "./color";
+import { categoryFromRow } from "./categories";
+import { personColor } from "./color";
 import { isTaskIconName } from "./taskIcons";
 
 type DayPlanRows = {
   taskId: string;
   title: string;
   icon: string | null;
-  category: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryTone: string | null;
+  categoryIcon: string | null;
   slotId: string | null;
   slotLabel: string | null;
   assignmentId: string | null;
@@ -15,8 +18,10 @@ type DayPlanRows = {
   completedAt: Date | null;
   assignedToId: string | null;
   assigneeName: string | null;
+  assigneeColor: string | null;
   completedById: string | null;
   completedByName: string | null;
+  completedByColor: string | null;
 }[];
 
 export function groupDayPlan({
@@ -33,7 +38,7 @@ export function groupDayPlan({
       ? {
           id: row.assignedToId,
           name: row.assigneeName ?? "",
-          color: colorFromUserId(row.assignedToId),
+          color: row.assigneeColor ?? personColor(0),
           isCurrentUser: row.assignedToId === currentUserId,
         }
       : null;
@@ -41,7 +46,7 @@ export function groupDayPlan({
       ? {
           id: row.completedById,
           name: row.completedByName ?? "",
-          color: colorFromUserId(row.completedById),
+          color: row.completedByColor ?? personColor(0),
           isCurrentUser: row.completedById === currentUserId,
         }
       : null;
@@ -70,7 +75,7 @@ export function groupDayPlan({
         taskId: row.taskId,
         title: row.title,
         icon: row.icon && isTaskIconName(row.icon) ? row.icon : null,
-        category: normalizeCategory(row.category),
+        category: categoryFromRow(row),
         slots: slot,
       });
     }
