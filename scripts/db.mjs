@@ -5,9 +5,7 @@
 // production:  URL kommt zur Laufzeit aus dem Neon-CLI und liegt nie in einer Datei.
 //              Nur Studio, nie push, und nur nach Bestätigung durch Tippen.
 
-import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { parseEnv } from "node:util";
+import { spawnSync } from "node:child_process";
 import {
   ask,
   bold,
@@ -19,72 +17,12 @@ import {
   select,
   yellow,
 } from "./lib/ui.mjs";
-
-const NEON_BRANCH_PRODUCTION = "production";
-
-// Nur sichere Zeichen, weil die Werte unten in einen Shell-Aufruf wandern.
-const SAFE = /^[\w.-]+$/;
-
-function developmentUrl() {
-  if (!existsSync(".env.local")) {
-    throw new Error(".env.local fehlt. Vorlage: .env.example.");
-  }
-  // parseEnv statt loadEnvFile: Eine in der Shell gesetzte DATABASE_URL darf
-  // die Datei nicht überschreiben.
-  const url = parseEnv(readFileSync(".env.local", "utf8")).DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL fehlt in .env.local.");
-  return url;
-}
-
-// Holt die Production-URL per Neon-CLI. Rolle und Datenbankname übernehmen wir
-// von der development-URL (der Neon-Branch ist eine Kopie davon).
-function productionUrl(devUrl) {
-  if (!existsSync(".neon")) {
-    throw new Error(
-      "Datei .neon fehlt (enthält die Neon-Projekt-ID). Anlegen: `npx neonctl set-context --project-id <id>`.",
-    );
-  }
-  const { projectId } = JSON.parse(readFileSync(".neon", "utf8"));
-  const { username, pathname } = new URL(devUrl);
-  const args = {
-    "--project-id": projectId,
-    "--role-name": decodeURIComponent(username),
-    "--database-name": decodeURIComponent(pathname.slice(1)),
-  };
-  for (const [flag, value] of Object.entries(args)) {
-    if (!SAFE.test(value ?? "")) {
-      throw new Error(`Unerwarteter Wert für ${flag}.`);
-    }
-  }
-
-  let url;
-  try {
-    url = execFileSync(
-      "npx",
-      [
-        "neonctl",
-        "connection-string",
-        NEON_BRANCH_PRODUCTION,
-        ...Object.entries(args).flat(),
-      ],
-      { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"], shell: true },
-    ).trim();
-  } catch {
-    throw new Error(
-      "Neon-CLI konnte die URL nicht holen. Einmalig anmelden: `npx neonctl auth`.",
-    );
-  }
-  if (!/^postgres(ql)?:\/\//.test(url)) {
-    throw new Error("Unerwartete Ausgabe vom Neon-CLI.");
-  }
-  return url;
-}
-
-// Endpunkt und Datenbankname, ohne Zugangsdaten.
-function describe(url) {
-  const { host, pathname } = new URL(url);
-  return `${host.split(".")[0]} / ${decodeURIComponent(pathname.slice(1))}`;
-}
+import {
+  NEON_BRANCH_PRODUCTION,
+  describe,
+  developmentUrl,
+  productionUrl,
+} from "./lib/target.mjs";
 
 async function main() {
   const action = await select("Was möchtest du tun?", [

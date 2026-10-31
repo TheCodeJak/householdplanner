@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { getUserFamily } from "@/db/queries/family";
+import { getUserMembership } from "@/db/queries/family";
 import { user as userTable } from "@/db/schema";
 import {
   MAX_EMAIL_LENGTH,
@@ -88,6 +88,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           name: user.name,
           email: user.email,
           familyId: user.familyId,
+          color: user.color,
         };
       },
     }),
@@ -98,22 +99,34 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
       if (user) {
         token.sub = user.id;
         token.familyId = user.familyId;
+        token.color = user.color;
       }
-      // Die Familie im Token stammt vom Anmelden. Nach dem Gründen oder
+      // Familie und Farbe im Token stammen vom Anmelden. Nach dem Gründen oder
       // Beitreten wird es über unstable_update aufgefrischt (trigger
-      // "update"). Fehlt die Familie noch (Konto ohne Familie, oder ein Token
-      // aus der Zeit vor dem Feld), kommt der aktuelle Wert aus der DB. Daten,
-      // die der Browser mit update() mitschickt, werden bewusst nie
-      // übernommen: Sonst könnte jeder sich selbst eine Familie ins Token
-      // schreiben.
-      if ((trigger === "update" || !token.familyId) && token.sub) {
-        token.familyId = await getUserFamily(token.sub);
+      // "update"; dabei bekommt man auch die Farbe). Fehlt die Familie noch
+      // (Konto ohne Familie, oder ein Token aus der Zeit vor dem Feld) oder die
+      // Farbe trotz Familie (Token aus der Zeit vor der Farbe), kommt der
+      // aktuelle Wert aus der DB. Daten, die der Browser mit update()
+      // mitschickt, werden bewusst nie übernommen: Sonst könnte jeder sich
+      // selbst eine Familie ins Token schreiben.
+      if (
+        (trigger === "update" || !token.familyId || !token.color) &&
+        token.sub
+      ) {
+        const membership = await getUserMembership(token.sub);
+        token.familyId = membership.familyId;
+        token.color = membership.color;
       }
       return token;
     },
     session: ({ session, token }) => ({
       ...session,
-      user: { ...session.user, id: token.sub!, familyId: token.familyId },
+      user: {
+        ...session.user,
+        id: token.sub!,
+        familyId: token.familyId,
+        color: token.color,
+      },
     }),
   },
 });

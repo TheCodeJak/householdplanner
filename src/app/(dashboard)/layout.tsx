@@ -2,6 +2,7 @@ import { AppBackdrop } from "@/components/layout/AppBackdrop";
 import BottomNav from "@/components/layout/BottomNav";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { VariantSwitcher } from "./_variants/VariantSwitcher"; // Gerüst für Design-Varianten
 
 // Rahmen für alle Seiten nach dem Login: Hintergrund, Inhalt, Bottom-Navigation.
 export default async function DashboardLayout({
@@ -22,6 +23,8 @@ export default async function DashboardLayout({
           letzte Karte nicht darunter verschwindet */}
       <div className="h-16 md:hidden" />
       <BottomNav />
+      {/* Bleibt beim Seitenwechsel eingehängt; ohne offene Varianten unsichtbar */}
+      <VariantSwitcher />
     </div>
   );
 }

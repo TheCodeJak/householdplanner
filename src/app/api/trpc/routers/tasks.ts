@@ -18,14 +18,20 @@ export const tasksRouter = router({
       z.object({
         title: z.string().trim().min(1).max(100),
         description: z.string().trim().max(500).optional(),
-        category: z.string().trim().max(50).optional(),
+        categoryId: z.uuid().nullable().optional(),
         icon: z.enum(TASK_ICON_NAMES).optional(),
         slots: z.array(z.string().trim().min(1).max(50)).max(10).optional(),
       }),
     )
-    .mutation(({ input, ctx }) =>
-      createTask({ ...input, familyId: ctx.familyId, createdById: ctx.userId }),
-    ),
+    .mutation(async ({ input, ctx }) => {
+      const result = await createTask({
+        ...input,
+        familyId: ctx.familyId,
+        createdById: ctx.userId,
+      });
+      if (!result.ok) throw unknownCategory();
+      return result.task;
+    }),
   /** Vorlagen für die Profilseite: alle Aufgaben der Familie samt Zeitfenstern */
   list: familyProcedure.query(({ ctx }) =>
     getTaskTemplates({ familyId: ctx.familyId }),
@@ -38,7 +44,7 @@ export const tasksRouter = router({
         title: z.string().trim().min(1).max(100),
         // null/leer = Feld leeren
         description: z.string().trim().max(500).nullable(),
-        category: z.string().trim().max(50).nullable(),
+        categoryId: z.uuid().nullable(),
         icon: z.enum(TASK_ICON_NAMES).nullable(),
         slots: z
           .array(
@@ -54,7 +60,6 @@ export const tasksRouter = router({
       const result = await updateTask({
         ...input,
         description: input.description || null,
-        category: input.category || null,
         familyId: ctx.familyId,
       });
       if (!result.ok) throw updateError(result);
@@ -76,9 +81,18 @@ function notFound() {
   });
 }
 
+function unknownCategory() {
+  return new TRPCError({
+    code: "BAD_REQUEST",
+    message:
+      "Diese Kategorie gibt es nicht mehr. Lade die Seite neu und wähle eine andere.",
+  });
+}
+
 // Die Meldungen sind für Nutzer gedacht (siehe describeError) und werden angezeigt
 function updateError(result: Extract<UpdateTaskResult, { ok: false }>) {
   if (result.reason === "not_found") return notFound();
+  if (result.reason === "unknown_category") return unknownCategory();
   if (result.reason === "unknown_slot") {
     return new TRPCError({
       code: "BAD_REQUEST",

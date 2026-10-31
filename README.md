@@ -50,6 +50,18 @@ npm run db   # Aktion und Datenbank per Pfeiltasten wählen
 
 Production ist geschützt: Die URL holt das Script zur Laufzeit per Neon-CLI (einmalig `npx neonctl auth`, außerdem braucht es die Datei `.neon` mit der Projekt-ID, anlegen mit `npx neonctl set-context --project-id <id>`). Zum Starten musst du `production` eintippen. Beachte: Studio kann auch Daten ändern und löschen. Schema-Änderungen für Production gehören später in Migrationen (`drizzle-kit generate` und `migrate`), nicht in `push`.
 
+### Datenbank-Umzüge auf Production
+
+Schema-Änderungen und Datenumzüge liegen als Skripte in `scripts/` und laufen auf Production mit `--production`. Die URL holt das Skript selbst per Neon-CLI (wie `npm run db`), du musst nichts kopieren. Jedes Skript macht ohne `--apply` einen Trockenlauf (alles wird zurückgerollt); `--apply` schreibt fest und verlangt auf Production das Eintippen von `production`.
+
+| Skript                                 | Zweck                                            |
+| -------------------------------------- | ------------------------------------------------ |
+| `node scripts/schema-update.mjs`       | legt Tabelle `category` und die neuen Spalten an |
+| `node scripts/backfill-categories.mjs` | macht aus dem Kategorie-Text echte Kategorien    |
+| `node scripts/backfill-colors.mjs`     | vergibt die Farben der Personen (`user.color`)   |
+
+Ablauf einer Version, die das Schema ändert: **erst die Datenbank, dann der Code.** Vorher einen Neon-Branch von `production` als Sicherung anlegen. Dann je Skript `--production` (Trockenlauf prüfen) und danach `--production --apply`, in der Reihenfolge der Tabelle. Der Trockenlauf eines Skripts setzt voraus, dass das davor festgeschrieben ist. Alte Programmversionen vertragen neue, optionale Spalten, die Datenbank darf also vor dem Deployment umgebaut werden.
+
 ## Prüfen vor dem PR
 
 ```bash

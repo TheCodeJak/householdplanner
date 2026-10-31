@@ -2,17 +2,16 @@
 
 import { IconButton } from "@/components/ui/IconButton";
 import { InlineAlert } from "@/components/ui/InlineAlert";
-import { PersonChip } from "@/components/ui/PersonChip";
-import { StatusPill } from "@/components/ui/StatusPill";
 import { TaskTile } from "@/components/ui/TaskTile";
 import { useAssignmentActions } from "@/hooks/useAssignmentActions";
 import { useDayPlan } from "@/hooks/useDayPlan";
 import { formatDayLabel, fromIsoDate } from "@/lib/dateUtils";
 import { describeError } from "@/lib/describeError";
-import { fitsSideBySide, getSlotActions } from "@/lib/getSlotActions";
-import { TASK_ICON_GLOWS, taskIconTones } from "@/lib/taskIcons";
-import type { SlotRef, SlotView } from "@/types/plan";
+import { getSlotActions } from "@/lib/getSlotActions";
+import { TASK_ICON_GLOWS } from "@/lib/taskIcons";
+import type { SlotRef } from "@/types/plan";
 import { Button, Modal } from "jaklib/core";
+import { SlotStatus } from "./SlotStatus";
 
 /**
  * Detail-Sheet einer Aufgabe bzw. eines Slots, öffnet sich von unten.
@@ -44,7 +43,7 @@ export default function TaskDetailModal({
 
   const actions = getSlotActions(slot);
   // Verlauf in der Farbe der Aufgabe, z.B. "from-sky-100" (siehe taskIcons.ts)
-  const glow = TASK_ICON_GLOWS[task.icon ? taskIconTones[task.icon] : "slate"];
+  const glow = TASK_ICON_GLOWS[task.category.tone];
 
   function close() {
     reset();
@@ -63,12 +62,14 @@ export default function TaskDetailModal({
           (Aufgabenfarbe) nach unten (durchsichtig). pt-7 lässt Platz für den
           Zieh-Griff von jaklib, der darüberliegt. */}
       <div
+        // className={`flex items-center gap-2.5 bg-blue-500 px-4 pt-7 pb-3`}
         className={`flex items-center gap-2.5 bg-linear-to-b to-transparent px-4 pt-7 pb-3 ${glow}`}
       >
         <TaskTile
           icon={task.icon}
           title={task.title}
           completed={slot.status === "completed"}
+          tone={task.category.tone}
         />
         <div className="min-w-0 flex-1">
           <h2 className="line-clamp-2 text-body leading-snug font-bold text-fg">
@@ -79,7 +80,6 @@ export default function TaskDetailModal({
             {slot.label && ` · ${slot.label}`}
           </p>
         </div>
-        <StatusPill status={slot.status} />
         {/* Das X ist bewusst das erste Bedienelement: jaklib fokussiert beim
             Öffnen das erste davon – sonst läge der Fokus auf einer Aktion, und
             ein Tastendruck könnte sie versehentlich auslösen. */}
@@ -92,7 +92,7 @@ export default function TaskDetailModal({
       </div>
 
       <div className="px-4 pb-4">
-        <SlotPeople slot={slot} />
+        <SlotStatus slot={slot} />
 
         {slot.notes && (
           <div className="mb-3 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-body leading-relaxed text-fg-2 dark:border-amber-500/20 dark:bg-amber-500/10">
@@ -100,13 +100,7 @@ export default function TaskDetailModal({
           </div>
         )}
 
-        <div
-          className={
-            fitsSideBySide(actions)
-              ? "grid grid-cols-2 gap-2"
-              : "flex flex-col gap-2"
-          }
-        >
+        <div className="flex gap-2">
           {actions.map((action) => (
             <Button
               key={action.key}
@@ -128,33 +122,5 @@ export default function TaskDetailModal({
         )}
       </div>
     </Modal>
-  );
-}
-
-/** Wer hat geplant / wer hat erledigt – kompakt in einer Zeile */
-function SlotPeople({ slot }: { slot: SlotView }) {
-  const { assignee, completedBy } = slot;
-  if (!assignee) {
-    return (
-      <p className="mb-3 text-secondary text-subtle">
-        Noch niemand eingeteilt.
-      </p>
-    );
-  }
-
-  const samePerson = completedBy?.id === assignee.id;
-  return (
-    <div className="mb-3 flex gap-2">
-      {samePerson ? (
-        <PersonChip label="Geplant und erledigt von" person={assignee} />
-      ) : (
-        <>
-          <PersonChip label="Geplant von" person={assignee} />
-          {completedBy && (
-            <PersonChip label="Erledigt von" person={completedBy} />
-          )}
-        </>
-      )}
-    </div>
   );
 }

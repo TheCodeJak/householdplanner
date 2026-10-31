@@ -9,8 +9,9 @@ export function SectionLabel({
   action?: ReactNode;
 }) {
   return (
-    <div className="mt-6 mb-2 flex items-center justify-between px-2">
-      <h2 className="text-caption font-semibold tracking-wider text-subtle uppercase">
+    // min-h-9: gleiche Höhe wie eine Aktion rechts, damit beide mittig zueinander stehen
+    <div className="mt-5 mb-1 flex min-h-9 items-center justify-between px-2">
+      <h2 className="text-secondary font-semibold tracking-wide text-subtle uppercase">
         {children}
       </h2>
       {action}
