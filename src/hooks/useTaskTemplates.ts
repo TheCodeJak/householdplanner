@@ -25,17 +25,15 @@ export function useTaskTemplates() {
  */
 export function useTaskTemplateActions() {
   const utils = trpc.useUtils();
-  // Nach jeder Änderung (Erfolg oder Fehler) Liste, Tagesplan und Kategorien
-  // als veraltet markieren: React Query lädt sie neu, Profil und Dashboard
-  // zeigen den neuen Stand. Das Promise bewusst NICHT zurückgeben (wie in
+  // Nach jeder Änderung (Erfolg oder Fehler) Liste und Tagesplan als veraltet
+  // markieren: React Query lädt beide neu, Profil und Dashboard zeigen den
+  // neuen Stand. Das Promise bewusst NICHT zurückgeben (wie in
   // useAssignmentActions): sonst gilt die Mutation erst nach dem Neuladen als
   // fertig, und "Speichert …" bliebe unnötig lange stehen.
   const options = {
     onSettled: () => {
       void utils.tasks.list.invalidate();
       void utils.plan.getDay.invalidate();
-      // Die Zahl der Aufgaben je Kategorie (Warnung beim Löschen) ändert sich mit
-      void utils.categories.list.invalidate();
     },
   };
 
@@ -55,7 +53,7 @@ export function useTaskTemplateActions() {
         {
           title: draft.title,
           description: draft.description || undefined,
-          categoryId: draft.categoryId,
+          category: draft.category || undefined,
           icon: draft.icon ?? undefined,
           slots: draft.slots.map((slot) => slot.label),
         },
@@ -68,7 +66,7 @@ export function useTaskTemplateActions() {
         taskId: task.id,
         title: draft.title,
         description: draft.description || null,
-        categoryId: draft.categoryId,
+        category: draft.category || null,
         icon: draft.icon,
         slots: draft.slots,
       },

@@ -5,21 +5,20 @@ import { InviteModal } from "@/components/modals/InviteModal";
 import { MemberModal } from "@/components/modals/MemberModal";
 import { TaskEditModal } from "@/components/modals/TaskEditModal";
 import { AccountSection } from "@/components/profile/AccountSection";
-import { ProfileHero } from "@/components/profile/ProfileHero";
 import { MemberCircles } from "@/components/profile/MemberCircles";
+import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileTasks } from "@/components/profile/ProfileTasks";
 import { InlineAlert } from "@/components/ui/InlineAlert";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { useCategories, useCategoryActions } from "@/hooks/useCategories";
 import { useFamily, useRegenerateInviteCode } from "@/hooks/useFamily";
 import { useModalTarget } from "@/hooks/useModalTarget";
 import {
   useTaskTemplateActions,
   useTaskTemplates,
 } from "@/hooks/useTaskTemplates";
-import { personColor } from "@/lib/color";
+import { DEFAULT_CATEGORY } from "@/lib/categories";
+import { colorFromUserId } from "@/lib/color";
 import { describeError } from "@/lib/describeError";
-import { TASK_TONE_CHOICES } from "@/lib/taskIcons";
 import type { FamilyMember, TaskTemplate } from "@/types/profile";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -45,7 +44,7 @@ export default function ProfilePage() {
           id: session.user.id,
           name: session.user.name ?? "",
           email: session.user.email ?? "",
-          color: session.user.color ?? personColor(0),
+          color: colorFromUserId(session.user.id),
           isCurrentUser: true,
           isAdmin: false,
         }
@@ -55,12 +54,10 @@ export default function ProfilePage() {
   const actions = useTaskTemplateActions();
   const activeTasks = tasks.filter((t) => t.isActive);
   const archivedTasks = tasks.filter((t) => !t.isActive);
-  const { categories } = useCategories();
-  const categoryActions = useCategoryActions();
-  // Vorauswahl für eine neue Kategorie: die erste Farbe, die noch keine hat
-  const suggestedTone =
-    TASK_TONE_CHOICES.find((t) => !categories.some((c) => c.tone === t)) ??
-    TASK_TONE_CHOICES[0];
+  // Vorhandene Kategorien; "Sonstiges" steht immer zur Wahl
+  const categories = [
+    ...new Set([...tasks.map((t) => t.category), DEFAULT_CATEGORY]),
+  ];
 
   // { task: null } = neue Aufgabe. Das Objekt drumherum, damit "null" ein
   // gültiges Ziel ist und useModalTarget es von "kein Ziel" unterscheidet.
@@ -73,7 +70,6 @@ export default function ProfilePage() {
 
   function openTask(task: TaskTemplate | null) {
     actions.reset();
-    categoryActions.reset();
     setEditSession((n) => n + 1);
     taskModal.openFor({ task });
   }
@@ -132,7 +128,6 @@ export default function ProfilePage() {
           <ProfileTasks
             tasks={activeTasks}
             archived={archivedTasks}
-            categories={categories}
             onEdit={openTask}
             onRestore={actions.restore}
           />
@@ -155,17 +150,6 @@ export default function ProfilePage() {
           onClose={taskModal.close}
           task={taskModal.target.task}
           categories={categories}
-          suggestedTone={suggestedTone}
-          categoryEditing={{
-            create: categoryActions.create,
-            update: categoryActions.update,
-            remove: categoryActions.remove,
-            isPending: categoryActions.isPending,
-            errorText: categoryActions.error
-              ? describeError(categoryActions.error).text
-              : null,
-            reset: categoryActions.reset,
-          }}
           onSave={(draft) =>
             actions.save(taskModal.target!.task, draft, taskModal.close)
           }

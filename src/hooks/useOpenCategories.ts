@@ -7,8 +7,6 @@ import { useOpenState } from "./useOpenState";
  * Gerät gemerkt (siehe useOpenState) und bleibt auch nach einem Seitenwechsel.
  */
 export function useOpenCategories(initiallyOpen: string[]) {
-  // Die Einträge sind Schlüssel der Kategorien (categoryKey), keine Namen:
-  // So bleibt der Zustand beim Umbenennen erhalten.
   const state = useOpenState("profile-categories");
   // Der Standard wird einmal festgehalten. Käme eine neue Kategorie dazu und
   // rückte nach vorn, würde sonst eine unberührte Gruppe von selbst zuklappen.

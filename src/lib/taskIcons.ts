@@ -61,73 +61,10 @@ export const TASK_ICON_TONES = {
     "bg-indigo-100 text-indigo-700 dark:bg-indigo-400/15 dark:text-indigo-300",
   lime: "bg-lime-100 text-lime-700 dark:bg-lime-400/15 dark:text-lime-300",
   rose: "bg-rose-100 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300",
-  orange:
-    "bg-orange-100 text-orange-700 dark:bg-orange-400/15 dark:text-orange-300",
-  green: "bg-green-100 text-green-700 dark:bg-green-400/15 dark:text-green-300",
-  cyan: "bg-cyan-100 text-cyan-700 dark:bg-cyan-400/15 dark:text-cyan-300",
-  blue: "bg-blue-100 text-blue-700 dark:bg-blue-400/15 dark:text-blue-300",
-  purple:
-    "bg-purple-100 text-purple-700 dark:bg-purple-400/15 dark:text-purple-300",
-  fuchsia:
-    "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-400/15 dark:text-fuchsia-300",
   slate: "bg-surface-2 text-muted",
 } as const;
 
 export type TaskIconTone = keyof typeof TASK_ICON_TONES;
-
-// Type Guard wie isTaskIconName: prüft einen Ton-Namen aus der DB (category.tone)
-export function isTaskIconTone(value: string): value is TaskIconTone {
-  return Object.hasOwn(TASK_ICON_TONES, value);
-}
-
-// Alle gültigen Töne als Tupel (für z.enum). Dazu gehören auch ältere Töne, die
-// die Farbauswahl nicht mehr anbietet, damit bestehende Kategorien gültig bleiben.
-export const TASK_TONE_NAMES = Object.keys(TASK_ICON_TONES) as [
-  TaskIconTone,
-  ...TaskIconTone[],
-];
-
-// Die Farben, die die Auswahl anbietet: 15 in 3 Reihen à 5. Ausgesucht nach
-// Farbabstand (CIE Lab, ΔE): Der kleinste Abstand zweier Farben beträgt 20
-// (Smaragd ↔ Türkis); bei den alten zehn Tönen waren es 14. Mehr als 15 gleiche
-// Abstände gibt es nicht, ohne dass sich Paare stark ähneln. Die Reihenfolge ist
-// so gewählt, dass auch Nachbarn im Raster verschieden sind (mindestens ΔE 90).
-export const TASK_TONE_CHOICES: readonly TaskIconTone[] = [
-  "green",
-  "blue",
-  "teal",
-  "rose",
-  "sky",
-  "pink",
-  "lime",
-  "indigo",
-  "emerald",
-  "orange",
-  "cyan",
-  "fuchsia",
-  "amber",
-  "purple",
-  "slate",
-];
-
-export const TASK_TONE_LABELS: Record<TaskIconTone, string> = {
-  sky: "Hellblau",
-  blue: "Blau",
-  cyan: "Cyan",
-  teal: "Türkis",
-  emerald: "Smaragd",
-  green: "Grün",
-  lime: "Limette",
-  amber: "Gelb",
-  orange: "Orange",
-  rose: "Rot",
-  pink: "Pink",
-  fuchsia: "Magenta",
-  purple: "Lila",
-  violet: "Violett",
-  indigo: "Indigo",
-  slate: "Grau",
-};
 
 // Weicher Farbverlauf in der Farbe der Aufgabe, z.B. als Kopfbereich im Detail-Sheet
 export const TASK_ICON_GLOWS: Record<TaskIconTone, string> = {
@@ -140,12 +77,6 @@ export const TASK_ICON_GLOWS: Record<TaskIconTone, string> = {
   indigo: "from-indigo-100 dark:from-indigo-400/15",
   lime: "from-lime-100 dark:from-lime-400/15",
   rose: "from-rose-100 dark:from-rose-400/15",
-  orange: "from-orange-100 dark:from-orange-400/15",
-  green: "from-green-100 dark:from-green-400/15",
-  cyan: "from-cyan-100 dark:from-cyan-400/15",
-  blue: "from-blue-100 dark:from-blue-400/15",
-  purple: "from-purple-100 dark:from-purple-400/15",
-  fuchsia: "from-fuchsia-100 dark:from-fuchsia-400/15",
   slate: "from-surface-2",
 };
 
@@ -204,11 +135,5 @@ export const TASK_TONE_HEX: Record<
   indigo: { 50: "#eef2ff", 100: "#e0e7ff", 600: "#4f46e5" },
   lime: { 50: "#f7fee7", 100: "#ecfccb", 600: "#65a30d" },
   rose: { 50: "#fff1f2", 100: "#ffe4e6", 600: "#e11d48" },
-  orange: { 50: "#fff7ed", 100: "#ffedd5", 600: "#ea580c" },
-  green: { 50: "#f0fdf4", 100: "#dcfce7", 600: "#16a34a" },
-  cyan: { 50: "#ecfeff", 100: "#cffafe", 600: "#0891b2" },
-  blue: { 50: "#eff6ff", 100: "#dbeafe", 600: "#2563eb" },
-  purple: { 50: "#faf5ff", 100: "#f3e8ff", 600: "#9333ea" },
-  fuchsia: { 50: "#fdf4ff", 100: "#fae8ff", 600: "#c026d3" },
   slate: { 50: "#f8fafc", 100: "#f1f5f9", 600: "#475569" },
 };
