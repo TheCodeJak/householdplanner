@@ -5,8 +5,12 @@
 //   node scripts/backfill-categories.mjs           Trockenlauf (alles wird zurückgerollt)
 //   node scripts/backfill-categories.mjs --apply   Änderungen festschreiben
 //
-// Ziel: development aus .env.local. Eine andere Datenbank (z. B. production)
-// nur ausdrücklich über BACKFILL_DATABASE_URL, mit Bestätigung durch Tippen.
+// Voraussetzung: Das neue Schema ist da, also vorher
+//   node scripts/schema-update.mjs --apply
+//
+// Ziel: development aus .env.local. Mit --production die Production-Datenbank:
+// Ihre URL holt das Skript zur Laufzeit per Neon-CLI (lib/target.mjs), du musst
+// nichts kopieren. Festschreiben auf Production nur nach Bestätigung durch Tippen.
 //
 // Regeln:
 // - Pro Familie wird jeder Kategoriename zu EINER Zeile in category, wobei
@@ -21,19 +25,10 @@
 // - task.category (Text) bleibt unverändert. Zurück: UPDATE task SET
 //   category_id = NULL; DELETE FROM category;
 
-import { existsSync, readFileSync } from "node:fs";
-import { parseEnv } from "node:util";
 import postgres from "postgres";
-import {
-  ask,
-  bold,
-  cyan,
-  dim,
-  green,
-  red,
-  runMain,
-  yellow,
-} from "./lib/ui.mjs";
+import { missingAfter } from "./lib/schemaUpdate.mjs";
+import { bold, cyan, dim, green, red, runMain, yellow } from "./lib/ui.mjs";
+import { confirmProduction, describe, resolveTarget } from "./lib/target.mjs";
 
 const APPLY = process.argv.includes("--apply");
 const DEFAULT_CATEGORY = "Sonstiges";
@@ -75,26 +70,6 @@ const ICON_TONES = {
 const FALLBACK_TONE = "slate";
 
 class DryRun extends Error {}
-
-function target() {
-  if (process.env.BACKFILL_DATABASE_URL) {
-    return { url: process.env.BACKFILL_DATABASE_URL, isOverride: true };
-  }
-  if (!existsSync(".env.local")) {
-    throw new Error(".env.local fehlt (Aufruf im Projektordner).");
-  }
-  // parseEnv statt loadEnvFile: Eine in der Shell gesetzte DATABASE_URL darf
-  // die Datei nicht überschreiben.
-  const url = parseEnv(readFileSync(".env.local", "utf8")).DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL fehlt in .env.local.");
-  return { url, isOverride: false };
-}
-
-// Host und Datenbankname ohne Zugangsdaten
-function describe(url) {
-  const { hostname, pathname } = new URL(url);
-  return `${hostname}${pathname}`;
-}
 
 const isVirtual = (name) =>
   !name?.trim() || name.trim().toLowerCase() === DEFAULT_CATEGORY.toLowerCase();
@@ -142,27 +117,25 @@ function planGroups(tasks) {
   );
 }
 
-async function confirmOverride(url) {
-  console.log(
-    `\n${red(bold("Achtung:"))} Ziel ist NICHT .env.local, sondern ${bold(describe(url))}`,
-  );
-  const answer = await ask(
-    `Tippe den Datenbanknamen "${new URL(url).pathname.slice(1)}" zum Bestätigen:`,
-  );
-  if (answer !== new URL(url).pathname.slice(1)) {
-    throw new Error("Abgebrochen.");
-  }
-}
-
 async function main() {
-  const { url, isOverride } = target();
+  const { url, name } = resolveTarget();
   console.log(
-    `${dim("Ziel:")} ${cyan(describe(url))}  ${APPLY ? yellow("(festschreiben)") : green("(Trockenlauf)")}`,
+    `${dim("Ziel:")} ${cyan(`Neon ${name} (${describe(url)})`)}  ${APPLY ? yellow("(festschreiben)") : green("(Trockenlauf)")}`,
   );
-  if (isOverride && APPLY) await confirmOverride(url);
+  if (name === "production" && APPLY) await confirmProduction();
 
   const sql = postgres(url, { max: 1 });
   try {
+    // Der Trockenlauf braucht die neuen Tabellen und Spalten schon (er legt sie
+    // nicht an). Fehlen sie, kommt statt eines SQL-Fehlers eine klare Anweisung.
+    const missing = await missingAfter(sql);
+    if (missing.length > 0) {
+      throw new Error(
+        `Die Datenbank hat das neue Schema noch nicht (es fehlt: ${missing.join(", ")}).
+  Zuerst: node scripts/schema-update.mjs --apply`,
+      );
+    }
+
     await sql
       .begin(async (tx) => {
         // Keine Änderungen an Aufgaben, solange der Umzug läuft (Lesen bleibt möglich)
