@@ -3,31 +3,67 @@ import type { TaskIconName } from "@/lib/taskIcons";
 import type { TaskTemplate } from "@/types/profile";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { db } from "..";
-import { task, taskAssignment, taskSlot } from "../schema";
+import { category, task, taskAssignment, taskSlot } from "../schema";
 
-export async function createTask(data: {
+/**
+ * Gehört die Kategorie zu dieser Familie? Die Zeile wird bis zum Ende der
+ * Transaktion gesperrt, damit sie nicht gelöscht wird, während die Aufgabe
+ * darauf verweist. So kann eine Aufgabe nie an die Kategorie einer fremden
+ * Familie hängen.
+ */
+async function categoryBelongsToFamily(
+  executor: Pick<typeof db, "select">,
+  categoryId: string,
+  familyId: string,
+): Promise<boolean> {
+  const [row] = await executor
+    .select({ id: category.id })
+    .from(category)
+    .where(and(eq(category.id, categoryId), eq(category.familyId, familyId)))
+    .for("share");
+  return !!row;
+}
+
+export type CreateTaskResult =
+  | { ok: true; task: typeof task.$inferSelect }
+  | { ok: false; reason: "unknown_category" };
+
+export function createTask(data: {
   familyId: string;
   createdById: string;
   title: string;
   description?: string;
-  category?: string;
+  /** null/fehlt = "Sonstiges" */
+  categoryId?: string | null;
   icon?: TaskIconName;
   slots?: string[];
-}) {
-  const { slots: slotLabels, ...taskData } = data;
-  const [newTask] = await db.insert(task).values(taskData).returning();
+}): Promise<CreateTaskResult> {
+  return db.transaction(async (tx) => {
+    const { slots: slotLabels, categoryId = null, ...taskData } = data;
+    if (
+      categoryId &&
+      !(await categoryBelongsToFamily(tx, categoryId, data.familyId))
+    ) {
+      return { ok: false, reason: "unknown_category" };
+    }
 
-  if (slotLabels && slotLabels.length > 0) {
-    await db.insert(taskSlot).values(
-      slotLabels.map((label, i) => ({
-        taskId: newTask.id,
-        label,
-        sortOrder: i,
-      })),
-    );
-  }
+    const [newTask] = await tx
+      .insert(task)
+      .values({ ...taskData, categoryId })
+      .returning();
 
-  return newTask;
+    if (slotLabels && slotLabels.length > 0) {
+      await tx.insert(taskSlot).values(
+        slotLabels.map((label, i) => ({
+          taskId: newTask.id,
+          label,
+          sortOrder: i,
+        })),
+      );
+    }
+
+    return { ok: true, task: newTask };
+  });
 }
 
 /** Alle Aufgaben-Vorlagen der Familie (auch archivierte) samt Zeitfenstern */
@@ -36,21 +72,31 @@ export async function getTaskTemplates(
   // Nur für Tests in einer Transaktion; im Betrieb immer die normale Verbindung
   executor: Pick<typeof db, "select"> = db,
 ): Promise<TaskTemplate[]> {
+  // Sortierung wie im Tagesplan: "Sonstiges" (NULL) zuletzt, Gleichstand über den Namen
   const rows = await executor
     .select({
       id: task.id,
       title: task.title,
       icon: task.icon,
-      category: task.category,
+      categoryId: category.id,
+      categoryName: category.name,
+      categoryTone: category.tone,
+      categoryIcon: category.icon,
       description: task.description,
       isActive: task.isActive,
       slotId: taskSlot.id,
       slotLabel: taskSlot.label,
     })
     .from(task)
+    .leftJoin(category, eq(category.id, task.categoryId))
     .leftJoin(taskSlot, eq(taskSlot.taskId, task.id))
     .where(eq(task.familyId, familyId))
-    .orderBy(asc(task.category), asc(task.title), asc(taskSlot.sortOrder));
+    .orderBy(
+      asc(category.sortOrder),
+      asc(category.name),
+      asc(task.title),
+      asc(taskSlot.sortOrder),
+    );
   return groupTaskTemplates(rows);
 }
 
@@ -63,7 +109,8 @@ type UpdateTaskData = {
   taskId: string;
   title: string;
   description: string | null;
-  category: string | null;
+  /** null = "Sonstiges" */
+  categoryId: string | null;
   icon: TaskIconName | null;
   /** Bestehende Zeitfenster mit id, neue ohne. Die Reihenfolge ist die Sortierung. */
   slots: { id?: string; label: string }[];
@@ -72,6 +119,7 @@ type UpdateTaskData = {
 export type UpdateTaskResult =
   | { ok: true }
   | { ok: false; reason: "not_found" }
+  | { ok: false; reason: "unknown_category" }
   | { ok: false; reason: "unknown_slot" }
   | { ok: false; reason: "slot_in_use"; label: string };
 
@@ -97,7 +145,7 @@ export async function applyTaskUpdate(
     taskId,
     title,
     description,
-    category,
+    categoryId,
     icon,
     slots,
   }: UpdateTaskData,
@@ -110,6 +158,13 @@ export async function applyTaskUpdate(
     .where(and(eq(task.id, taskId), eq(task.familyId, familyId)))
     .for("update");
   if (!existing) return { ok: false, reason: "not_found" };
+
+  if (
+    categoryId &&
+    !(await categoryBelongsToFamily(tx, categoryId, familyId))
+  ) {
+    return { ok: false, reason: "unknown_category" };
+  }
 
   const current = await tx
     .select({ id: taskSlot.id, label: taskSlot.label })
@@ -145,7 +200,7 @@ export async function applyTaskUpdate(
 
   await tx
     .update(task)
-    .set({ title, description, category, icon })
+    .set({ title, description, categoryId, icon })
     .where(eq(task.id, taskId));
 
   for (const [i, slot] of slots.entries()) {

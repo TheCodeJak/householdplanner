@@ -21,7 +21,7 @@ export function useDayPlan(date: Date) {
         placeholderData: keepPreviousData,
         // Alle 20 s im Hintergrund neu laden: Änderungen anderer
         // Familienmitglieder erscheinen ohne Neuladen der Seite
-        refetchInterval: 20_000,
+        refetchInterval: 100_000,
       },
     );
   return {

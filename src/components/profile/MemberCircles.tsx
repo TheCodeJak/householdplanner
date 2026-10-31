@@ -4,7 +4,7 @@ import type { FamilyMember } from "@/types/profile";
 
 /**
  * Mitglieder als kleine Kreise mit Namen darunter, Admins mit Krönchen.
- * Hinten ein gestrichelter "+"-Kreis, der das Einladungs-Modal öffnet.
+ * Hinten ein neutraler "+"-Kreis, der das Einladungs-Modal öffnet.
  */
 export function MemberCircles({
   members,
@@ -48,10 +48,12 @@ export function MemberCircles({
         onClick={onInvite}
         className="flex w-13 shrink-0 flex-col items-center gap-1"
       >
-        <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-dashed border-brand-300 text-accent dark:border-brand-400/50">
+        {/* Weiße Fläche mit feiner Linie: gleiche Größe wie die Avatare, aber
+            ruhig – nichts, was um Aufmerksamkeit mit den Personen konkurriert */}
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-surface text-fg-2 ring-1 ring-line">
           <Glyph name="plus" size={18} />
         </span>
-        <span className="text-caption font-medium text-accent">Einladen</span>
+        <span className="text-caption font-medium text-fg-2">Einladen</span>
       </button>
     </div>
   );
