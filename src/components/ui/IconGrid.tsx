@@ -1,11 +1,12 @@
 import { TaskIcon } from "@/components/icons";
-import { TASK_ICON_NAMES, type TaskIconName } from "@/lib/taskIcons";
+import {
+  TASK_ICON_NAMES,
+  TASK_ICON_TONES,
+  type TaskIconName,
+  taskIconTones,
+} from "@/lib/taskIcons";
 
-/**
- * Alle Aufgaben-Icons als Raster zum Auswählen, das gewählte mit Ring.
- * Bewusst neutral (keine Farbe): Die Farbe einer Aufgabe kommt von ihrer
- * Kategorie, nicht vom Icon.
- */
+/** Alle Aufgaben-Icons als Raster zum Auswählen, das gewählte mit Ring */
 export function IconGrid({
   value,
   onChange,
@@ -22,10 +23,12 @@ export function IconGrid({
           onClick={() => onChange(name)}
           aria-label={name}
           aria-pressed={value === name}
-          className={`flex aspect-square items-center justify-center rounded-xl bg-surface-2 transition dark:bg-white/5 ${
+          className={`flex aspect-square items-center justify-center rounded-xl transition ${
+            TASK_ICON_TONES[taskIconTones[name]]
+          } ${
             value === name
-              ? "text-fg ring-2 ring-brand-500 ring-offset-2 ring-offset-surface"
-              : "text-muted hover:text-fg"
+              ? "ring-2 ring-brand-500 ring-offset-2 ring-offset-surface"
+              : "opacity-80 hover:opacity-100"
           }`}
         >
           <TaskIcon name={name} size="md" />

@@ -1,4 +1,4 @@
-import { PERSON_COLORS, freeColor, personColor } from "@/lib/color";
+import { colorFromUserId } from "@/lib/color";
 import { INVITE_CODE_ALPHABET, INVITE_CODE_LENGTH } from "@/lib/inviteCode";
 import type { FamilyMember, FamilyOverview } from "@/types/profile";
 import { randomInt } from "node:crypto";
@@ -22,17 +22,6 @@ export async function getUserFamily(userId: string): Promise<string | null> {
     .from(user)
     .where(eq(user.id, userId));
   return row?.familyId ?? null;
-}
-
-/** Familie und Farbe des Nutzers: das, was das Anmelde-Token von ihm mitführt */
-export async function getUserMembership(
-  userId: string,
-): Promise<{ familyId: string | null; color: string | null }> {
-  const [row] = await db
-    .select({ familyId: user.familyId, color: user.color })
-    .from(user)
-    .where(eq(user.id, userId));
-  return { familyId: row?.familyId ?? null, color: row?.color ?? null };
 }
 
 // ── Einladungscodes ─────────────────────────────────────────────────────────
@@ -111,7 +100,7 @@ export async function applyCreateFamily(
 
   await tx
     .update(user)
-    .set({ familyId: created.id, isAdmin: true, color: PERSON_COLORS[0] })
+    .set({ familyId: created.id, isAdmin: true })
     .where(eq(user.id, userId));
 
   return {
@@ -148,18 +137,11 @@ export async function joinFamily(
     .where(eq(family.inviteCode, code));
   if (!target) return { ok: false, reason: "unknown_code" };
 
-  // Die Farbe: die erste, die in der Familie noch frei ist
-  const members = await executor
-    .select({ color: user.color })
-    .from(user)
-    .where(eq(user.familyId, target.id));
-  const color = freeColor(members.map((m) => m.color));
-
   // "where family_id is null": Hat der Nutzer in der Zwischenzeit anderswo
   // beigetreten, ändert dieses Update nichts
   const updated = await executor
     .update(user)
-    .set({ familyId: target.id, color })
+    .set({ familyId: target.id })
     .where(and(eq(user.id, userId), isNull(user.familyId)))
     .returning({ id: user.id });
   if (updated.length === 0) return { ok: false, reason: "already_in_family" };
@@ -180,7 +162,6 @@ export async function getFamilyMembers(
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
-      color: user.color,
     })
     .from(user)
     .where(eq(user.familyId, familyId))
@@ -188,8 +169,7 @@ export async function getFamilyMembers(
 
   return rows.map((row) => ({
     ...row,
-    // Rückfall nur für Konten ohne Farbe (vor dem Umzug scripts/backfill-colors.mjs)
-    color: row.color ?? personColor(0),
+    color: colorFromUserId(row.id),
     isCurrentUser: row.id === currentUserId,
   }));
 }

@@ -2,7 +2,7 @@ import type { Person } from "@/types/plan";
 
 /**
  * Runder Avatar mit Anfangsbuchstabe in der Farbe der Person, in beliebiger
- * Größe.
+ * Größe (PersonDot ist die feste 28px-Variante für Karten im Dashboard).
  */
 export function PersonAvatar({
   person,

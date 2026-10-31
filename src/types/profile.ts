@@ -1,5 +1,5 @@
-import type { TaskIconName, TaskIconTone } from "@/lib/taskIcons";
-import type { CategoryView, Person } from "./plan";
+import type { TaskIconName } from "@/lib/taskIcons";
+import type { Person } from "./plan";
 
 // Typen der Profilseite (Familie verwalten, Aufgaben-Vorlagen bearbeiten).
 
@@ -15,22 +15,12 @@ export type SlotTemplate = {
   label: string;
 };
 
-/** Eine Kategorie der Familie zur Verwaltung (Tabelle `category`) */
-export type CategoryOption = {
-  id: string;
-  name: string;
-  tone: TaskIconTone;
-  icon: TaskIconName | null;
-  /** Aufgaben in dieser Kategorie, auch archivierte (so viele wandern beim Löschen nach "Sonstiges") */
-  taskCount: number;
-};
-
 /** Eine Aufgaben-Vorlage (Tabelle `task` + ihre `task_slot`-Zeilen) */
 export type TaskTemplate = {
   id: string;
   title: string;
   icon: TaskIconName | null;
-  category: CategoryView;
+  category: string;
   description?: string;
   /** Zeitfenster in Reihenfolge, leer = einmal am Tag */
   slots: SlotTemplate[];
@@ -46,8 +36,7 @@ export type TaskTemplate = {
 export type TaskDraft = {
   title: string;
   icon: TaskIconName | null;
-  /** null = "Sonstiges" (keine Kategorie) */
-  categoryId: string | null;
+  category: string;
   description: string;
   slots: { id?: string; label: string }[];
 };

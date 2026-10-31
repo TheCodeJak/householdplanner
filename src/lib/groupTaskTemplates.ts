@@ -1,15 +1,12 @@
 import type { TaskTemplate } from "@/types/profile";
-import { categoryFromRow } from "./categories";
+import { normalizeCategory } from "./categories";
 import { isTaskIconName } from "./taskIcons";
 
 type TemplateRow = {
   id: string;
   title: string;
   icon: string | null;
-  categoryId: string | null;
-  categoryName: string | null;
-  categoryTone: string | null;
-  categoryIcon: string | null;
+  category: string | null;
   description: string | null;
   isActive: boolean;
   slotId: string | null;
@@ -31,7 +28,7 @@ export function groupTaskTemplates(rows: TemplateRow[]): TaskTemplate[] {
         id: row.id,
         title: row.title,
         icon: row.icon && isTaskIconName(row.icon) ? row.icon : null,
-        category: categoryFromRow(row),
+        category: normalizeCategory(row.category),
         description: row.description ?? undefined,
         slots: [],
         isActive: row.isActive,

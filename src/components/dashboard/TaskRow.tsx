@@ -2,29 +2,24 @@
 
 import { Glyph } from "@/components/icons";
 import { Collapse } from "@/components/ui/Collapse";
-import { PersonAvatar } from "@/components/ui/PersonAvatar";
-import { SlotIcon } from "@/components/ui/SlotIcon";
+import { PersonPair } from "@/components/ui/PersonPair";
+import { TaskTile } from "@/components/ui/TaskTile";
 import { useOpenState } from "@/hooks/useOpenState";
-import { slotSentence, slotShort } from "@/lib/slotText";
-import type { TaskIconTone } from "@/lib/taskIcons";
-import type { Person, SlotView, TaskView } from "@/types/plan";
-import { SoftTile } from "./SoftTile";
+import { slotStatusText } from "@/lib/planText";
+import type { SlotView, TaskStatus, TaskView } from "@/types/plan";
 
 /**
  * Eine Aufgabe als schlichte Zeile innerhalb einer Gruppe (ohne eigene Karte,
  * ohne Trennlinie). Zwei Formen:
- * - ohne Zeitfenster: eine Zeile mit Kachel, Titel, Status-Satz und Person
+ * - ohne Zeitfenster: eine Zeile mit Kachel, Titel, Status-Text und Personen
  * - mit Zeitfenstern: Kopf mit Kachel + Titel zum Auf- und Zuklappen, darunter
- *   alle Zeitfenster in einem abgerundeten Kasten
+ *   der Zeitstrahl, der mittig an der Kachel hängt
  */
 export function TaskRow({
   task: { taskId, title, icon, slots },
-  tone,
   onSelect,
 }: {
   task: TaskView;
-  /** Farbe der Kategorie, in der die Aufgabe steht */
-  tone: TaskIconTone;
   onSelect: (slotId: string | null) => void;
 }) {
   const doneCount = slots.filter((slot) => slot.status === "completed").length;
@@ -40,17 +35,13 @@ export function TaskRow({
   // Ein Slot ohne Beschriftung: eine ganze Zeile zum Antippen
   if (slots.length === 1 && !slots[0].label) {
     const slot = slots[0];
-    const who: Person | null =
-      slot.status === "completed"
-        ? (slot.completedBy ?? slot.assignee)
-        : slot.assignee;
     return (
       <button
         type="button"
         onClick={() => onSelect(slot.slotId)}
         className="flex w-full items-center gap-3 px-3 py-2 text-left"
       >
-        <SoftTile icon={icon} title={title} completed={isDone} tone={tone} />
+        <TaskTile icon={icon} title={title} completed={isDone} />
         {/* min-w-0 + flex-1: nimmt den restlichen Platz, darf aber schrumpfen,
             damit line-clamp/truncate lange Texte kürzen können */}
         <span className="min-w-0 flex-1">
@@ -61,16 +52,14 @@ export function TaskRow({
             {title}
           </span>
           <span
-            className={`mt-0.5 line-clamp-2 block text-secondary leading-snug ${
+            className={`mt-0.5 block truncate text-secondary ${
               slot.status === "claimed" ? "text-muted" : "text-subtle"
             }`}
           >
-            {slotSentence(slot)}
+            {slotStatusText(slot)}
           </span>
         </span>
-        {who && slot.status !== "open" && (
-          <PersonAvatar person={who} size={28} />
-        )}
+        <PersonPair assignee={slot.assignee} completedBy={slot.completedBy} />
       </button>
     );
   }
@@ -81,9 +70,9 @@ export function TaskRow({
         type="button"
         onClick={() => openState.set(taskId, !open)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-3 py-2 text-left"
+        className="relative flex w-full items-center gap-3 px-3 py-2 text-left"
       >
-        <SoftTile icon={icon} title={title} completed={isDone} tone={tone} />
+        <TaskTile icon={icon} title={title} completed={isDone} />
         <span className="min-w-0 flex-1">
           <span className={`block text-body font-semibold ${titleClass}`}>
             {title}
@@ -92,7 +81,7 @@ export function TaskRow({
             {doneCount} von {slots.length} erledigt
           </span>
         </span>
-        {/* Zugeklappt zeigen kleine Kreise den Stand der Zeitfenster. Aufgeklappt
+        {/* Zugeklappt zeigen Punkte den Stand der Zeitfenster. Aufgeklappt
             bleiben sie unsichtbar, nehmen aber ihren Platz ein, damit der
             Titel nicht springt. */}
         <span
@@ -102,7 +91,7 @@ export function TaskRow({
           aria-hidden
         >
           {slots.map((slot) => (
-            <StatusDot key={slot.slotId} slot={slot} />
+            <StatusDot key={slot.slotId} status={slot.status} />
           ))}
         </span>
         <Glyph
@@ -112,74 +101,128 @@ export function TaskRow({
             open ? "rotate-90" : ""
           }`}
         />
+        {/* Linienstück von der Unterkante der Kachel bis zum Zeitstrahl:
+            12 px Zeilenrand + 20 px (halbe Kachel) − 0,75 px (halbe Linie).
+            h-2 = das Polster unter der Kachel. */}
+        <span
+          aria-hidden
+          className={`absolute bottom-0 left-[31.25px] h-2 w-[1.5px] bg-slate-300 transition-opacity duration-200 motion-reduce:transition-none dark:bg-white/15 ${
+            open ? "opacity-100" : "opacity-0"
+          }`}
+        />
       </button>
       <Collapse open={open}>
-        <SlotBox slots={slots} onSelect={onSelect} />
+        <SlotTimeline slots={slots} onSelect={onSelect} />
       </Collapse>
     </div>
   );
 }
 
-// Die Farben der Zeitfenster (--slot-*) setzt der Behälter, siehe SlotIcon.tsx.
+// Farbe des Status-Worts rechts in der Zeile
+const STATUS_TONE: Record<TaskStatus, string> = {
+  open: "text-subtle",
+  claimed: "text-orange-700 dark:text-orange-300",
+  completed: "text-green-700 dark:text-green-300",
+};
 
-/** Kleiner Kreis für den zugeklappten Kopf: gefüllt = erledigt, Ring = übernommen */
-function StatusDot({ slot }: { slot: SlotView }) {
-  if (slot.status === "open") {
-    return (
-      <span className="block h-2.5 w-2.5 rounded-full border-2 border-slate-300 dark:border-white/25" />
-    );
-  }
+/** Kurzes Status-Wort: "Frei", "Du" oder der Name */
+function shortStatus(slot: SlotView) {
+  if (slot.status === "open") return "Frei";
+  const who = slot.completedBy ?? slot.assignee;
+  if (!who) return slot.status === "completed" ? "Erledigt" : "Übernommen";
+  return who.isCurrentUser ? "Du" : who.name;
+}
+
+/** Kleiner Punkt für den zugeklappten Kopf: gleiche Farben wie der Knoten */
+function StatusDot({ status }: { status: TaskStatus }) {
   return (
     <span
-      className="block h-2.5 w-2.5 rounded-full"
-      style={
-        slot.status === "completed"
-          ? { backgroundColor: "var(--slot-done)" }
-          : { border: "2px solid var(--slot-claimed)" }
-      }
+      className={`block h-2.5 w-2.5 rounded-full ${
+        status === "completed"
+          ? "bg-green-600"
+          : status === "claimed"
+            ? "border-2 border-orange-500"
+            : "border-2 border-slate-300 dark:border-white/25"
+      }`}
     />
   );
 }
 
 /**
- * Alle Zeitfenster einer Aufgabe in einem abgerundeten Kasten mit dezentem
- * Rahmen, dünne Striche zwischen den Zeilen. Nur das Icon ist farbig.
+ * Knoten der Zeitleiste (18 px): erledigt = grüner Kreis mit Häkchen,
+ * übernommen = orangefarbener Ring mit Loch, offen = grauer Ring.
  */
-function SlotBox({
+function TimelineNode({ status }: { status: TaskStatus }) {
+  if (status === "completed") {
+    return (
+      <span
+        className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-green-600 text-white"
+        aria-hidden
+      >
+        <Glyph name="check" size={11} />
+      </span>
+    );
+  }
+  return (
+    <span
+      className={`block h-[18px] w-[18px] shrink-0 rounded-full border-[3.5px] ${
+        status === "claimed"
+          ? "border-orange-500"
+          : "border-slate-300 dark:border-white/25"
+      }`}
+      aria-hidden
+    />
+  );
+}
+
+/**
+ * Zeitstrahl: Die Zeitfenster sitzen als Knoten auf einer senkrechten Linie,
+ * die mittig unter der Kachel der Aufgabe verläuft; rechts Status-Wort und
+ * Pfeil. Jede Zeile zeichnet nur das Stück Linie zwischen ihrem Knoten und
+ * dem der Nachbarzeile (die erste auch das Stück bis zur Kachel), so läuft
+ * die Linie nie durch das Loch eines Rings.
+ */
+function SlotTimeline({
   slots,
   onSelect,
 }: {
   slots: SlotView[];
   onSelect: (slotId: string | null) => void;
 }) {
+  // Linienstück: 1,5 px breit, mittig unter dem 18-px-Knoten, reicht bis an
+  // den Knotenrand (50 % der Zeile − 9 px Knotenradius). left-[19.25px] =
+  // 11 px Zeilenpolster + 9 px halber Knoten − 0,75 px halbe Linie.
+  const line =
+    "absolute left-[19.25px] h-[calc(50%-9px)] w-[1.5px] bg-slate-300 dark:bg-white/15";
+
   return (
-    <div className="mx-3 mt-0.5 mb-2.5 overflow-hidden rounded-2xl bg-(--slot-box) ring-1 ring-(color:--slot-line)">
-      <div className="divide-y divide-(--slot-line)">
-        {slots.map((slot) => (
-          <button
-            key={slot.slotId}
-            type="button"
-            onClick={() => onSelect(slot.slotId)}
-            aria-label={`${slot.label}: ${slotSentence(slot)}`}
-            // pl-2: Die Mitte des Icons liegt dann bei 12 (Rand des Kastens) + 8 + 12
-            // = 32 px, genau unter der Mitte der 40-px-Kachel der Aufgabe
-            className="flex min-h-11 w-full items-center gap-3 py-2 pr-3 pl-2 text-left"
+    <div className="flex flex-col px-3 pb-2">
+      {slots.map((slot, i) => (
+        <button
+          key={slot.slotId}
+          type="button"
+          onClick={() => onSelect(slot.slotId)}
+          aria-label={`${slot.label}: ${slotStatusText(slot)}`}
+          // pl-[11px]: 12 px Rand + 11 px = der Knoten (18 px) sitzt mittig
+          // unter der 40-px-Kachel (12 + 20 = 32 = 23 + 9)
+          className="relative flex min-h-8 w-full items-center gap-3 pl-[11px] text-left"
+        >
+          <span aria-hidden className={`top-0 ${line}`} />
+          {i < slots.length - 1 && (
+            <span aria-hidden className={`bottom-0 ${line}`} />
+          )}
+          <TimelineNode status={slot.status} />
+          <span className="min-w-0 flex-1 truncate text-secondary font-semibold text-fg">
+            {slot.label}
+          </span>
+          <span
+            className={`w-24 shrink-0 truncate text-secondary font-semibold ${STATUS_TONE[slot.status]}`}
           >
-            <SlotIcon status={slot.status} />
-            <span className="min-w-0 flex-1 truncate text-secondary font-semibold text-fg">
-              {slot.label}
-            </span>
-            <span
-              className={`max-w-[45%] shrink-0 truncate text-secondary ${
-                slot.status === "open" ? "text-subtle" : "text-fg-2"
-              }`}
-            >
-              {slotShort(slot)}
-            </span>
-            <Glyph name="chevron" size={14} className="shrink-0 text-subtle" />
-          </button>
-        ))}
-      </div>
+            {shortStatus(slot)}
+          </span>
+          <Glyph name="chevron" size={14} className="shrink-0 text-subtle" />
+        </button>
+      ))}
     </div>
   );
 }
